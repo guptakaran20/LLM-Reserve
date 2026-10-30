@@ -266,13 +266,18 @@ Each gate is a hard checkpoint: don't start the next phase until its "Done when"
 
 ### Day 2: Explore the data
 
-- [ ] Histogram of output length per model, log x-axis.
-- [ ] Scatter of output length against `input_size`.
-- [ ] Within-prompt spread: the distribution of std ÷ mean across each prompt's 10 completions.
-- [ ] Share of degenerate samples per model (original vs. sanitized).
-- [ ] Write 5 observations in `docs/findings.md` (start from the data check above).
+- [x] Histogram of output length per model, log x-axis.
+- [x] Scatter of output length against `input_size`.
+- [x] Within-prompt spread: the distribution of std ÷ mean across each prompt's 10 completions.
+- [x] Share of degenerate samples per model (original vs. sanitized).
+- [x] Write 5 observations in `docs/findings.md` (start from the data check above).
 
 **Done when:** 4 plots are saved and 5 observations are written.
+
+**Done, 30 Oct 2026.** `make explore` rebuilds the 4 plots and the stats in 7 seconds, on the train split only. Findings are in [findings.md](findings.md). The two that change later days:
+
+- **The prompt explains 71% of log-length variance, the model 0.6%** (prompt × model: 93%). The per-model p95 bar uses almost none of the signal; the Day-4 text features carry the project.
+- **Models disagree about which prompts are long:** the gemma models are terse on code and verbose on chat, Qwen2.5-32B is the reverse. The model must interact with the prompt features (Day 6 MLP: model embedding into the hidden layers, not just an output offset).
 
 ### Day 3: Metrics and baselines
 

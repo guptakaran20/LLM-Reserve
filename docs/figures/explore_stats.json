@@ -1,0 +1,343 @@
+{
+  "split": "train",
+  "completions_sanitized": 976769,
+  "completions_original": 978270,
+  "overall": {
+    "p50": 369.0,
+    "p90": 776.0,
+    "p95": 1005.0,
+    "p99": 1649.0,
+    "p99.9": 2652.0
+  },
+  "tail": {
+    "original_over_4096": 0.0018134052971061159,
+    "sanitized_over_4096": 0.0002794928995494329,
+    "original_at_15000_cap": 1482
+  },
+  "per_model": {
+    "Qwen2.5-32B-Instruct": {
+      "n": 77370.0,
+      "p50": 380.0,
+      "p95": 757.0,
+      "p99": 1021.0
+    },
+    "Llama-3.2-3B-Instruct": {
+      "n": 77156.0,
+      "p50": 334.0,
+      "p95": 780.0,
+      "p99": 1222.0
+    },
+    "Qwen2.5-14B-Instruct": {
+      "n": 77351.0,
+      "p50": 392.0,
+      "p95": 801.0,
+      "p99": 1107.0
+    },
+    "Mistral-7B-Instruct-v0.3": {
+      "n": 77372.0,
+      "p50": 354.0,
+      "p95": 807.0,
+      "p99": 1260.3
+    },
+    "Llama-3.3-70B-Instruct": {
+      "n": 77336.0,
+      "p50": 384.0,
+      "p95": 838.0,
+      "p99": 1231.0
+    },
+    "Phi-4-mini-instruct": {
+      "n": 77232.0,
+      "p50": 344.0,
+      "p95": 844.0,
+      "p99": 1210.0
+    },
+    "Llama-3.1-8B-Instruct": {
+      "n": 77057.0,
+      "p50": 403.0,
+      "p95": 846.0,
+      "p99": 1340.4
+    },
+    "Llama-3.2-1B-Instruct": {
+      "n": 62244.0,
+      "p50": 397.0,
+      "p95": 854.0,
+      "p99": 1419.0
+    },
+    "Mixtral-8x7B-Instruct-v0.1": {
+      "n": 77360.0,
+      "p50": 340.0,
+      "p95": 856.0,
+      "p99": 1287.0
+    },
+    "Ministral-8B-Instruct-2410": {
+      "n": 77380.0,
+      "p50": 447.0,
+      "p95": 907.0,
+      "p99": 1240.2
+    },
+    "Qwen2.5-7B-Instruct-1M": {
+      "n": 77291.0,
+      "p50": 393.0,
+      "p95": 976.5,
+      "p99": 1439.0
+    },
+    "gemma-3-4b-it": {
+      "n": 77380.0,
+      "p50": 276.0,
+      "p95": 1368.1,
+      "p99": 1876.0
+    },
+    "gemma-3-12b-it": {
+      "n": 64240.0,
+      "p50": 262.0,
+      "p95": 1792.0,
+      "p99": 2234.6
+    }
+  },
+  "input_size": {
+    "spearman": 0.158,
+    "bins": [
+      {
+        "input_median": 13.0,
+        "p50": 330.0,
+        "p95": 1026.0
+      },
+      {
+        "input_median": 18.0,
+        "p50": 416.0,
+        "p95": 1543.0
+      },
+      {
+        "input_median": 25.0,
+        "p50": 321.0,
+        "p95": 1444.0
+      },
+      {
+        "input_median": 35.0,
+        "p50": 262.0,
+        "p95": 1180.0
+      },
+      {
+        "input_median": 41.0,
+        "p50": 364.0,
+        "p95": 813.0
+      },
+      {
+        "input_median": 45.0,
+        "p50": 379.0,
+        "p95": 822.0
+      },
+      {
+        "input_median": 50.0,
+        "p50": 320.0,
+        "p95": 871.0
+      },
+      {
+        "input_median": 59.0,
+        "p50": 225.0,
+        "p95": 941.0
+      },
+      {
+        "input_median": 81.0,
+        "p50": 260.0,
+        "p95": 947.0
+      },
+      {
+        "input_median": 102.0,
+        "p50": 291.0,
+        "p95": 740.0
+      },
+      {
+        "input_median": 122.0,
+        "p50": 326.0,
+        "p95": 685.0
+      },
+      {
+        "input_median": 146.0,
+        "p50": 360.0,
+        "p95": 728.4000000000015
+      },
+      {
+        "input_median": 172.0,
+        "p50": 373.0,
+        "p95": 701.0
+      },
+      {
+        "input_median": 205.0,
+        "p50": 371.0,
+        "p95": 730.0
+      },
+      {
+        "input_median": 248.0,
+        "p50": 371.0,
+        "p95": 739.0
+      },
+      {
+        "input_median": 305.0,
+        "p50": 392.0,
+        "p95": 781.0
+      },
+      {
+        "input_median": 377.0,
+        "p50": 425.0,
+        "p95": 815.7999999999956
+      },
+      {
+        "input_median": 480.0,
+        "p50": 465.0,
+        "p95": 893.6500000000015
+      },
+      {
+        "input_median": 653.5,
+        "p50": 516.0,
+        "p95": 993.0
+      },
+      {
+        "input_median": 1193.0,
+        "p50": 625.0,
+        "p95": 1465.75
+      }
+    ]
+  },
+  "within_prompt": {
+    "samples": 97822,
+    "cv_quantiles": {
+      "0.1": 0.062,
+      "0.25": 0.098,
+      "0.5": 0.159,
+      "0.75": 0.261,
+      "0.9": 0.414,
+      "0.99": 0.978
+    },
+    "max_over_median": {
+      "0.5": 1.26,
+      "0.9": 1.94,
+      "0.99": 5.6
+    }
+  },
+  "degenerate": {
+    "gemma-3-12b-it": {
+      "completions": 0.0,
+      "samples_any": 0.0,
+      "samples_all": 0.0,
+      "samples": 6424
+    },
+    "Ministral-8B-Instruct-2410": {
+      "completions": 0.0,
+      "samples_any": 0.0,
+      "samples_all": 0.0,
+      "samples": 7738
+    },
+    "Qwen2.5-32B-Instruct": {
+      "completions": 0.00013,
+      "samples_any": 0.00078,
+      "samples_all": 0.0,
+      "samples": 7738
+    },
+    "gemma-3-4b-it": {
+      "completions": 0.00013,
+      "samples_any": 0.0009,
+      "samples_all": 0.0,
+      "samples": 7739
+    },
+    "Mistral-7B-Instruct-v0.3": {
+      "completions": 0.0001,
+      "samples_any": 0.00103,
+      "samples_all": 0.0,
+      "samples": 7738
+    },
+    "Qwen2.5-14B-Instruct": {
+      "completions": 0.00037,
+      "samples_any": 0.00194,
+      "samples_all": 0.00013,
+      "samples": 7738
+    },
+    "Mixtral-8x7B-Instruct-v0.1": {
+      "completions": 0.00026,
+      "samples_any": 0.00258,
+      "samples_all": 0.0,
+      "samples": 7738
+    },
+    "Llama-3.3-70B-Instruct": {
+      "completions": 0.00057,
+      "samples_any": 0.00426,
+      "samples_all": 0.0,
+      "samples": 7738
+    },
+    "Qwen2.5-7B-Instruct-1M": {
+      "completions": 0.00115,
+      "samples_any": 0.00543,
+      "samples_all": 0.00013,
+      "samples": 7738
+    },
+    "Phi-4-mini-instruct": {
+      "completions": 0.00191,
+      "samples_any": 0.01473,
+      "samples_all": 0.0,
+      "samples": 7738
+    },
+    "Llama-3.2-3B-Instruct": {
+      "completions": 0.00289,
+      "samples_any": 0.01926,
+      "samples_all": 0.0,
+      "samples": 7738
+    },
+    "Llama-3.1-8B-Instruct": {
+      "completions": 0.00417,
+      "samples_any": 0.02675,
+      "samples_all": 0.0,
+      "samples": 7738
+    },
+    "Llama-3.2-1B-Instruct": {
+      "completions": 0.00948,
+      "samples_any": 0.05649,
+      "samples_all": 0.0,
+      "samples": 6284
+    }
+  },
+  "log_r2": {
+    "model": 0.0058,
+    "dataset": 0.1298,
+    "model+dataset": 0.2368,
+    "prompt_id": 0.7059,
+    "sample_id": 0.9343
+  },
+  "cross_model_corr_median": 0.812,
+  "per_dataset": {
+    "Alpaca": {
+      "input_median": 40.0,
+      "p50": 227.0,
+      "p95": 932.0
+    },
+    "Apps": {
+      "input_median": 449.0,
+      "p50": 486.0,
+      "p95": 930.0
+    },
+    "BigCodeBench": {
+      "input_median": 155.0,
+      "p50": 440.0,
+      "p95": 698.0
+    },
+    "DS1000": {
+      "input_median": 279.0,
+      "p50": 306.0,
+      "p95": 623.0
+    },
+    "DollyDataset": {
+      "input_median": 44.0,
+      "p50": 224.0,
+      "p95": 931.0
+    },
+    "Mbpp": {
+      "input_median": 125.0,
+      "p50": 308.0,
+      "p95": 593.0
+    },
+    "ShareGPT": {
+      "input_median": 56.0,
+      "p50": 518.0,
+      "p95": 1541.0
+    }
+  }
+}
