@@ -9,9 +9,10 @@ Work in progress. See [docs/PRD.md](docs/PRD.md) for the plan and the data check
 Requires Python 3.12.
 
 ```bash
-make setup   # .venv from the pinned requirements.txt
-make data    # download CASTILLO (~600 MB, cached in data/raw) and build data/processed
-make explore # Day-2 plots and stats from the train split -> docs/figures/
+make setup     # .venv from the pinned requirements.txt
+make data      # download CASTILLO (~600 MB, cached in data/raw) and build data/processed
+make explore   # Day-2 plots and stats from the train split -> docs/figures/
+make baselines # Day-3 baseline table on validation at 95% coverage -> docs/figures/
 make test
 ```
 
