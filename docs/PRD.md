@@ -281,12 +281,17 @@ Each gate is a hard checkpoint: don't start the next phase until its "Done when"
 
 ### Day 3: Metrics and baselines
 
-- [ ] `evaluate.py`: coverage, reservation ratio, **oracle gap closed (rev 2)**, matched-coverage tuning on validation, and the 0.80–0.99 curve sweep.
-- [ ] Unit tests for the metrics using small hand-computed examples.
-- [ ] Baselines: `max_tokens` = 4,096, fixed per-model 95th percentile, per-model × prompt-length-bucket 95th percentile (**quintile edges fitted on train, rev 2**).
-- [ ] **(rev 2)** Reference rows: the oracle and per-model × source dataset. They should reproduce the data-check table (2.25 / 2.14 / 2.00 / about 1.31).
+- [x] `evaluate.py`: coverage, reservation ratio, **oracle gap closed (rev 2)**, matched-coverage tuning on validation, and the 0.80–0.99 curve sweep.
+- [x] Unit tests for the metrics using small hand-computed examples.
+- [x] Baselines: `max_tokens` = 4,096, fixed per-model 95th percentile, per-model × prompt-length-bucket 95th percentile (**quintile edges fitted on train, rev 2**).
+- [x] **(rev 2)** Reference rows: the oracle and per-model × source dataset. They should reproduce the data-check table (2.25 / 2.14 / 2.00 / about 1.31).
 
 **Done when:** the baseline table on validation at 95% coverage exists. This is the bar every model must beat. **Gate: baselines locked.**
+
+**Done, 30 Oct 2026. Baselines locked.** `make baselines` builds the table and the 80–99% curve in 6 seconds; 27 of 27 tests pass. On the overlap-fixed validation split, the bar (fixed per-model percentile) is **2.246**, per-model × input quintile 2.142, per-model × dataset 1.993 and the oracle 1.309 (k = 1.11), matching the data check. The 20% target means a test ratio of **1.797** or less, 48% of the oracle gap. Details in [findings.md](findings.md#day-3-baselines-locked-30-oct-2026). Two notes:
+
+- **Below about 93% coverage, a global percentile beats the per-model one** (1.84 vs. 1.90 at 90%). Equal coverage per model is not the cheapest route to 95% overall, so Day 7 reports coverage per model next to the headline number.
+- `max_tokens` = 4,096 is scored as is (99.96% coverage, ratio 9.72), and the sanitized-tuned percentiles cover 94.85% of the original config.
 
 ### Day 4: Features
 
