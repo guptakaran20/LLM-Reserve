@@ -2,7 +2,7 @@ PYTHON ?= python3.12
 VENV := .venv
 PY := $(VENV)/bin/python
 
-.PHONY: setup lock data test clean-data
+.PHONY: setup lock data explore test clean-data
 
 # Create the virtualenv from the pinned requirements.
 setup: $(VENV)/.installed
@@ -23,6 +23,10 @@ lock: setup
 data: setup
 	rm -rf data/processed
 	$(PY) -m llm_reserve.data
+
+# Day-2 plots and stats from the train split -> docs/figures/.
+explore: setup
+	$(PY) -m llm_reserve.explore
 
 test: setup
 	$(PY) -m pytest -q
