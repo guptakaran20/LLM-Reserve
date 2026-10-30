@@ -1,0 +1,7 @@
+# Direct dependencies. `make lock` pins these and their transitive deps into requirements.txt.
+# Add each stage's libraries here as the stage starts (xgboost, torch, onnx, fastapi, redis...).
+numpy
+pandas
+pyarrow
+huggingface_hub
+pytest
