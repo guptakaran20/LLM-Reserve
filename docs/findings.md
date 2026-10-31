@@ -107,3 +107,46 @@ Below about 93% coverage, **one global percentile reserves less than the per-mod
 ### 7. Input length adds little, the dataset adds more, and both are small next to the prompt
 
 Per-model × input-length quintile saves 4.6%. Knowing the source dataset, which the gateway can't, saves 11.3%. The oracle saves 41.7%. The gap between the bar and the oracle widens as coverage rises: 0.38 at 80% coverage (1.55 vs. 1.17), 0.94 at 95% and 1.68 at 99% (3.27 vs. 1.59). The tail is where a prompt-aware bound pays most. The sanitized-tuned θ loses 0.15 points of coverage on the original config for every percentile baseline, which is the degenerate tail that the simulator (Day 8) will have to absorb.
+
+## Day 4: Features (31 Oct 2026)
+
+**Scope.** Features for all three splits; the checks below fit on train and score on validation. Rebuild with `make features` (1 min 50 s from scratch, 18 s when the embeddings are cached); the numbers come from [`figures/features_validate.json`](figures/features_validate.json).
+
+Every feature is computed from what a gateway has before it sends a request: the prompt text, `input_size` and the target model.
+
+- **29 hand-built features:** size and shape (log characters, words, lines and bullets; code fences; shares of code characters, digits, upper case and non-ASCII; question marks; URLs), log `input_size`, 4 length hints and 13 cue words.
+- **A 13-model one-hot,** with its vocabulary fitted on train.
+- **MiniLM embeddings** (`all-MiniLM-L6-v2`, pinned revision), 384 dimensions, one per unique prompt (11,395), on CPU as at serving time. They are built at 128 tokens (the serving default) and at 256.
+
+The matrix has one row per completion of the original config (sanitized is the `is_degenerate` filter, as on Day 1) and stores `prompt_row` instead of the embedding, so 1.4M rows × 384 floats are never materialized. Leakage is checked three ways: `check_no_leaks` runs whenever the matrix is built or loaded; a unit test shuffles the label, flips the degenerate flag and adds every never-column, and the features don't change; and on the real matrix every feature is constant within each (prompt, model) sample, so nothing that varies by completion, as the label does, can reach a model.
+
+### 8. Length hints are precise but rare
+
+When a prompt asks for a word count above 30, the answer follows it. Train prompts asking for 31–60, 61–120, 121–250, 251–600 and more than 600 words get median outputs of 61, 125, 224, 698 and 1,028 tokens. Asking for a number of sentences is just as telling: those prompts have a median output of 66 tokens, against 398 without one.
+
+But the hints rarely fire. On train, a word count appears in 1.3% of prompts, a sentence count in 0.5%, a paragraph count in 0.04% and an item count ("list 10", "five ideas") in 4.2%. Item counts barely track length (rank correlation 0.09), since "N points" is often a geometry input in Apps, not a request. Counts of 30 words or fewer are mostly not hints at all: they are problem text in code tasks ("Given two words and a letter", "contains at least one word").
+
+**So:** hints help the few prompts that have them and can't carry the project. Most of the signal has to come from the embedding.
+
+### 9. The embedding carries most of the signal, and 128 tokens costs nothing measurable
+
+As a probe, not a model: a ridge regression of each (prompt, model) sample's mean log length, fitted on train, then scored as the share of completion-level log-length variance it explains on validation. λ is picked on validation from 1 to 10⁵.
+
+| Features | Count | Validation R² of log length |
+|---|---|---|
+| Model one-hot | 13 | 0.5% |
+| + hand-built | 42 | 14.9% |
+| Model + MiniLM-128 | 397 | 33.5% |
+| **+ hand-built + MiniLM-128** | 426 | **37.5%** |
+| + hand-built + MiniLM-256 | 426 | 37.0% |
+| Ceiling: each sample's own mean (in-sample) | — | 93.2% |
+
+The embedding alone explains more than twice as much as the hand-built features, and together they add 4 points to the embedding alone. 256 tokens is no better than 128 in this probe (37.0% vs. 37.5%), even though 46% of prompts are cut at 128 MiniLM tokens and 28% at 256. Code tasks are 76% of the prompts cut at 128 (Apps alone 39%; 98% of Apps prompts are cut), ShareGPT and Dolly's pasted context most of the rest, and the log character and line counts still see the full length.
+
+A linear probe can't model the prompt × model interaction (finding 2), which is most of the gap to the ceiling, so Day 5's XGBoost should land well above 37.5%. The 128 vs. 256 check reruns there, on the reservation ratio, before 128 is frozen.
+
+### 10. The text names its source dataset, so the 11% reference row is not out of reach
+
+The dataset is never a feature. But a nearest-centroid rule on the embedding alone names a validation prompt's source dataset 77% of the time at 128 tokens (80% at 256), across 7 datasets, because CASTILLO's datasets have fixed templates ("QUESTION:", "You are an expert Python programmer", "Problem:", "Context:"). Per-model × source dataset, a reference row that is "not deployable" on Day 3 (ratio 1.993, −11.3%), is therefore largely reachable from the text on this data.
+
+That is fair at serving time, since the template is in the prompt. But real gateway traffic has no CASTILLO templates, so part of any gain may not transfer. **So:** the Day-7 leave-one-dataset-out check is no longer a stretch goal. It is the test of whether the model learned what prompts ask for or which benchmark they came from.

@@ -295,12 +295,18 @@ Each gate is a hard checkpoint: don't start the next phase until its "Done when"
 
 ### Day 4: Features
 
-- [ ] Hand-built features from `prompt_text`: characters, lines, code fences, question marks, cue words (explain, list, write, summarize), length hints ("in 100 words", "one sentence", "list 10").
-- [ ] MiniLM embeddings for unique prompts only (about 11.4k), cached to `.npy`, joined back by `prompt_id`. **Use a 128-token input (from the latency check), also build a 256-token version to compare on validation, and use the same length in training and serving (rev 2).**
-- [ ] Leakage unit test on the feature matrix.
+- [x] Hand-built features from `prompt_text`: characters, lines, code fences, question marks, cue words (explain, list, write, summarize), length hints ("in 100 words", "one sentence", "list 10").
+- [x] MiniLM embeddings for unique prompts only (about 11.4k), cached to `.npy`, joined back by `prompt_id`. **Use a 128-token input (from the latency check), also build a 256-token version to compare on validation, and use the same length in training and serving (rev 2).**
+- [x] Leakage unit test on the feature matrix.
 - [ ] One hour on quantile regression and pinball loss.
 
 **Done when:** `make features` builds the matrix for all splits and the leakage test passes.
+
+**Done, 31 Oct 2026.** `make features` builds the matrix for all three splits in 1 min 50 s (18 s with the embeddings cached), and 38 of 38 tests pass, including the leakage checks on the real matrix. Details in [findings.md](findings.md#day-4-features-31-oct-2026). Three notes:
+
+- **The matrix stores `prompt_row`, not the embedding.** One row per completion, 29 hand-built features plus a 13-model one-hot; embeddings are joined by row at train time. The leakage test also checks that every feature is constant within each (prompt, model) sample.
+- **256 tokens does not beat 128 in a linear probe** (validation R² of log length 37.0% vs. 37.5%, with hand-built features). Day 5 repeats the comparison on the reservation ratio before 128 is frozen.
+- **The embedding names the source dataset 77% of the time** from CASTILLO's prompt templates, so the leave-one-dataset-out check on Day 7 moves from stretch to required.
 
 ### Day 5: Linear and XGBoost models
 
@@ -324,6 +330,7 @@ Each gate is a hard checkpoint: don't start the next phase until its "Done when"
 - [ ] Freeze every choice; score test on both sanitized and original.
 - [ ] Coverage vs. reservation curve for all methods, **with the oracle as a reference line (rev 2)**, plus the per-model breakdown.
 - [ ] Group the 100 worst under-predictions by cause and count them.
+- [ ] **(Day 4)** Leave one source dataset out of training and score it, for each of the 7 datasets: the embedding recognizes CASTILLO's prompt templates, so this checks the model learned what prompts ask for, not which benchmark they came from.
 - [ ] Buffer: finish anything left over from days 1–6.
 
 **Done when:** the results table, curve and error categories are in `docs/findings.md`. **Gate: model frozen.**
