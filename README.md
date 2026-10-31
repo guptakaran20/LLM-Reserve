@@ -13,6 +13,7 @@ make setup     # .venv from the pinned requirements.txt
 make data      # download CASTILLO (~600 MB, cached in data/raw) and build data/processed
 make explore   # Day-2 plots and stats from the train split -> docs/figures/
 make baselines # Day-3 baseline table on validation at 95% coverage -> docs/figures/
+make features  # Day-4 feature matrix + MiniLM embeddings (128 and 256 tokens) -> data/features/
 make test
 ```
 

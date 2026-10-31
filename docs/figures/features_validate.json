@@ -1,0 +1,61 @@
+{
+  "split": "validate",
+  "n_features_hand": 29,
+  "n_models": 13,
+  "embed_dim": 384,
+  "fire_rate_train": {
+    "hint_words": 0.012626578322290286,
+    "hint_sentences": 0.004750593824228029,
+    "hint_paragraphs": 0.00037504688086010754,
+    "hint_items": 0.04213026628328541,
+    "cue_explain": 0.07850981372671584,
+    "cue_list": 0.15639454931866484,
+    "cue_write": 0.27365920740092514,
+    "cue_summarize": 0.018627328416052007,
+    "cue_describe": 0.07775971996499563,
+    "cue_compare": 0.04588073509188648,
+    "cue_rewrite": 0.021752719089886234,
+    "cue_extract": 0.05613201650206276,
+    "cue_code": 0.44430553819227403,
+    "cue_creative": 0.060132516564570575,
+    "cue_brief": 0.041505188148518564,
+    "cue_detail": 0.031128891111388925,
+    "starts_wh": 0.16277034629328666
+  },
+  "truncated_share": {
+    "128": 0.4596752961825362,
+    "256": 0.2824923211935059
+  },
+  "dataset_recall": {
+    "128": 0.7656663724624889,
+    "256": 0.795233892321271
+  },
+  "feature_sets": {
+    "model": {
+      "r2_validate": 0.004543381375950339,
+      "lambda": 10000.0,
+      "n_features": 13
+    },
+    "model + hand": {
+      "r2_validate": 0.14945549321371676,
+      "lambda": 10000.0,
+      "n_features": 42
+    },
+    "model + MiniLM-128": {
+      "r2_validate": 0.33484923794354815,
+      "lambda": 10000.0,
+      "n_features": 397
+    },
+    "model + hand + MiniLM-128": {
+      "r2_validate": 0.37467383055491144,
+      "lambda": 10000.0,
+      "n_features": 426
+    },
+    "model + hand + MiniLM-256": {
+      "r2_validate": 0.36967223606741306,
+      "lambda": 10000.0,
+      "n_features": 426
+    }
+  },
+  "ceiling_r2_validate": 0.93217523909966
+}
