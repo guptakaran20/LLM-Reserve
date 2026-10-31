@@ -2,7 +2,7 @@ PYTHON ?= python3.12
 VENV := .venv
 PY := $(VENV)/bin/python
 
-.PHONY: setup lock data explore baselines test clean-data
+.PHONY: setup lock data explore baselines features test clean-data
 
 # Create the virtualenv from the pinned requirements.
 setup: $(VENV)/.installed
@@ -32,8 +32,12 @@ explore: setup
 baselines: setup
 	$(PY) -m llm_reserve.baselines
 
+# Day-4 feature matrix for all splits, plus cached MiniLM embeddings (128 and 256 tokens) -> data/features/.
+features: setup
+	$(PY) -m llm_reserve.features
+
 test: setup
 	$(PY) -m pytest -q
 
 clean-data:
-	rm -rf data/raw data/processed
+	rm -rf data/raw data/processed data/features
