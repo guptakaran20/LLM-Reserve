@@ -14,6 +14,7 @@ make data      # download CASTILLO (~600 MB, cached in data/raw) and build data/
 make explore   # Day-2 plots and stats from the train split -> docs/figures/
 make baselines # Day-3 baseline table on validation at 95% coverage -> docs/figures/
 make features  # Day-4 feature matrix + MiniLM embeddings (128 and 256 tokens) -> data/features/
+make models    # Day-5 linear + XGBoost quantile models at 95% validation coverage -> docs/figures/, data/models/
 make test
 ```
 
