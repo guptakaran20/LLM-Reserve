@@ -150,3 +150,67 @@ A linear probe can't model the prompt × model interaction (finding 2), which is
 The dataset is never a feature. But a nearest-centroid rule on the embedding alone names a validation prompt's source dataset 77% of the time at 128 tokens (80% at 256), across 7 datasets, because CASTILLO's datasets have fixed templates ("QUESTION:", "You are an expert Python programmer", "Problem:", "Context:"). Per-model × source dataset, a reference row that is "not deployable" on Day 3 (ratio 1.993, −11.3%), is therefore largely reachable from the text on this data.
 
 That is fair at serving time, since the template is in the prompt. But real gateway traffic has no CASTILLO templates, so part of any gain may not transfer. **So:** the Day-7 leave-one-dataset-out check is no longer a stretch goal. It is the test of whether the model learned what prompts ask for or which benchmark they came from.
+
+## Day 5: Linear and XGBoost models (31 Oct 2026)
+
+**Scope.** Trained on train (sanitized, 976,769 completions), tuned on validation (sanitized, 277,351 completions); test is not loaded. Each model predicts the 95th percentile of log1p(output tokens) with the pinball loss. Its knob θ is an additive shift on that log prediction, bound = ⌈expm1(prediction + θ)⌉, tuned on validation to the smallest shift that reaches 95% coverage, the same protocol as the baselines. XGBoost early-stops on validation pinball loss. Rebuild with `make models` (7 min: 2 min for the linear LP, 3 min for the raw-embedding XGBoost, about 30 s for each other model); the numbers come from [`figures/models_validate.json`](figures/models_validate.json). The fitted models and their frozen shifts are in `data/models/` for Day 7.
+
+| Method | Shift θ | Coverage (sanitized) | Coverage (original) | Reservation ratio | vs. the bar | Oracle gap closed |
+|---|---|---|---|---|---|---|
+| Per-model percentile (the bar) | — | 95.00% | 94.85% | 2.246 | — | 0% |
+| Per-model × input-length quintile | — | 95.00% | 94.85% | 2.142 | −4.6% | 11.1% |
+| Linear quantile regression (hand-built) | +0.017 | 95.00% | 94.85% | 2.195 | −2.3% | 5.4% |
+| XGBoost (hand-built) | +0.043 | 95.00% | 94.85% | 1.903 | −15.3% | 36.6% |
+| XGBoost (hand-built + raw MiniLM-128, 384 dims) | +0.094 | 95.00% | 94.85% | 1.853 | −17.5% | 41.9% |
+| **XGBoost (hand-built + MiniLM-128, PCA-32)** | +0.082 | 95.00% | 94.85% | **1.815** | **−19.2%** | **45.9%** |
+| XGBoost (hand-built + MiniLM-256, PCA-32) | +0.084 | 95.00% | 94.85% | 1.831 | −18.4% | 44.2% |
+| Oracle: k × own mean + own std | — | 95.00% | 94.94% | 1.309 | −41.7% | 100% |
+
+"Hand-built" always includes log `input_size` and the 13-model one-hot. The linear model is fitted on a random 50,000 completions (the exact LP takes 2 minutes at that size, and 5 seconds at 10,000).
+
+![Models vs. baselines](figures/models_curve.png)
+
+### 11. XGBoost beats the bar by 19% on validation, just short of the 20% target
+
+The best model, XGBoost on hand-built features plus a 32-component PCA of the MiniLM-128 embedding, reserves 1.815× what is used at 95% coverage, against 2.246 for the per-model percentile. That closes 46% of the gap to the oracle, short of the 48% (1.797) the target asks for **on test**. The lead holds along the whole curve: 1.37 vs. 1.55 at 80% coverage, 1.60 vs. 1.90 at 90%, and 2.50 vs. 3.27 at 99%. The frozen shift loses the same 0.15 points of coverage on the original config as every baseline.
+
+Two things make this validation number optimistic. Both early stopping and the shift are tuned on validation, and the feature design below was chosen on validation from 12 configurations. Day 7's test score is the number that counts. **So:** XGBoost beats the fixed 95th percentile, and the 20% target is not reached yet. Day 6's MLP, with the model interacting with the prompt in its hidden layers, has to find the last 1–2%.
+
+### 12. Trees overfit the raw embedding; a 32-component projection fixes it
+
+Each train prompt appears in about 120 rows (10 completions × 12 models) with the same 384 embedding values, so a tree can carve out a single prompt and fit its completions. On the raw embedding, validation pinball loss gets **worse** than with hand-built features alone (0.0599 vs. 0.0595), and early stopping triggers sooner (473 vs. 732 rounds). The reservation ratio still improves a little, because the bound's ranking gets better while its calibration gets worse. Every configuration tried, on validation:
+
+| Embedding features | `min_child_weight` | Validation pinball loss | Ratio at 95% |
+|---|---|---|---|
+| none | 20 | 0.05951 | 1.907 |
+| none | 300 | 0.05898 | 1.903 |
+| raw MiniLM-128 (384) | 20 | 0.05988 | 1.874 |
+| raw MiniLM-128 (384) | 300 | 0.05948 | 1.853 |
+| raw MiniLM-256 (384) | 20 | 0.05961 | 1.861 |
+| PCA-16 of MiniLM-128 | 300 | 0.05677 | 1.827 |
+| PCA-32 of MiniLM-128 | 20 | 0.05723 | 1.828 |
+| **PCA-32 of MiniLM-128** | **300** | **0.05688** | **1.815** |
+| PCA-64 of MiniLM-128 | 300 | 0.05727 | 1.815 |
+| PCA-32 of MiniLM-256 | 300 | 0.05759 | 1.831 |
+| Out-of-fold ridge score of the embedding (1 feature) | 20 | 0.05724 | 1.831 |
+| Ridge score + PCA-32 | 20 | 0.05698 | 1.819 |
+
+The PCA is fitted on train prompts only. Projecting to 16–64 components gives the trees a few dense directions instead of 384 noisy ones. A `min_child_weight` of 300 (more than one prompt's ~120 rows) stops leaves from isolating a single prompt. The two fixes add up. PCA-64 ties PCA-32 on ratio but has a worse pinball loss and twice the inputs, so PCA-32 is frozen. A stacked ridge score of the embedding does as well as PCA, but needs out-of-fold fitting and gains nothing. Training also gets 6× faster (33 s vs. 3 min).
+
+The shift θ tells the same story. The linear model needs +0.017 to reach 95%, so its training quantile was almost calibrated on new prompts. XGBoost on hand-built features needs +0.043, and the embedding models need +0.08 to +0.09: their raw 95th-percentile predictions run 8–9% low on prompts they have not seen.
+
+### 13. 128 tokens wins again, so it is frozen
+
+With the frozen design, MiniLM-128 beats MiniLM-256 (1.815 vs. 1.831, pinball 0.0569 vs. 0.0576). On the raw embedding, 256 was slightly ahead (1.861 vs. 1.874), but both of those models overfit. This matches the Day-4 probe (37.5% vs. 37.0%) and the latency check, so **128 tokens is frozen** for training and serving.
+
+### 14. The linear model only beats the bar because of the prompt's length
+
+Linear quantile regression saves 2.3% and loses to the per-model × input-quintile baseline (2.195 vs. 2.142). A linear model in log space can shift each model's bound by a constant, and scale it with input length and cue words, but it can't let a feature mean different things for different models (finding 2) or bend with input length (finding 3). XGBoost on the same features saves 15.3%, so the hand-built features carry the signal and linear quantile regression can't use it.
+
+![Feature importance](figures/feature_importance.png)
+
+### 15. What the trees use, and who they under-cover
+
+With the embedding, its 32 components take 42% of the total split gain, the model one-hot 23%, and the size features (log input size, lines, characters, words) 24%. Without it, the model one-hot leads (28%), followed by the size features (42% together) and the code-character share (7%). The cue words and length hints get under 2.5% each in both models: the hints fire on too few prompts (finding 8).
+
+Coverage per model at the frozen shift ranges from **93.9% (gemma-3-4b)** to 95.8% (Mistral-7B). The hand-built XGBoost ranges from 94.5% to 96.4%. The embedding model buys part of its saving by under-covering gemma-3-4b, the model with the long second peak (finding 6). That is the risk flagged on Day 3. Day 7 reports it next to the headline number, and the simulator will show whether a 1-point coverage loss on one model matters for overshoot.

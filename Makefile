@@ -2,7 +2,7 @@ PYTHON ?= python3.12
 VENV := .venv
 PY := $(VENV)/bin/python
 
-.PHONY: setup lock data explore baselines features test clean-data
+.PHONY: setup lock data explore baselines features models test clean-data
 
 # Create the virtualenv from the pinned requirements.
 setup: $(VENV)/.installed
@@ -18,6 +18,10 @@ $(VENV)/.installed: requirements.txt pyproject.toml
 lock: setup
 	$(PY) -m pip install -r requirements.in
 	$(PY) -m pip freeze --exclude-editable > requirements.txt
+	@# Linux xgboost wheels pull in NCCL (CUDA); CI and Docker get the CPU-only build of the same version.
+	awk '/^xgboost==/ { v = substr($$0, 10); print "xgboost==" v "; sys_platform == \"darwin\""; \
+		print "xgboost-cpu==" v "; sys_platform == \"linux\""; next } 1' requirements.txt > requirements.tmp
+	mv requirements.tmp requirements.txt
 
 # Download CASTILLO (cached in data/raw) and rebuild data/processed.
 data: setup
@@ -35,6 +39,10 @@ baselines: setup
 # Day-4 feature matrix for all splits, plus cached MiniLM embeddings (128 and 256 tokens) -> data/features/.
 features: setup
 	$(PY) -m llm_reserve.features
+
+# Day-5 linear and XGBoost quantile models, tuned to 95% coverage on validation -> docs/figures/ and data/models/.
+models: setup
+	$(PY) -m llm_reserve.models
 
 test: setup
 	$(PY) -m pytest -q
