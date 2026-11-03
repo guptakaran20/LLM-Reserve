@@ -310,12 +310,18 @@ Each gate is a hard checkpoint: don't start the next phase until its "Done when"
 
 ### Day 5: Linear and XGBoost models
 
-- [ ] Linear quantile regression on the hand-built features (sklearn `QuantileRegressor`, on a sample if it is slow).
-- [ ] XGBoost with `reg:quantileerror` on a `log1p` target, early stopping on validation.
-- [ ] Tune each model's quantile on validation to 95% coverage and compare reservation ratios with the baselines.
-- [ ] Feature importance plot.
+- [x] Linear quantile regression on the hand-built features (sklearn `QuantileRegressor`, on a sample if it is slow).
+- [x] XGBoost with `reg:quantileerror` on a `log1p` target, early stopping on validation.
+- [x] Tune each model's quantile on validation to 95% coverage and compare reservation ratios with the baselines.
+- [x] Feature importance plot.
 
 **Done when:** both models have validation rows and you know whether XGBoost beats the fixed 95th percentile.
+
+**Done, 31 Oct 2026.** `make models` trains and tunes every model in 7 minutes, and 46 of 46 tests pass. The knob is an additive shift on the log prediction, tuned to 95% coverage like the baselines. **XGBoost beats the fixed per-model percentile by 19.2% on validation** (1.815 vs. 2.246, 46% of the oracle gap), just short of the 1.797 target. The linear model saves only 2.3%. Details in [findings.md](findings.md#day-5-linear-and-xgboost-models-31-oct-2026). Three notes:
+
+- **The trees overfit the raw 384-dim embedding** (each train prompt repeats in ~120 rows). The fix is a 32-component PCA, fitted on train prompts, plus `min_child_weight` = 300. Chosen on validation from 12 configurations, all reported. Serving adds one 384 × 32 projection.
+- **128 tokens is frozen:** with the final design it beats 256 (1.815 vs. 1.831).
+- **The best model under-covers gemma-3-4b** (93.9%; the other models range 94.4–95.8%). Day 7 reports it next to the headline number.
 
 ### Day 6: Neural network
 

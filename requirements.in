@@ -7,3 +7,6 @@ huggingface_hub
 matplotlib
 pytest
 sentence-transformers
+scikit-learn
+xgboost; sys_platform == "darwin"
+xgboost-cpu; sys_platform == "linux"  # same package without the CUDA/NCCL dependency
