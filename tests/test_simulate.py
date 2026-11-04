@@ -150,3 +150,49 @@ def test_a_bounds_policy_looks_up_each_requests_row_and_rounds_up():
     assert np.array_equal(sim.bounds_policy(np.full(3, 4096.0))(t), sim.max_tokens_policy()(t))
     with pytest.raises(ValueError):
         sim.bounds_policy(np.array([1.0, -1.0, 2.0]))
+
+
+def test_a_capped_request_is_cut_at_its_reservation_and_never_overshoots():
+    t = trace([0, 1], [10, 10], [50, 5], datasets=["d", "d"])
+    t = sim.Trace(**{**t.__dict__, "degenerate": np.array([False, False])})
+    res = sim.simulate(t, [20, 20], CFG, cap=True)  # sent with max_tokens = 20
+    assert res.limit.tolist() == [20, 20]
+    assert res.reserved.tolist() == [30, 30] and res.actual.tolist() == [30, 15]
+    s = sim.summarize(t, res, CFG)
+    assert (s["truncated"], s["cut_by_cap"], s["truncated_clean"], s["overshoot_windows"]) == (1, 1, 1, 0)
+    assert s["truncated_rate"] == 0.5 and s["under_reserved_tokens"] == 0
+
+
+def test_a_cap_never_lifts_max_tokens_and_degenerate_cuts_are_not_counted_as_real_answers():
+    t = trace([0, 61], [10, 10], [500, 60])  # one per window, so both are admitted
+    t = sim.Trace(**{**t.__dict__, "degenerate": np.array([True, False])})
+    res = sim.simulate(t, [1_000, 40], CFG, cap=True)
+    assert res.limit.tolist() == [80, 40]  # max_tokens = 80 still wins
+    s = sim.summarize(t, res, CFG)
+    assert (s["truncated"], s["cut_by_cap"]) == (2, 1)  # the runaway would have been cut at 80 anyway
+    assert (s["truncated_clean"], s["cut_by_cap_clean"]) == (1, 1)
+    with pytest.raises(ValueError):
+        sim.simulate(t, [0, 40], CFG, cap=True)
+
+
+def test_a_holdback_keeps_a_share_out_of_admission_but_overshoot_is_measured_on_the_whole_budget():
+    t = trace([0, 1], [10, 10], [70, 5])
+    no = sim.simulate(t, [40, 40], CFG)
+    held = sim.simulate(t, [40, 40], CFG, holdback=0.15)  # admits up to 85 of 100
+    assert no.admitted.tolist() == [True, True] and held.admitted.tolist() == [True, False]
+    s = sim.summarize(t, held, CFG)
+    assert held.spend[0] == 80 and s["overshoot_windows"] == 0  # the 30-token miss fits in the buffer
+    assert sim.summarize(t, held, CFG)["wrongful_rejections"] == 1  # its real cost (15) would have fit
+
+
+def test_run_applies_the_strategy_a_policy_carries():
+    rows = pd.DataFrame({"sample_id": ["a", "b"], "input_size": [10, 10], "output_tokens": [300, 20],
+                         "model": ["m", "m"], "dataset": ["d", "d"], "is_degenerate": [False, False]})
+    cfg = sim.Config(budget=2_000, duration=60.0, rate=2.0, max_tokens=4096)
+    policy = sim.with_strategy(sim.bounds_policy(np.array([50.0, 50.0])), cap=True)
+    r = sim.run(rows, {"capped": policy, "plain": sim.bounds_policy(np.array([50.0, 50.0]))}, cfg, seeds=(0,))
+    capped, plain = r["capped"]["seeds"][0], r["plain"]["seeds"][0]
+    assert capped["under_reserved_tokens"] == 0 and capped["truncated"] > 0
+    assert plain["under_reserved_tokens"] > 0 and plain["truncated"] == 0
+    with pytest.raises(ValueError):
+        sim.with_strategy(policy, holdback=1.0)
