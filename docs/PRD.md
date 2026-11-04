@@ -405,11 +405,17 @@ The one item left from days 1–6 is the Day-4 hour on quantile regression and p
 
 ### Day 11: Export to ONNX
 
-- [ ] Export the regressor (`onnxmltools` for XGBoost, `torch.onnx.export` for the MLP).
-- [ ] Embedding model: try an ONNX export; if it fights you, keep it in PyTorch on CPU.
-- [ ] Parity test: ONNX and Python predictions agree within 1e-4 on 1,000 prompts.
+- [x] Export the regressor (`onnxmltools` for XGBoost, `torch.onnx.export` for the MLP).
+- [x] Embedding model: try an ONNX export; if it fights you, keep it in PyTorch on CPU.
+- [x] Parity test: ONNX and Python predictions agree within 1e-4 on 1,000 prompts.
 
 **Done when:** the parity test passes.
+
+**Done, 4 Nov 2026.** `make onnx` exports the winner's two regressors and the MiniLM-128 encoder to `data/models/onnx/` with the tokenizer, the frozen PCA and `serving.json` (about 40 seconds), and 108 of 108 tests pass. The parity check runs on 1,000 test prompts (12,446 requests) in a process with only ONNX Runtime loaded. Every ONNX stage agrees with its Python model on identical inputs, and so does raw text → winner: at most 1.3e-5 in log1p tokens (XGBoost), 9.5e-7 (MLP), 2.5e-7 (encoder), with identical token ids. Details in [findings.md](findings.md#day-11-export-to-onnx-4-nov-2026). Three notes:
+
+- **The gate compares each stage on identical inputs, a choice made after the first run (finding 36).** Against the Day-7 predictions, 27 requests in 3 prompts differ by up to 2.5e-3: rounding of about 1e-7 in the embedding and the PCA moves an XGBoost row across a split, and xgboost does the same with per-request PyTorch embeddings. 21 bounds move by one token; coverage on the parity set is unchanged (95.89%), so the Day-7 numbers stand for the served model. The PCA is now accumulated in float64, so a single request and a batch give identical inputs.
+- **ONNX bought no latency (finding 37):** 6.5 ms p50 and 10.8–12.5 ms p99 per request on one thread, about 8.7 ms p99 of it the encoder, so `/predict` has 2.5–4 ms left for HTTP. Day 13 measures it; int8 quantization of the encoder is the fallback, with its own coverage check.
+- **The service needs neither torch nor xgboost:** onnxruntime, tokenizers, numpy and pandas, plus a 94.5 MB bundle. Day 12's image uses `serving.Predictor`, which refuses a bundle whose file hashes don't match `serving.json`.
 
 ### Day 12: The service
 
