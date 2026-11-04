@@ -118,3 +118,35 @@ def test_the_simulator_reads_test_from_the_original_config_degenerate_included()
     res = sim.simulate(t, sim.max_tokens_policy()(t), cfg)
     s = sim.summarize(t, res, cfg)
     assert s["overshoot_windows"] == 0 and 0 < s["admitted"] <= s["requests"]
+
+
+def test_a_wrongful_rejection_is_a_429_whose_real_cost_would_have_fit():
+    # A reserves 10 + 50 and holds it. B (cost 30) would fit in the 40 left but reserves 10 + 50: wrongful.
+    # C (cost 50) would not fit in 40 either way: a rightful 429.
+    t = trace([0, 1, 2], [10, 10, 10], [5, 20, 40], models=["a", "a", "b"])
+    res = sim.simulate(t, [50, 50, 50], CFG)
+    assert res.admitted.tolist() == [True, False, False]
+    assert res.fits.tolist() == [True, True, False]
+    s = sim.summarize(t, res, CFG)
+    assert (s["rejected"], s["wrongful_rejections"]) == (2, 1)
+    assert s["wrongful_rejection_rate"] == pytest.approx(1 / 3) and s["mean_admitted_cost"] == 15
+    by = sim.group_table(t.model, t, res)
+    assert (by["a"]["wrongful_rejections"], by["b"]["wrongful_rejections"]) == (1, 0)
+
+
+def test_an_exact_reservation_is_never_wrongfully_rejected():
+    rng = np.random.default_rng(1)
+    n = 400
+    t = trace(np.sort(rng.uniform(0, 120, n)), rng.integers(1, 30, n), rng.integers(0, 60, n))
+    res = sim.simulate(t, t.output_tokens, CFG)  # each request reserves exactly what it will use
+    s = sim.summarize(t, res, CFG)
+    assert s["rejected"] > 0 and s["wrongful_rejections"] == 0 and s["overshoot_windows"] == 0
+
+
+def test_a_bounds_policy_looks_up_each_requests_row_and_rounds_up():
+    t = sim.Trace(arrival=np.array([0.0, 1.0, 2.0]), row=np.array([2, 0, 2]), input_tokens=np.array([1, 1, 1]),
+                  output_tokens=np.array([1, 1, 1]), model=np.array(["m"] * 3), dataset=np.array(["d"] * 3))
+    assert sim.bounds_policy(np.array([10.0, 20.0, 30.2]))(t).tolist() == [31, 10, 31]
+    assert np.array_equal(sim.bounds_policy(np.full(3, 4096.0))(t), sim.max_tokens_policy()(t))
+    with pytest.raises(ValueError):
+        sim.bounds_policy(np.array([1.0, -1.0, 2.0]))
