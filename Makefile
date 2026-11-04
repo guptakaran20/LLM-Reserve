@@ -2,7 +2,7 @@ PYTHON ?= python3.12
 VENV := .venv
 PY := $(VENV)/bin/python
 
-.PHONY: setup lock data explore baselines features models mlp test clean-data
+.PHONY: setup lock data explore baselines features models mlp eval test clean-data
 
 # Create the virtualenv from the pinned requirements.
 setup: $(VENV)/.installed
@@ -48,8 +48,17 @@ models: setup
 mlp: setup
 	$(PY) -m llm_reserve.mlp
 
+# Day-7 test split, scored once with every choice frozen: results, breakdowns, error analysis and
+# leave-one-dataset-out -> docs/figures/. XGBoost and torch run in separate processes (findings 20).
+eval: setup
+	$(PY) -m llm_reserve.predict xgb
+	$(PY) -m llm_reserve.predict mlp
+	$(PY) -m llm_reserve.lodo xgb
+	$(PY) -m llm_reserve.lodo mlp
+	$(PY) -m llm_reserve.holdout
+
 test: setup
 	$(PY) -m pytest -q
 
 clean-data:
-	rm -rf data/raw data/processed data/features
+	rm -rf data/raw data/processed data/features data/predictions data/lodo
