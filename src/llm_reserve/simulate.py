@@ -20,9 +20,12 @@ can only happen when a request uses more than it reserved. Under-reserved tokens
 reserved)+, are also summed per target model and per source dataset, where Day 7 found coverage
 differs most (91.3% on ShareGPT to 98.3% on Dolly).
 
+A wrongful rejection is a 429 for a request whose real cost would have fit in what was left of its
+window at that moment: the gateway turned it away only because of the size of its reservation.
+
 A policy is a function from the trace to one output reservation per request. Day 8 runs the
 `max_tokens` policy end to end; Day 9 adds the fixed-percentile and model policies from precomputed
-predictions, and Day 10 the misprediction strategies.
+bounds (`bounds_policy`, swept by llm_reserve.sweep), and Day 10 the misprediction strategies.
 
 Writes docs/figures/sim_max_tokens.json and sim_windows.png. Run with `make sim`.
 """
@@ -97,6 +100,15 @@ def max_tokens_policy(max_tokens: int = MAX_TOKENS) -> Policy:
     return lambda trace: np.full(len(trace), max_tokens, dtype=np.int64)
 
 
+def bounds_policy(bounds: np.ndarray) -> Policy:
+    """Reserve a precomputed bound per row of load_features(split, "original"), looked up by `trace.row`."""
+    bounds = np.asarray(bounds)
+    if (bounds < 0).any() or not np.isfinite(bounds).all():
+        raise ValueError("bounds must be finite and nonnegative")
+    b = np.ceil(bounds).astype(np.int64)  # a gateway reserves whole tokens
+    return lambda trace: b[trace.row]
+
+
 def poisson_arrivals(rng: np.random.Generator, rate: float, duration: float) -> np.ndarray:
     """Arrival times in [0, duration) of a Poisson process: cumulative exponential gaps."""
     n = int(rate * duration + 10 * np.sqrt(rate * duration) + 10)  # enough gaps to pass `duration`
@@ -137,6 +149,7 @@ class Result:
     reserved: np.ndarray  # tokens reserved per request (input + capped output bound), admitted or not
     actual: np.ndarray  # tokens the request costs if admitted: input + min(y, max_tokens)
     window: np.ndarray  # window each request arrived in
+    fits: np.ndarray  # bool per request: its real cost fit in what was left of its window when it arrived
     spend: np.ndarray  # per window: tokens actually spent once everything it admitted has settled
     peak_in_flight: int
     timeline: list[tuple[float, int, float]] | None  # (time, window, committed spend) after each event
@@ -154,6 +167,7 @@ def simulate(trace: Trace, reserved_output: np.ndarray, cfg: Config, record: boo
 
     committed = np.zeros(cfg.n_windows, dtype=np.int64)  # reserved in flight + actual of settled, per window
     admitted = np.zeros(len(trace), dtype=bool)
+    fits = np.zeros(len(trace), dtype=bool)
     events = [(float(t), ARRIVAL, i) for i, t in enumerate(trace.arrival)]
     heapq.heapify(events)
     in_flight = peak = 0
@@ -162,6 +176,7 @@ def simulate(trace: Trace, reserved_output: np.ndarray, cfg: Config, record: boo
         t, kind, i = heapq.heappop(events)
         w = window[i]
         if kind == ARRIVAL:
+            fits[i] = committed[w] + actual[i] <= cfg.budget
             if committed[w] + reserved[i] > cfg.budget:
                 continue  # 429
             committed[w] += reserved[i]
@@ -174,12 +189,13 @@ def simulate(trace: Trace, reserved_output: np.ndarray, cfg: Config, record: boo
             in_flight -= 1
         if record:
             timeline.append((t, int(w), float(committed[w])))
-    return Result(admitted, reserved, actual, window, committed, peak, timeline)
+    return Result(admitted, reserved, actual, window, fits, committed, peak, timeline)
 
 
 def group_table(groups: np.ndarray, trace: Trace, res: Result) -> dict:
     """Admission and under-reservation per group (target model or source dataset)."""
     under = np.where(res.admitted, np.maximum(res.actual - res.reserved, 0), 0)
+    wrongful = ~res.admitted & res.fits
     out = {}
     for g in sorted(set(groups)):
         m = groups == g
@@ -188,6 +204,7 @@ def group_table(groups: np.ndarray, trace: Trace, res: Result) -> dict:
             "requests": int(m.sum()),
             "admitted": int(adm.sum()),
             "admit_rate": float(adm.mean()),
+            "wrongful_rejections": int(wrongful[m].sum()),
             "under_reserved_requests": int((under[m] > 0).sum()),
             "under_reserved_tokens": int(under[m].sum()),
             "used_tokens": int(res.actual[m][adm].sum()),
@@ -208,6 +225,8 @@ def summarize(trace: Trace, res: Result, cfg: Config) -> dict:
         "rejected": int(n - adm.sum()),
         "admit_rate": float(adm.mean()) if n else 0.0,
         "admitted_per_minute": float(adm.sum() / (cfg.duration / 60)),
+        "wrongful_rejections": int((~adm & res.fits).sum()),  # 429s whose real cost would have fit
+        "wrongful_rejection_rate": float((~adm & res.fits).mean()) if n else 0.0,  # share of all requests
         "truncated": int((adm & (trace.output_tokens > cfg.max_tokens)).sum()),  # cut off at max_tokens
         "overshoot_windows": int((over > 0).sum()),
         "overshoot_max_tokens": int(over.max()),
@@ -216,6 +235,7 @@ def summarize(trace: Trace, res: Result, cfg: Config) -> dict:
         "under_reserved_tokens": int(under.sum()),
         "utilization": float(res.spend.mean() / cfg.budget),  # real spend ÷ budget, averaged over windows
         "reserved_per_used": float(res.reserved[adm].sum() / res.actual[adm].sum()),
+        "mean_admitted_cost": float(res.actual[adm].mean()),  # real tokens per admitted request
         "demand_per_budget": float(res.actual.sum() / (cfg.n_windows * cfg.budget)),  # if every request got in
         "peak_in_flight": res.peak_in_flight,
     }
