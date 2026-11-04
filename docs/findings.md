@@ -1,6 +1,6 @@
 # Findings
 
-Living results log for llm-reserve. Each section says which split it uses. The test split is not explored; it is scored once, on Day 7.
+Living results log for llm-reserve. Each section says which split it uses. The test split was not explored before Day 7, when it was scored once with every choice frozen.
 
 ## Day 2: Exploring the data (30 Oct 2026)
 
@@ -290,3 +290,137 @@ The average lifts gemma-3-4b from 93.9% to 94.5% and has the narrowest range of 
 ### 20. torch and xgboost can't run in one process on macOS
 
 Each wheel ships its own OpenMP runtime. In one Python process, xgboost segfaults if torch loaded first, and multi-threaded torch deadlocks if xgboost loaded first. So `make models` saves the XGBoost validation predictions (`data/models/xgb_minilm128_validate_pred.npz`) and `make mlp` reads them without running xgboost. That file was first written by a separate run of the same code: `make models` has not been rerun since the change. `tests/conftest.py` loads xgboost first and keeps torch on one thread, the one combination that works. **So:** Day 7 scores test the same way (XGBoost in one process, the MLP in another), and serving avoids the problem, since ONNX Runtime replaces both libraries on Day 11.
+
+## Day 7: Test, scored once (4 Nov 2026)
+
+**Scope.** The test split, read for the first time and scored once: 1,130 prompts, 140,276 sanitized completions (140,480 original), mean length 413. Every knob comes from validation and is read back, never re-tuned: each baseline's percentile (Day 3), each model's log-space shift (Days 5 and 6), and the winner, the average of the MLP and XGBoost log predictions (Day 6). The models are loaded from `data/models/` and must reproduce their validation ratios to within 10⁻⁶ before any test prediction is written. All five do, and the saved XGBoost reproduces the validation predictions Day 6 averaged, which closes the open point in finding 20. Rebuild with `make eval` (4 min 20 s, almost all of it the leave-one-dataset-out training; a second run reproduces every number exactly). The numbers come from [`figures/test_results.json`](figures/test_results.json).
+
+The frozen protocol is the headline: each method keeps its validation knob, so its test coverage lands near 95% but not on it. Two diagnostics sit next to it and choose nothing. "Matched on test" re-tunes every knob to exactly 95% on test, so a saving can't come from covering less. A bootstrap over whole prompts gives intervals for the frozen numbers. The oracle reads the lengths it bounds, so its k is tuned on test, as it was on validation.
+
+| Method | Deployable | Frozen knob θ | Coverage (sanitized) | Coverage (original) | Reservation ratio | vs. the bar | Oracle gap closed | Ratio matched on test | vs. the bar, matched |
+|---|---|---|---|---|---|---|---|---|---|
+| `max_tokens` = 4,096 | yes | — | 99.93% | 99.79% | 9.916 | +328.7% | — | — | — |
+| Global percentile | yes | 0.9463 | 95.51% | 95.37% | 2.368 | +2.4% | −5.5% | 2.281 | +3.5% |
+| **Per-model percentile (the bar)** | yes | 0.9539 | 96.05% | 95.91% | **2.313** | — | 0% | **2.203** | — |
+| Per-model × input-length quintile | yes | 0.9529 | 95.79% | 95.65% | 2.197 | −5.0% | 11.5% | 2.111 | −4.1% |
+| Per-model × source dataset | no | 0.9535 | 95.56% | 95.42% | 2.048 | −11.4% | 26.3% | 2.002 | −9.1% |
+| Linear quantile regression (hand-built) | yes | +0.017 | 95.55% | 95.42% | 2.258 | −2.4% | 5.5% | 2.205 | +0.1% |
+| XGBoost (hand-built) | yes | +0.043 | 95.40% | 95.26% | 1.938 | −16.2% | 37.4% | 1.906 | −13.5% |
+| XGBoost (hand-built + MiniLM-128 PCA-32) | yes | +0.082 | 95.74% | 95.60% | 1.872 | −19.1% | 43.9% | 1.815 | −17.6% |
+| MLP (hand-built + MiniLM-128 PCA-32) | yes | +0.015 | 95.81% | 95.67% | 1.821 | −21.3% | 49.0% | 1.766 | −19.8% |
+| **Average of the MLP and XGBoost (the winner)** | yes | +0.034 | 95.81% | 95.67% | **1.808** | **−21.8%** | **50.3%** | **1.753** | **−20.4%** |
+| Oracle: k × own mean + own std | no | tuned on test | 95.00% | 94.97% | 1.309 | −43.4% | 100% | 1.309 | −40.6% |
+
+![Coverage vs. reservation on test](figures/test_curve.png)
+
+### 21. The winner meets the 20% target on test: −21.8% against the bar, −20.4% at equal coverage
+
+At its frozen shift the winner reserves 1.808× what is used, at 95.81% coverage. The bar reserves 2.313× at 96.05%. That is 21.8% fewer tokens and 50% of the gap to the oracle. With both re-tuned to exactly 95% on test, the winner reserves 1.753 against 2.203: −20.4%, still 50% of the gap. Resampling whole prompts 2,000 times puts the frozen saving between −23.3% and −20.3% (95% interval), and 98.8% of resamples reach −20%. Against `max_tokens` = 4,096 the winner reserves 82% fewer tokens. The lead holds along the whole curve.
+
+Three things to read with it:
+
+- **The Day-3 figure of 1.797 does not carry over.** It was 80% of the *validation* bar (2.246). The target is relative to the bar on the same split. Test is about 2% shorter than validation (mean 413 vs. 421 tokens, p95 942 vs. 978), so every frozen knob over-covers by 0.4–1.1 points, and the bar costs 2.313 at its frozen percentile. The winner's 1.808 is above 1.797 and below 80% of the test bar (1.850).
+- **The margin at equal coverage is thin.** −20.4% clears the target by 0.4 points, and the bootstrap's lower end (−20.3%) only just does. The MLP alone sits on the line (−19.8% matched, −21.3% frozen), and XGBoost alone misses (−17.6% and −19.1%). The average that Day 6 picked before seeing test is what passes.
+- **Validation did not flatter the models.** Re-tuned to 95% on test, the winner, the MLP and XGBoost reserve 1.753, 1.766 and 1.815, against 1.756, 1.769 and 1.815 on validation, even though 19 MLP and 12 XGBoost configurations were compared on validation. The bar got cheaper instead (2.246 → 2.203), which is why the relative saving shrinks from −21.8% to −20.4%. At the frozen knobs, every method ranks as it did on validation.
+
+On the original config, degenerate completions included, every percentile and model loses 0.13–0.14 points of coverage (0.15 on validation): the winner covers 95.67%.
+
+### 22. Coverage holds for every model and every prompt length, but not for every kind of prompt
+
+![Per target model on test](figures/test_by_model.png)
+
+| Target model | Rows | Bar coverage | Bar ratio | Winner coverage | Winner ratio | Change vs. the bar |
+|---|---|---|---|---|---|---|
+| Llama-3.1-8B-Instruct | 10,994 | 95.69% | 2.024 | 95.09% | 1.717 | −15.2% |
+| Llama-3.2-1B-Instruct | 10,945 | 96.34% | 2.035 | 96.05% | 1.703 | −16.3% |
+| Llama-3.2-3B-Instruct | 11,021 | 95.62% | 2.168 | 96.15% | 1.844 | −14.9% |
+| Llama-3.3-70B-Instruct | 11,029 | 96.33% | 2.096 | 96.14% | 1.776 | −15.3% |
+| Ministral-8B-Instruct-2410 | 11,040 | 95.67% | 2.020 | 95.09% | 1.667 | −17.5% |
+| Mistral-7B-Instruct-v0.3 | 11,040 | 95.63% | 2.176 | 96.09% | 1.890 | −13.2% |
+| Mixtral-8x7B-Instruct-v0.1 | 11,035 | 95.80% | 2.311 | 95.33% | 1.925 | −16.7% |
+| Phi-4-mini-instruct | 11,028 | 95.96% | 2.255 | 96.28% | 1.873 | −17.0% |
+| Qwen2.5-14B-Instruct | 11,040 | 96.39% | 2.059 | 96.14% | 1.700 | −17.4% |
+| Qwen2.5-32B-Instruct | 11,037 | 96.44% | 2.022 | 96.50% | 1.696 | −16.1% |
+| Qwen2.5-7B-Instruct-1M | 11,027 | 96.33% | 2.306 | 95.86% | 1.786 | −22.5% |
+| gemma-3-12b-it | 8,000 | 97.01% | 3.730 | 95.85% | 2.026 | **−45.7%** |
+| gemma-3-4b-it | 11,040 | 95.72% | 2.966 | 95.01% | 1.948 | **−34.3%** |
+
+Every target model ends up between 95.0% and 96.5% coverage, and the winner saves on every one: 13–23% on the eleven similar models, and **46% and 34% on the two gemma models**, whose long second peak (finding 2) the bar covers with one bound for every prompt. gemma-3-4b, which XGBoost under-covered at 93.9% on validation (finding 15), is at 95.0%. So the saving is not bought by quietly under-covering one model, the risk flagged on Day 3.
+
+Per source dataset it is a different story:
+
+| Source dataset | Rows | Bar coverage | Bar ratio | Winner coverage | Winner ratio | Change vs. the bar |
+|---|---|---|---|---|---|---|
+| Alpaca | 24,973 | 96.59% | 2.688 | 95.63% | 1.972 | −26.6% |
+| Apps | 24,869 | 93.43% | 1.816 | 95.76% | 1.689 | −7.0% |
+| BigCodeBench | 14,813 | 99.42% | 2.190 | 97.41% | 1.525 | −30.4% |
+| DS1000 | 12,996 | 99.60% | 3.006 | 97.32% | 1.803 | −40.0% |
+| DollyDataset | 25,978 | 99.46% | 3.193 | 98.27% | 2.250 | −29.5% |
+| Mbpp | 12,737 | 99.76% | 3.076 | 96.33% | 1.735 | −43.6% |
+| ShareGPT | 23,910 | 88.52% | 1.649 | **91.31%** | 1.719 | **+4.2%** |
+
+The winner's coverage runs from **91.3% on ShareGPT to 98.3% on Dolly**. On ShareGPT it reserves 4% more than the bar and still covers less than 95% (the bar covers only 88.5% there). So 95% overall is an average over kinds of traffic: open-ended chat gets bounds that are too low, and short-answer instructions and code get bounds that are too high. Prompt length no longer matters the same way. The winner covers 95.0–96.8% of every input-length quintile, where the bar ranges from 92.9% to 98.3%:
+
+| Prompt tokens (train quintiles) | Rows | Bar coverage | Bar ratio | Winner coverage | Winner ratio | Change vs. the bar |
+|---|---|---|---|---|---|---|
+| < 38 | 27,775 | 95.52% | 2.356 | 94.96% | 1.901 | −19.3% |
+| 38–68 | 28,082 | 95.96% | 2.381 | 95.40% | 1.878 | −21.1% |
+| 68–157 | 26,964 | 97.63% | 2.670 | 96.81% | 1.755 | −34.3% |
+| 157–336 | 28,710 | 98.28% | 2.473 | 96.25% | 1.740 | −29.7% |
+| ≥ 336 | 28,745 | 92.94% | 1.867 | 95.68% | 1.768 | −5.3% |
+
+**So:** the simulator (Day 8) should report overshoot per source dataset as well as per model. ShareGPT-like traffic is where reservations will run short.
+
+### 23. Three quarters of the worst misses are runaways and lone long runs, which no prompt-only bound can see
+
+The 100 worst under-predictions are ranked by (y − bound) ÷ bound, taking each (prompt, model) sample's worst completion once; they come from 59 prompts. Each is assigned the first cause its numbers match:
+
+| Cause (rules applied in this order) | Count | Prompts | Median miss, y ÷ bound − 1 |
+|---|---|---|---|
+| Runaway: the completion is past `max_tokens` = 4,096, and the sanitized config kept it | 53 | 37 | 5.98 |
+| Lone long run: the sample's median completion is within the bound | 21 | 20 | 2.23 |
+| Prompt misread: the median is over the bound, and so it is for at least half of the other LLMs on the prompt | 16 | 5 | 2.23 |
+| This LLM, not the prompt: the median is over the bound, but most other LLMs stayed within theirs | 10 | 9 | 2.10 |
+
+The rules were written after looking at the misses, as error analysis is; they choose nothing.
+
+- **Runaways (53):** completions of 4,190–14,247 tokens, mostly one or two runs in an otherwise normal sample (the sample's median is past 4,096 in only 4). CASTILLO's degenerate rule needs a completion at 15,000 or a sample with std > 2 × mean and a max of at least 8,500, so it misses these. A gateway's `max_tokens` cuts them off.
+- **Lone long runs (21):** the bound fits the typical answer and one run goes 2–4× longer. With the runaways, that is 74 of the 100: the within-prompt spread of finding 4. The worst samples have a median CV of 0.84, against 0.16 for all samples, which answers finding 4's question: under-predictions are concentrated in high-spread samples.
+- **Prompt misread (16, from 5 prompts):** open-ended requests whose length the bound under-reads for most LLMs. "Give me a list of people who have won the Nobel Prize in Physics" gets bounds of 571–1,078 and medians up to 3,461. "Create a worksheet with 25 sentences…" gets 327–506 (a sentence count usually means a short answer, finding 8). The others are a MySQL schema exercise, a three-function Apps task and "Design a chess playing AI". 7 of the 16 have a length hint.
+- **This LLM, not the prompt (10, 9 prompts):** one LLM answers at length where the others don't, mostly Mixtral and Mistral on ShareGPT and Alpaca (a story, a poem in the style of "The Raven", a how-to written "as a textbook").
+
+Five models give 75 of the 100 (Llama-3.2-1B 23, Mixtral-8x7B 17, Phi-4-mini 14, Llama-3.2-3B 11, Llama-3.1-8B 10) but only 39% of the samples. They are the same models that produce most degenerate runs (finding 5). By dataset: ShareGPT 40, Apps 24, Alpaca 23.
+
+**On the original config,** the winner misses 6,076 completions (4.3%) at its frozen shift. All 204 degenerate completions are among them, and they carry **59% of the tokens over the bound**. Clipped at `max_tokens`, as a gateway bills, they carry 27%, and total overshoot is 3.9% of used tokens (the bar: 4.3%). **So:** Day 10 sizes the overdraft buffer from the clipped overshoot, broken down per model, since five models account for most of it.
+
+### 24. On a benchmark the model never saw, half the gain is gone
+
+The embedding recognizes CASTILLO's prompt templates (finding 10), so each of the 7 source datasets was held out in turn. The winner's design was retrained without it everywhere it could leak in (the PCA, both models' training rows and early stopping), its shift tuned on validation outside it, and it was scored on the held-out dataset's test prompts. "Bar" is the per-model percentile fitted without the dataset. The frozen winner ("full") is compared with the bar fitted on all of train, which is 0.01–0.07 cheaper. "Ratio at 95%" re-tunes every method to 95% on the dataset's own test rows, so it compares how well they rank its prompts.
+
+![Leave one dataset out](figures/lodo.png)
+
+| Held-out dataset | Test prompts | Coverage, frozen: bar / full / held out | Ratio at 95% on the dataset: bar / full / held out / oracle | vs. the bar: full / held out | Gap closed: full / held out |
+|---|---|---|---|---|---|
+| Alpaca | 200 | 97.0% / 95.6% / 96.6% | 2.503 / 1.916 / 2.241 / 1.281 | −23.3% / −10.5% | 48% / 21% |
+| Apps | 210 | 91.1% / 95.8% / 95.2% | 1.968 / 1.646 / 1.871 / 1.359 | −13.8% / −5.0% | 48% / 16% |
+| BigCodeBench | 114 | 99.5% / 97.4% / 96.8% | 1.804 / 1.428 / 1.587 / 1.240 | −20.0% / −12.0% | 66% / 38% |
+| DS1000 | 100 | 99.7% / 97.3% / 99.6% | 2.186 / 1.649 / 1.844 / 1.358 | −23.9% / −15.7% | 64% / 41% |
+| DollyDataset | 200 | 99.6% / 98.3% / 99.0% | 2.486 / 1.986 / 2.432 / 1.274 | −19.8% / −2.2% | 41% / 4% |
+| Mbpp | 98 | 99.8% / 96.3% / 97.7% | 2.054 / 1.660 / 1.780 / 1.302 | −18.5% / −13.4% | 51% / 37% |
+| ShareGPT | 208 | 81.5% / 91.3% / 77.4% | 2.104 / 1.979 / 2.272 / 1.326 | −2.9% / **+8.0%** | 8% / **−22%** |
+
+| Training data | Coverage, frozen | Ratio at 95% | vs. the bar at 95% | Oracle gap closed |
+|---|---|---|---|---|
+| All of train (the frozen winner) | 95.81% | 1.753 | −20.4% | 50% |
+| A random seventh of the train prompts removed (control) | 95.81% | 1.760 | −20.1% | 50% |
+| Each row's own dataset removed (all 7 held-out runs, pooled) | **93.94%** | 2.126 | **−9.3%** | **21%** |
+
+Held out of training, the winner still beats its bar on 6 of the 7 datasets, but by 2–16% instead of 14–24%, closing 4–41% of the oracle gap instead of 41–66%. On ShareGPT it does worse than the bar (+8.0%). Pooled, with every test row scored by the model that never saw its dataset and each run keeping its own frozen shift, the saving is **−9.3% at equal coverage (−12.0% frozen) and 21% of the oracle gap**, against −20.4% and 50% with every dataset in training. That is about what knowing the source dataset buys (−9.1%, the not-deployable reference row).
+
+**It is not the smaller training set.** Holding out a dataset leaves 795k–889k of the 977k train rows. The control removes a random seventh of the train prompts from every dataset (836k rows left), and it keeps −20.1% and 50% of the gap.
+
+**Calibration doesn't transfer either.** With the shift frozen on validation outside the dataset, coverage on the held-out dataset runs from **77.4% (ShareGPT)** to 99.6% (DS1000), and 93.9% pooled. ShareGPT is the worst case on both counts, and it is real user chat, the closest of the seven to gateway traffic. The trees transfer better than the network: held out, XGBoost ranks prompts better than the MLP on 4 of the 7 datasets (Apps 1.840 vs. 2.033, ShareGPT 2.271 vs. 2.397), while with every dataset in training the MLP is better on all 7.
+
+**So:** "the model learned what prompts ask for" is half true. It keeps a real gain on 6 of 7 benchmarks it never saw, but about half of its test gain comes from recognizing CASTILLO's seven templates. The −21.8% headline is for CASTILLO-like traffic. On a new kind of prompt, expect about −10% and a coverage shortfall until the quantile is re-tuned on that traffic. This goes in the README next to the headline. Day 10's overdraft buffer has to absorb a coverage drop on unfamiliar traffic, not just runaways, and the January plan's online adaptation of the quantile (v2 item 3) moves from a nice-to-have to the fix for this.
+
+**Gate: model frozen.** The served model is Day 6's average of `mlp.pt` and `xgb_minilm128.ubj`, both on `pca_minilm128_32.npz`, with the shift +0.034 from `data/models/manifest.json`. Their sha256 hashes are in `test_results.json`, so Days 8–13 can check they serve what test scored. Nothing changes from here on because of a test number.

@@ -340,13 +340,22 @@ Each gate is a hard checkpoint: don't start the next phase until its "Done when"
 
 ### Day 7: Test once, then error analysis
 
-- [ ] Freeze every choice; score test on both sanitized and original.
-- [ ] Coverage vs. reservation curve for all methods, **with the oracle as a reference line (rev 2)**, plus the per-model breakdown.
-- [ ] Group the 100 worst under-predictions by cause and count them.
-- [ ] **(Day 4)** Leave one source dataset out of training and score it, for each of the 7 datasets: the embedding recognizes CASTILLO's prompt templates, so this checks the model learned what prompts ask for, not which benchmark they came from.
+- [x] Freeze every choice; score test on both sanitized and original.
+- [x] Coverage vs. reservation curve for all methods, **with the oracle as a reference line (rev 2)**, plus the per-model breakdown.
+- [x] Group the 100 worst under-predictions by cause and count them.
+- [x] **(Day 4)** Leave one source dataset out of training and score it, for each of the 7 datasets: the embedding recognizes CASTILLO's prompt templates, so this checks the model learned what prompts ask for, not which benchmark they came from.
 - [ ] Buffer: finish anything left over from days 1–6.
 
 **Done when:** the results table, curve and error categories are in `docs/findings.md`. **Gate: model frozen.**
+
+**Done, 4 Nov 2026. Model frozen.** `make eval` scores test once in 4 min 20 s, and 69 of 69 tests pass. **On test the winner reserves 21.8% fewer tokens than the bar (1.808 vs. 2.313) at 95.8% coverage, and 20.4% fewer with both re-tuned to exactly 95% (50% of the oracle gap).** A bootstrap over prompts puts the frozen saving between −23.3% and −20.3%. The 20% target is met, by 0.4 points at equal coverage. Details in [findings.md](findings.md#day-7-test-scored-once-4-nov-2026). Four notes:
+
+- **1.797 was the validation translation of the target.** The target is relative to the bar on test, and there every frozen knob over-covers by 0.4–1.1 points because test is about 2% shorter. 80% of the test bar is 1.850.
+- **Coverage per model is 95.0–96.5%, but per source dataset it runs from 91.3% (ShareGPT) to 98.3% (Dolly).** Day 8 reports overshoot per dataset as well as per model.
+- **74 of the 100 worst misses are runaways (past 4,096 tokens) and lone long runs**, mostly from five small models; the other 26 are prompts or prompt × model pairs the bound under-reads. On the original config, degenerate completions carry 27% of the overshoot once clipped at `max_tokens`, which is what Day 10's overdraft has to cover.
+- **On a benchmark the model never saw, the saving falls to −9.3% and coverage to 93.9%** (77% on ShareGPT). A control with a random seventh of the train prompts removed keeps −20.1%, so the cause is the unseen benchmark, not less data. The README must say the headline is for CASTILLO-like traffic.
+
+The one item left from days 1–6 is the Day-4 hour on quantile regression and pinball loss. It is reading, not code, so the buffer box stays open.
 
 ### Day 8: Simulator core
 

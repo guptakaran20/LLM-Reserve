@@ -16,6 +16,7 @@ make baselines # Day-3 baseline table on validation at 95% coverage -> docs/figu
 make features  # Day-4 feature matrix + MiniLM embeddings (128 and 256 tokens) -> data/features/
 make models    # Day-5 linear + XGBoost quantile models at 95% validation coverage -> docs/figures/, data/models/
 make mlp       # Day-6 PyTorch MLP (pinball loss) and the winning model, on validation -> docs/figures/, data/models/
+make eval      # Day-7 test split, scored once (frozen models), error analysis, leave-one-dataset-out -> docs/figures/
 make test
 ```
 
