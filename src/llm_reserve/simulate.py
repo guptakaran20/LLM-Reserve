@@ -25,7 +25,14 @@ window at that moment: the gateway turned it away only because of the size of it
 
 A policy is a function from the trace to one output reservation per request. Day 8 runs the
 `max_tokens` policy end to end; Day 9 adds the fixed-percentile and model policies from precomputed
-bounds (`bounds_policy`, swept by llm_reserve.sweep), and Day 10 the misprediction strategies.
+bounds (`bounds_policy`, swept by llm_reserve.sweep). Day 10 adds the two misprediction strategies
+(llm_reserve.mispredict), as attributes a policy can carry (`with_strategy`):
+
+- `cap` (strategy A): the reservation is also sent as the request's `max_tokens`, so the provider
+  stops there. A request can never cost more than it reserved, and a longer answer is truncated.
+- `holdback` (strategy B): a share of every window is kept out of admission, as an overdraft buffer
+  that requests outrunning their reservation spend into. Overshoot is still measured against the
+  whole budget.
 
 Writes docs/figures/sim_max_tokens.json and sim_windows.png. Run with `make sim`.
 """
@@ -87,6 +94,7 @@ class Trace:
     output_tokens: np.ndarray  # the completion's real length, before `max_tokens` cuts it
     model: np.ndarray
     dataset: np.ndarray
+    degenerate: np.ndarray | None = None  # bool: the completion is degenerate (a runaway or a repetition loop)
 
     def __len__(self) -> int:
         return len(self.arrival)
@@ -107,6 +115,18 @@ def bounds_policy(bounds: np.ndarray) -> Policy:
         raise ValueError("bounds must be finite and nonnegative")
     b = np.ceil(bounds).astype(np.int64)  # a gateway reserves whole tokens
     return lambda trace: b[trace.row]
+
+
+def with_strategy(policy: Policy, cap: bool = False, holdback: float = 0.0) -> Policy:
+    """`policy` with a misprediction strategy attached: `cap` (A) and/or a `holdback` share of the budget (B)."""
+    if not 0.0 <= holdback < 1.0:
+        raise ValueError("holdback must be a share of the budget in [0, 1)")
+
+    def wrapped(trace: Trace) -> np.ndarray:
+        return policy(trace)
+
+    wrapped.cap, wrapped.holdback = cap, holdback
+    return wrapped
 
 
 def poisson_arrivals(rng: np.random.Generator, rate: float, duration: float) -> np.ndarray:
@@ -138,6 +158,7 @@ def make_trace(rows: pd.DataFrame, cfg: Config) -> Trace:
         output_tokens=rows.output_tokens.to_numpy(np.int64)[row],
         model=rows.model.astype(str).to_numpy()[row],
         dataset=rows.dataset.astype(str).to_numpy()[row],
+        degenerate=rows.is_degenerate.to_numpy(bool)[row] if "is_degenerate" in rows else None,
     )
 
 
@@ -153,13 +174,25 @@ class Result:
     spend: np.ndarray  # per window: tokens actually spent once everything it admitted has settled
     peak_in_flight: int
     timeline: list[tuple[float, int, float]] | None  # (time, window, committed spend) after each event
+    limit: np.ndarray | None = None  # the `max_tokens` each request was sent with; the provider stops there
 
 
-def simulate(trace: Trace, reserved_output: np.ndarray, cfg: Config, record: bool = False) -> Result:
-    """Run the gateway over `trace`, reserving input + min(reserved_output, max_tokens) per request."""
-    reserved = trace.input_tokens + np.minimum(np.asarray(reserved_output, dtype=np.int64), cfg.max_tokens)
-    produced = np.minimum(trace.output_tokens, cfg.max_tokens)
+def simulate(trace: Trace, reserved_output: np.ndarray, cfg: Config, record: bool = False, cap: bool = False,
+             holdback: float = 0.0) -> Result:
+    """Run the gateway over `trace`, reserving input + min(reserved_output, max_tokens) per request.
+
+    With `cap` (strategy A), each request is also sent with max_tokens = its reserved output, so it can
+    never cost more than it reserved. With `holdback` (strategy B), a request is admitted only if it
+    fits under (1 - holdback) of the budget; the rest is an overdraft buffer for misses.
+    """
+    output = np.minimum(np.asarray(reserved_output, dtype=np.int64), cfg.max_tokens)
+    limit = output if cap else np.full(len(trace), cfg.max_tokens, dtype=np.int64)
+    if cap and len(trace) and limit.min() < 1:
+        raise ValueError("a capped request must be allowed at least one output token")
+    reserved = trace.input_tokens + output
+    produced = np.minimum(trace.output_tokens, limit)
     actual = trace.input_tokens + produced
+    admit_limit = cfg.budget - int(np.floor(holdback * cfg.budget))
     runtime = produced / cfg.tokens_per_second
     window = (trace.arrival // cfg.window).astype(np.int64)
     if len(trace) and window.max() >= cfg.n_windows:
@@ -177,7 +210,7 @@ def simulate(trace: Trace, reserved_output: np.ndarray, cfg: Config, record: boo
         w = window[i]
         if kind == ARRIVAL:
             fits[i] = committed[w] + actual[i] <= cfg.budget
-            if committed[w] + reserved[i] > cfg.budget:
+            if committed[w] + reserved[i] > admit_limit:
                 continue  # 429
             committed[w] += reserved[i]
             admitted[i] = True
@@ -189,13 +222,20 @@ def simulate(trace: Trace, reserved_output: np.ndarray, cfg: Config, record: boo
             in_flight -= 1
         if record:
             timeline.append((t, int(w), float(committed[w])))
-    return Result(admitted, reserved, actual, window, fits, committed, peak, timeline)
+    return Result(admitted, reserved, actual, window, fits, committed, peak, timeline, limit)
+
+
+def limits(res: Result, cfg: Config | None = None) -> np.ndarray:
+    if res.limit is not None:
+        return res.limit
+    return np.full(len(res.admitted), (cfg or Config()).max_tokens, dtype=np.int64)
 
 
 def group_table(groups: np.ndarray, trace: Trace, res: Result) -> dict:
-    """Admission and under-reservation per group (target model or source dataset)."""
+    """Admission, truncation and under-reservation per group (target model or source dataset)."""
     under = np.where(res.admitted, np.maximum(res.actual - res.reserved, 0), 0)
     wrongful = ~res.admitted & res.fits
+    truncated = res.admitted & (trace.output_tokens > limits(res))
     out = {}
     for g in sorted(set(groups)):
         m = groups == g
@@ -205,6 +245,7 @@ def group_table(groups: np.ndarray, trace: Trace, res: Result) -> dict:
             "admitted": int(adm.sum()),
             "admit_rate": float(adm.mean()),
             "wrongful_rejections": int(wrongful[m].sum()),
+            "truncated": int(truncated[m].sum()),
             "under_reserved_requests": int((under[m] > 0).sum()),
             "under_reserved_tokens": int(under[m].sum()),
             "used_tokens": int(res.actual[m][adm].sum()),
@@ -219,6 +260,16 @@ def summarize(trace: Trace, res: Result, cfg: Config) -> dict:
     under = np.where(adm, np.maximum(res.actual - res.reserved, 0), 0)
     if res.spend.sum() != res.actual[adm].sum():
         raise AssertionError("window books do not add up to the admitted requests' real cost")
+    limit = limits(res, cfg)
+    truncated = adm & (trace.output_tokens > limit)
+    # Cut short by a cap below max_tokens: the answer would have finished had it been sent with max_tokens.
+    cut = adm & (np.minimum(trace.output_tokens, cfg.max_tokens) > limit)
+    n_adm = max(int(adm.sum()), 1)
+    extra = {}
+    if trace.degenerate is not None:  # real answers cut, as opposed to runaways and repetition loops
+        extra = {"truncated_clean": int((truncated & ~trace.degenerate).sum()),
+                 "truncated_clean_rate": float((truncated & ~trace.degenerate).sum() / n_adm),
+                 "cut_by_cap_clean": int((cut & ~trace.degenerate).sum())}
     return {
         "requests": n,
         "admitted": int(adm.sum()),
@@ -227,7 +278,9 @@ def summarize(trace: Trace, res: Result, cfg: Config) -> dict:
         "admitted_per_minute": float(adm.sum() / (cfg.duration / 60)),
         "wrongful_rejections": int((~adm & res.fits).sum()),  # 429s whose real cost would have fit
         "wrongful_rejection_rate": float((~adm & res.fits).mean()) if n else 0.0,  # share of all requests
-        "truncated": int((adm & (trace.output_tokens > cfg.max_tokens)).sum()),  # cut off at max_tokens
+        "truncated": int(truncated.sum()),  # cut off at the max_tokens the request was sent with
+        "truncated_rate": float(truncated.sum() / n_adm),  # share of admitted requests
+        "cut_by_cap": int(cut.sum()),
         "overshoot_windows": int((over > 0).sum()),
         "overshoot_max_tokens": int(over.max()),
         "overshoot_max_share": float(over.max() / cfg.budget),
@@ -238,7 +291,7 @@ def summarize(trace: Trace, res: Result, cfg: Config) -> dict:
         "mean_admitted_cost": float(res.actual[adm].mean()),  # real tokens per admitted request
         "demand_per_budget": float(res.actual.sum() / (cfg.n_windows * cfg.budget)),  # if every request got in
         "peak_in_flight": res.peak_in_flight,
-    }
+    } | extra
 
 
 def load_rows(split: str = SPLIT) -> pd.DataFrame:
@@ -256,7 +309,8 @@ def run(rows: pd.DataFrame, policies: dict[str, Policy], cfg: Config, seeds: Seq
         trace = make_trace(rows, c)
         models = np.array([short_model(m) for m in trace.model])
         for name, policy in policies.items():
-            res = simulate(trace, policy(trace), c)
+            res = simulate(trace, policy(trace), c, cap=getattr(policy, "cap", False),
+                           holdback=getattr(policy, "holdback", 0.0))
             out[name]["seeds"].append(summarize(trace, res, c) | {"seed": seed})
             out[name]["by_model"].append(group_table(models, trace, res))
             out[name]["by_dataset"].append(group_table(trace.dataset, trace, res))
