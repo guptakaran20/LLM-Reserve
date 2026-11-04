@@ -325,11 +325,18 @@ Each gate is a hard checkpoint: don't start the next phase until its "Done when"
 
 ### Day 6: Neural network
 
-- [ ] PyTorch MLP: embedding plus hand-built features, two hidden layers (256 and 64 units, ReLU), one output (log length). **Add dropout and weight decay: train has only ~8k unique prompts (rev 2).**
-- [ ] Write the training loop yourself with pinball loss and Adam; early stopping on validation.
-- [ ] Tune the quantile and add the validation row.
+- [x] PyTorch MLP: embedding plus hand-built features, two hidden layers (256 and 64 units, ReLU), one output (log length). **Add dropout and weight decay: train has only ~8k unique prompts (rev 2).**
+- [x] Write the training loop yourself with pinball loss and Adam; early stopping on validation.
+- [x] Tune the quantile and add the validation row.
 
 **Done when:** the MLP has a validation row and you have picked the winning model.
+
+**Done, 4 Nov 2026.** `make mlp` trains 19 MLP configurations, a seed study and the candidates in 2 min 20 s on 4 threads, and 52 of 52 tests pass. **The MLP beats XGBoost on validation (1.769 vs. 1.815, −21.2% vs. the bar), and the winner, the average of the two in log space, reaches 1.756 (−21.8%, 52% of the oracle gap)**, below the 1.797 test target with 0.041 to spare. Details in [findings.md](findings.md#day-6-neural-network-4-nov-2026). Four notes:
+
+- **Dropout and weight decay were not enough.** The network memorizes train prompts within 3 epochs. What works is the Day-5 PCA-32 of the embedding plus dropout 0.2 on the inputs. All 19 configurations are reported.
+- **Seed noise is about ±0.01** (1.769–1.772 over 3 seeds). Most of the average's edge over the MLP alone is variance reduction: a 3-seed MLP average reaches 1.759.
+- **The winner evens out coverage per model** (94.5–95.7%; gemma-3-4b goes from 93.9% to 94.5%). Day 7 scores test with the MLP and XGBoost and the frozen shift +0.034 from `data/models/manifest.json`; Day 11 exports both regressors.
+- **torch and xgboost crash or deadlock in one process on macOS** (two OpenMP runtimes). The stages stay in separate processes, and Day 7 must too.
 
 ### Day 7: Test once, then error analysis
 

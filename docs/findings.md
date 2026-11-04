@@ -214,3 +214,79 @@ Linear quantile regression saves 2.3% and loses to the per-model × input-quinti
 With the embedding, its 32 components take 42% of the total split gain, the model one-hot 23%, and the size features (log input size, lines, characters, words) 24%. Without it, the model one-hot leads (28%), followed by the size features (42% together) and the code-character share (7%). The cue words and length hints get under 2.5% each in both models: the hints fire on too few prompts (finding 8).
 
 Coverage per model at the frozen shift ranges from **93.9% (gemma-3-4b)** to 95.8% (Mistral-7B). The hand-built XGBoost ranges from 94.5% to 96.4%. The embedding model buys part of its saving by under-covering gemma-3-4b, the model with the long second peak (finding 6). That is the risk flagged on Day 3. Day 7 reports it next to the headline number, and the simulator will show whether a 1-point coverage loss on one model matters for overshoot.
+
+## Day 6: Neural network (4 Nov 2026)
+
+**Scope.** Trained on train (sanitized), early-stopped and tuned on validation (sanitized); test is not loaded. The MLP takes the Day-5 inputs (hand-built features, log input size, the 13-model one-hot, and the MiniLM-128 embedding raw or as the Day-5 PCA-32), has two hidden layers (256 and 64, ReLU, dropout) and one output: the 95th percentile of log1p(output tokens). The training loop is hand-written: AdamW on the pinball loss, batches of 512 (prompt, model) samples, learning rate halved after 4 epochs without improvement, stopped after 12, best epoch kept. Completions of a sample share their features, so training runs on 97,825 samples with up to 10 targets each. The loss is the same as one row per completion and 10× cheaper. The knob θ and the 95% tuning are Day 5's. Rebuild with `make mlp` (2 min 20 s on 4 threads, after `make models`); the numbers come from [`figures/mlp_validate.json`](figures/mlp_validate.json).
+
+| Method | Shift θ | Coverage (original) | Validation pinball | Reservation ratio | vs. the bar | Oracle gap closed |
+|---|---|---|---|---|---|---|
+| Per-model percentile (the bar) | — | 94.85% | — | 2.246 | — | 0% |
+| XGBoost (hand-built + MiniLM-128, PCA-32), Day 5 | +0.082 | 94.85% | 0.05688 | 1.815 | −19.2% | 45.9% |
+| MLP (hand-built) | +0.020 | 94.85% | 0.05798 | 1.910 | −15.0% | 35.9% |
+| MLP (hand-built + raw MiniLM-128) | +0.087 | 94.85% | 0.05826 | 1.880 | −16.3% | 39.1% |
+| MLP (hand-built + MiniLM-128 PCA-32) | −0.004 | 94.85% | 0.05447 | 1.804 | −19.7% | 47.2% |
+| **MLP (hand-built + MiniLM-128 PCA-32; input dropout 0.2)** | +0.015 | 94.85% | 0.05377 | **1.769** | **−21.2%** | **50.9%** |
+| **Average of that MLP and XGBoost, in log space (the winner)** | +0.034 | 94.85% | 0.05392 | **1.756** | **−21.8%** | **52.3%** |
+| Average of 3 seeds of the MLP (reference) | −0.001 | 94.85% | 0.05329 | 1.759 | −21.7% | 52.0% |
+| Oracle: k × own mean + own std | — | 94.94% | — | 1.309 | −41.7% | 100% |
+
+![MLP vs. XGBoost](figures/mlp_curve.png)
+
+### 16. The MLP beats XGBoost, and averaging the two passes the 20% target on validation
+
+The chosen MLP reserves 1.769× what is used at 95% coverage, against 1.815 for XGBoost and 2.246 for the bar: −21.2%, 51% of the oracle gap. The equal-weight average of the two log predictions does a little better, 1.756 (−21.8%, 52%), and is the winner by the rule fixed before the run (lowest validation ratio among XGBoost, the MLP and their average). The target asks for 1.797 **on test**, so validation leaves 0.041 of margin for Day 7. The lead holds along the curve: the average is at 1.34 vs. 1.37 for XGBoost at 80% coverage, 1.55 vs. 1.60 at 90%, and 2.45 vs. 2.50 at 99%.
+
+The same caveat as Day 5 applies, more strongly: 19 MLP configurations plus 3 candidates were compared on validation, and early stopping and θ use it too.
+
+### 17. The network memorizes prompts in a few epochs; only input dropout stops it
+
+With the raw embedding, validation loss is best after epoch 3 and climbs from there, while train loss keeps falling (0.049 vs. 0.058 at the best epoch). Each train prompt appears 12 times (once per model) with the same 384 values, so the network can recognize the prompt. The usual levers barely move it. Every configuration tried, on validation with seed 0 (the defaults are dropout 0.2 after each hidden layer, weight decay 1e-4, lr 1e-3, batch 512):
+
+| Inputs | Change from the defaults | Best epoch | Validation pinball | Ratio at 95% |
+|---|---|---|---|---|
+| hand-built | — | 25 | 0.05798 | 1.910 |
+| hand-built | input dropout 0.2 | 23 | 0.05901 | 1.897 |
+| + raw MiniLM-128 | — | 3 | 0.05826 | 1.880 |
+| + raw MiniLM-128 | dropout 0.5 | 11 | 0.05604 | 1.807 |
+| + raw MiniLM-128 | dropout 0.7 | 22 | 0.05657 | 1.838 |
+| + raw MiniLM-128 | weight decay 0.01 | 2 | 0.05871 | 1.880 |
+| + raw MiniLM-128 | weight decay 0.1 | 3 | 0.05789 | 1.874 |
+| + raw MiniLM-128 | lr 1e-4 | 4 | 0.05828 | 1.907 |
+| + raw MiniLM-128 | batch 4,096 | 2 | 0.05826 | 1.898 |
+| + raw MiniLM-128 | input dropout 0.3, dropout 0.5 | 18 | 0.05477 | 1.792 |
+| + raw MiniLM-128 | input dropout 0.5 | 21 | 0.05493 | 1.802 |
+| + PCA-32 | — | 5 | 0.05447 | 1.804 |
+| + PCA-32 | dropout 0.5 | 17 | 0.05491 | 1.817 |
+| + PCA-32 | dropout 0.3, weight decay 0.01 | 7 | 0.05437 | 1.799 |
+| + PCA-32 | input dropout 0.1 | 28 | 0.05377 | 1.781 |
+| **+ PCA-32** | **input dropout 0.2** | **49** | **0.05377** | **1.769** |
+| + PCA-32 | input dropout 0.3 | 56 | 0.05393 | 1.766 |
+| + PCA-32 | input dropout 0.4 | 35 | 0.05495 | 1.786 |
+| + PCA-32 | input dropout 0.2, dropout 0 | 9 | 0.05409 | 1.808 |
+
+Two changes do the work, and they add up. The Day-5 PCA helps the network as it helped the trees (1.880 → 1.804). Dropout on the inputs, which hides a random 20% of the features from every step, stops the network from keying on a prompt's exact coordinates: with it, training runs 49 epochs and train and validation loss stay level. Weight decay, a lower learning rate and bigger batches only stop training earlier. Input dropout 0.1–0.3 is a plateau, and 0.2 is frozen: it ties 0.1 on pinball loss with a better ratio, and 0.3's lead (0.003) is below the seed noise below. Hidden dropout still matters next to input dropout (1.808 without it).
+
+The MLP on hand-built features alone is no better than XGBoost on them (1.910 vs. 1.903). So the gain is not the prompt × model interaction that finding 2 asked for, since the trees model interactions too. It comes from using the embedding as a smooth input instead of something to split on.
+
+### 18. Seed noise is about ±0.01, and most of the average's gain is variance reduction
+
+The chosen configuration retrained with seeds 0, 1 and 2 gives 1.769, 1.772 and 1.772. Without input dropout the spread is wider: 1.787–1.807. Differences under about 0.01 between single runs are not findings. Seed 0 is the frozen model.
+
+Averaging the three seeds gives 1.759, almost all of the 0.013 the MLP + XGBoost average gains over the MLP alone. Most of the winner's edge is averaging out noise, not XGBoost knowing something the MLP doesn't. Averaging seeds would serve three MLPs and is not a candidate; the MLP + XGBoost average was the pre-registered one and is kept. Serving it means two small regressors after one embedding. The embedding is most of the 15 ms budget, so Day 11 exports both.
+
+### 19. The MLP is close to calibrated, and evens out coverage per model
+
+The MLP needs a shift of only +0.015 to reach 95% on validation, against +0.082 for XGBoost (finding 12): its raw 95th-percentile predictions run about 1.5% low on unseen prompts instead of 8–9%. Coverage per model at the frozen shift:
+
+| Model | Lowest per-model coverage | Highest |
+|---|---|---|
+| XGBoost | 93.87% (gemma-3-4b) | 95.80% (Mistral-7B) |
+| MLP | 94.34% (Ministral-8B) | 95.84% (Qwen2.5-32B) |
+| Average (the winner) | 94.48% (gemma-3-4b) | 95.67% (Qwen2.5-32B) |
+
+The average lifts gemma-3-4b from 93.9% to 94.5% and has the narrowest range of the three. Day 7 reports the per-model table on test next to the headline number.
+
+### 20. torch and xgboost can't run in one process on macOS
+
+Each wheel ships its own OpenMP runtime. In one Python process, xgboost segfaults if torch loaded first, and multi-threaded torch deadlocks if xgboost loaded first. So `make models` saves the XGBoost validation predictions (`data/models/xgb_minilm128_validate_pred.npz`) and `make mlp` reads them without running xgboost. That file was first written by a separate run of the same code: `make models` has not been rerun since the change. `tests/conftest.py` loads xgboost first and keeps torch on one thread, the one combination that works. **So:** Day 7 scores test the same way (XGBoost in one process, the MLP in another), and serving avoids the problem, since ONNX Runtime replaces both libraries on Day 11.
