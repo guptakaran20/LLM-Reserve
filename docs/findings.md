@@ -522,3 +522,53 @@ At the default setting no window overshoots, because real spend stays at 76.7%. 
 ### 31. The winner evens out admission across target models but widens it across kinds of prompt
 
 At 8 requests/s the bar admits the two Gemma models at 61.4% and 61.9% and every other model at 66–69%, because their per-model p95 is the highest (1,792 and 1,368 on train: terse on code, verbose on chat, finding 2), so every Gemma request reserves a lot. The winner admits every model at 66.3–70.1%: it reserves for the prompt, not the model. Across source datasets it goes the other way: the bar spans 63.5–69.4%, the winner 63.2% (Apps, long code answers) to 73.3% (Alpaca, short ones), and the oracle 62.9–76.5%. A tighter bound favours requests that are cheap to serve. That is the right call for a gateway maximizing requests per budget, but it is a choice, and it should be a flag, not a side effect: in the overloaded case, a user asking for long code solutions gets turned away more often than one asking a short question. `max_tokens` treats every request the same (44.0–47.5% per dataset) only because it over-reserves for all of them.
+
+## Day 10: Misprediction strategies (4 Nov 2026)
+
+**Scope.** Two things the gateway can do when a request outruns its bound (`src/llm_reserve/mispredict.py`), applied to the bar (per-model p95) and the winner alike, on the same traces as Day 9. **A, cap:** each request is sent with `max_tokens` = ceil(bound × margin) and reserves exactly that, so it can never cost more than it reserved; overshoot is zero by construction (asserted on every run), and the price is truncation. **B, overdraft buffer:** a share of every window is kept out of admission, and requests that outrun their reservation spend into it; overshoot is still measured against the whole budget. Truncation is split into degenerate completions (runaways and repetition loops, cut at no loss) and **real answers**. Overshoot is the PRD's measure: the largest of any window in any run, so the worst seed, not the mean over seeds (Day 9's 8.8% was a mean; the worst single run unprotected is 10.6–10.9%).
+
+Both knobs are chosen on **validation**, with different seeds (10–12) from test (0–2), before test is simulated. The bounds reproduce each method's frozen validation coverage and ratio to 1e-6. **A's margin** is the smallest of 1, 1.25, 1.5, 2 and 3 that cuts at most 1% of real answers on validation (the mirror of the 1% overshoot target): **×1.5 for both** (the winner 0.73%, the bar 0.91%; ×1.25 cuts 1.63% and 1.90%). In fairness: this 1% rule was written after a first test run had printed the table for all five margins; the margin grid was fixed before, and the rule itself reads validation only. **B's share** is the smallest on a 0.5% grid whose largest overshoot over the whole Day-9 grid (35 settings × 3 seeds) is at most 1% on validation: **8.5% for the winner, 10.0% for the bar**. Rebuild with `make mispredict` (about 2.5 minutes, one core); the numbers come from [`figures/mispredict.json`](figures/mispredict.json).
+
+Overloaded setting (8 requests/s, 200,000 tokens per minute, 50 tokens/s), means over 3 seeds; the last two columns are the whole grid and the default load:
+
+| Policy and strategy | Admitted | ÷ `max_tokens` | ÷ bar, unprotected | Real answers truncated | All truncated | Largest overshoot, 8/s | Largest overshoot, whole grid | Admit rate at 4/s |
+|---|---|---|---|---|---|---|---|---|
+| `max_tokens` = 4,096 | 13,377 | 1.000× | 0.689× | 0.06% | 0.18% | 0.00% | 0.00% | 83.3% |
+| Bar, unprotected | 19,428 | 1.452× | 1.000× | 0.06% | 0.20% | 8.00% | 10.62% | 100.0% |
+| Bar, A ×1 | 19,623 | 1.467× | 1.010× | 3.84% | 3.98% | 0 | 0 | 100.0% |
+| Bar, A ×1.25 | 19,194 | 1.435× | 0.988× | 1.35% | 1.50% | 0 | 0 | 100.0% |
+| **Bar, A ×1.5** | **18,774** | **1.404×** | **0.966×** | **0.74%** | **0.88%** | **0** | **0** | **99.8%** |
+| Bar, A ×2 | 17,885 | 1.337× | 0.921× | 0.32% | 0.45% | 0 | 0 | 98.7% |
+| Bar, A ×3 | 16,017 | 1.197× | 0.824× | 0.13% | 0.27% | 0 | 0 | 93.4% |
+| **Bar, B 10.0% held back** | **17,601** | **1.316×** | **0.906×** | **0.06%** | **0.20%** | **0.00%** | **0.57%** | **99.8%** |
+| Winner, unprotected | 19,953 | 1.492× | 1.027× | 0.06% | 0.20% | 7.43% | 10.85% | 100.0% |
+| Winner, A ×1 | 20,154 | 1.507× | 1.037× | 4.02% | 4.16% | 0 | 0 | 100.0% |
+| Winner, A ×1.25 | 19,954 | 1.492× | 1.027× | 1.22% | 1.35% | 0 | 0 | 100.0% |
+| **Winner, A ×1.5 (the default)** | **19,745** | **1.476×** | **1.016×** | **0.62%** | **0.76%** | **0** | **0** | **99.9%** |
+| Winner, A ×2 | 19,171 | 1.433× | 0.987× | 0.29% | 0.42% | 0 | 0 | 99.3% |
+| Winner, A ×3 | 17,820 | 1.332× | 0.917× | 0.15% | 0.26% | 0 | 0 | 95.6% |
+| **Winner, B 8.5% held back** | **18,404** | **1.376×** | **0.947×** | **0.06%** | **0.20%** | **0.00%** | **2.56%** | **99.9%** |
+
+"Real answers truncated" and "All truncated" are shares of admitted requests; the 0.06% and 0.18–0.20% in the unprotected and B rows are what `max_tokens` = 4,096 cuts on its own.
+
+![What each misprediction strategy costs](figures/mispredict.png)
+
+### 32. The buffer sized on validation does not hold on test: 2.56% overshoot where 1% was the target
+
+On validation, the winner needs 8.5% of every window held back to keep the worst window in 105 runs at or under 1%. On test, that buffer gives 2.56% at 100k tokens per minute and 8 requests/s (and 1.16% at 12 requests/s); every 200k and 400k setting stays at 0. The bar's 10% happens to hold (0.57%). Two reasons, both structural rather than bad luck. First, **at a small budget one runaway is already past the target**: 1% of a 100k window is 1,000 tokens, and a completion that runs to 4,096 against a bound of a few hundred misses by about 3,500, so the buffer has to cover the coincidence of several runaways settling after their window closes, which is a far-tail event that 3 seeds per setting can only sample. Second, **overshoot does not fall smoothly as the buffer grows**: on validation the bar's worst window goes 3.1% at 5.5% held back, 4.8% at 6%, 2.3% at 6.5%, because each share changes which requests get in and so which runaways land in which window. A buffer tuned to a maximum on one set of traces is tuned to that set's few worst coincidences. B can make overshoot rare; it cannot promise a bound on it.
+
+### 33. A cap at 1.5× the bound gives zero overshoot for 1% fewer admitted requests and 0.6% of answers cut short
+
+At 8 requests/s the winner with A ×1.5 admits 19,745 requests, 1.0% fewer than unprotected (19,953) and 7.3% more than with B (18,404), and no window in any run overshoots, because no request can. The cost is truncation: **0.62% of admitted requests are real answers cut short** (0.76% counting degenerate runs), on top of the 0.06% that 4,096 already cuts (validation predicted 0.73%). Truncation does not depend on load: it is 0.55–0.82% of admitted requests at every one of the 35 settings, including 1 request/s, where the budget never binds and the cap buys nothing. A also raises wrongful 429s at 8 requests/s from 2,414 to 4,287, since reservations are 1.5× the bound while the real cost is unchanged, but B raises them to 10,547.
+
+A ×1 is the extreme: it admits the most (1.507× `max_tokens`, more than unprotected, because the truncated requests cost less), at 4.0% of answers cut, i.e. every miss. The cut answers concentrate where Day 7's coverage was lowest: ShareGPT 2.1% and Apps 1.0% at ×1.5, against 0.2–0.3% for the code benchmarks and Dolly; by target model, Llama-3.2-1B (1.9%) and Llama-3.1-8B (1.5%) the most and Qwen2.5-14B the least (0.1%).
+
+### 34. Under the same strategy the winner's edge over the bar doubles
+
+Unprotected, the winner admits 2.7% more than the bar at 8 requests/s. With both under A ×1.5 it admits **5.2% more** (19,745 vs. 18,774), 7.2% at ×2 and 11.3% at ×3, because the margin multiplies the bound: a bound that is 22% smaller reserves 22% less at every margin, and the extra reserved tokens cost the bar more requests. Across the grid, winner + A ×1.5 against the bar + A ×1.5 is 1.00× wherever the budget does not bind and up to 1.20× (100k, 16 requests/s); it is never below 1. Against the *unprotected* bar it is 0.94–1.19×: the cap's 50% extra reservation is not free. B leaves the edge where it was (1.027–1.030× at every share), because a holdback shrinks every policy's window by the same amount.
+
+With the cap, the ≥1.5× target over `max_tokens` is met from 6 requests/s at 100k (1.58×), from 12 requests/s at 200k (1.55×), and at 25 tokens/s from 4 requests/s (1.61–2.18×); still never at 100 tokens/s (at most 1.22×) or at 400k within 16 requests/s (1.46×). So finding 28 stands with the cap on.
+
+### 35. Decision: strategy A at 1.5× the bound is the default; B stays an opt-in
+
+**The gateway sends each request with `max_tokens` = min(ceil(1.5 × bound), the client's `max_tokens`) and reserves exactly that.** It is the only strategy that meets the PRD's overshoot target as stated (at most 1% of a window, the largest across runs): it has zero overshoot by construction, at any budget, load or decode speed, and on traffic unlike CASTILLO, where finding 24 expects coverage to drop. B, sized the same honest way, missed the target on test (2.56%) and costs 8% of the winner's admitted requests at 8 requests/s (up to 8% across the grid, never a gain). The margin costs 1% there; across the grid it ranges from 8% fewer admitted (6 requests/s at 25 tokens/s) to 8% more (16 requests/s at 100k), so neither strategy is free under slow decoding. What A gives up is 0.6% of real answers cut short (0.7% on validation), at every load. For a spend gateway that is the right side of the trade: a truncated response is visible to the client (`finish_reason = length`) and can be continued, while an overshoot is money spent past a hard cap that nobody approved. B remains an option, behind a flag, for deployments where no answer may be cut and the budget is soft, with the warning from finding 32 that its overshoot is a rate, not a bound. Two refinements belong to v2: apply the cap only when a window is close to full (finding 33: the cap truncates even when the budget is not binding), and replace the hard cap with the streaming top-up reservations already planned for January, so a long answer can ask for more budget instead of being cut. Finding 31's preference for cheap requests is unchanged by A (Apps 60.8% to Mbpp 74.0% admitted at 8 requests/s) and still needs to be stated in the README.
