@@ -49,7 +49,7 @@ mlp: setup
 	$(PY) -m llm_reserve.mlp
 
 # Everything the frozen winner needs, in order: features, the Day-5 models (XGBoost uses every core: OMP_NUM_THREADS=4
-# caps it) and the Day-6 MLP. About 15 minutes on an M5 laptop.
+# caps it) and the Day-6 MLP. About 11 minutes on an M5 laptop at 4 threads.
 train: features models mlp
 
 # Day-7 test split, scored once with every choice frozen: results, breakdowns, error analysis and
