@@ -2,7 +2,7 @@ PYTHON ?= python3.12
 VENV := .venv
 PY := $(VENV)/bin/python
 
-.PHONY: setup lock data explore baselines features models mlp eval sim sweep mispredict onnx int8-served serve demo bench down test clean-data
+.PHONY: setup lock data explore baselines features models mlp train eval sim sweep mispredict onnx int8-served serve demo bench down test clean-data
 
 # Create the virtualenv from the pinned requirements.
 setup: $(VENV)/.installed
@@ -47,6 +47,10 @@ models: setup
 # Day-6 PyTorch MLP (pinball loss), its configuration sweep and the winning model, on validation -> docs/figures/, data/models/.
 mlp: setup
 	$(PY) -m llm_reserve.mlp
+
+# Everything the frozen winner needs, in order: features, the Day-5 models (XGBoost uses every core: OMP_NUM_THREADS=4
+# caps it) and the Day-6 MLP. About 15 minutes on an M5 laptop.
+train: features models mlp
 
 # Day-7 test split, scored once with every choice frozen: results, breakdowns, error analysis and
 # leave-one-dataset-out -> docs/figures/. XGBoost and torch run in separate processes (findings 20).
