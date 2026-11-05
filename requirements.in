@@ -15,3 +15,8 @@ onnxruntime
 onnxmltools  # XGBoost -> ONNX
 onnxscript  # torch.onnx.export(dynamo=True)
 tokenizers  # the serving tokenizer, without transformers
+fastapi  # the Day-12 service (requirements-serve.in lists what its image installs)
+uvicorn
+redis
+httpx  # FastAPI's test client
+fakeredis[lua]  # the Lua scripts under pytest, without a Redis server

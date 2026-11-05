@@ -23,7 +23,6 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from huggingface_hub import hf_hub_download
 
 REPO_ID = "danfperam/castillo"
 # refs/convert/parquet, generated from main@fb93f412. Pinned so `make data` is reproducible.
@@ -51,6 +50,8 @@ def read_raw(config: str, split: str, columns: Sequence[str] = RAW_COLUMNS) -> p
     leaked = set(columns) & set(LEAKY_COLUMNS)
     if leaked:
         raise ValueError(f"refusing to read label-derived columns: {sorted(leaked)}")
+    from huggingface_hub import hf_hub_download  # here, so the service image (Day 12) does not need it
+
     path = hf_hub_download(
         REPO_ID, f"{config}/{split}/0000.parquet", repo_type="dataset", revision=REVISION, local_dir=RAW_DIR,
     )
