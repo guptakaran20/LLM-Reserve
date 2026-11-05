@@ -94,8 +94,14 @@ class Settings:
     cap_margin: float = CAP_MARGIN
     default_max_tokens: int = MAX_TOKENS
     reservation_ttl: int = 3600  # an unsettled reservation is forgotten after this (it stays charged)
+    # Day 13 (findings 47): a bounded pool that makes a request wait for a free connection. redis-py's default
+    # pool raised "Too many connections" (a 500) for half of 1,000 simultaneous reserves.
+    redis_max_connections: int = 64
+    redis_pool_timeout: float = 5.0  # seconds a request waits for a connection before failing
     prefix: str = "llm-reserve"
     bundle: Path = field(default=BUNDLE_DIR)
+    encoder: str = "int8"  # Day 13: the per-channel int8 MiniLM (findings 42-44); "fp32" is the Day-11 export
+    predict_threads: int = 2  # ONNX Runtime intra-op threads per session (findings 45)
 
     @classmethod
     def from_env(cls) -> Settings:
@@ -107,8 +113,12 @@ class Settings:
             cap_margin=float(env.get("CAP_MARGIN", d.cap_margin)),
             default_max_tokens=int(env.get("DEFAULT_MAX_TOKENS", d.default_max_tokens)),
             reservation_ttl=int(env.get("RESERVATION_TTL", d.reservation_ttl)),
+            redis_max_connections=int(env.get("REDIS_MAX_CONNECTIONS", d.redis_max_connections)),
+            redis_pool_timeout=float(env.get("REDIS_POOL_TIMEOUT", d.redis_pool_timeout)),
             prefix=env.get("KEY_PREFIX", d.prefix),
             bundle=Path(env.get("BUNDLE_DIR", d.bundle)),
+            encoder=env.get("ENCODER", d.encoder),
+            predict_threads=int(env.get("PREDICT_THREADS", d.predict_threads)),
         )
 
     # The window index is a hash tag ({...}), so a script's two keys share one Redis Cluster slot.
@@ -180,6 +190,41 @@ class SettleOut(BaseModel):
     overshoot: int  # tokens the window is now over budget (0 under strategy A)
 
 
+class ServerTiming:
+    """Adds `Server-Timing: app;dur=<ms>` to every response: the time from the request reaching the app to
+    its response headers, so the Day-13 benchmark can split model and Redis time from HTTP and Docker.
+
+    A plain ASGI middleware (not BaseHTTPMiddleware), so it adds a clock read, not a task, per request.
+    """
+
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            return await self.app(scope, receive, send)
+        t0 = time.perf_counter()
+
+        async def timed_send(message):
+            if message["type"] == "http.response.start":
+                dur = (time.perf_counter() - t0) * 1e3
+                message = {**message, "headers": [*message.get("headers", []),
+                                                   (b"server-timing", f"app;dur={dur:.3f}".encode())]}
+            await send(message)
+
+        await self.app(scope, receive, timed_send)
+
+
+def redis_client(settings: Settings):
+    """An async Redis client whose pool blocks (up to redis_pool_timeout) instead of failing when every
+    one of its redis_max_connections connections is busy."""
+    from redis.asyncio import BlockingConnectionPool, Redis
+
+    pool = BlockingConnectionPool.from_url(settings.redis_url, max_connections=settings.redis_max_connections,
+                                           timeout=settings.redis_pool_timeout)
+    return Redis(connection_pool=pool)
+
+
 def create_app(settings: Settings | None = None, predictor=None, redis=None, clock=time.time) -> FastAPI:
     """The FastAPI app. Tests pass a stub predictor, fakeredis and a clock; otherwise all come from the env."""
     settings = settings or Settings.from_env()
@@ -190,13 +235,11 @@ def create_app(settings: Settings | None = None, predictor=None, redis=None, clo
         if predictor is None:
             from llm_reserve.serving import Predictor
 
-            app.state.predictor = Predictor(settings.bundle)
+            app.state.predictor = Predictor(settings.bundle, threads=settings.predict_threads, encoder=settings.encoder)
         else:
             app.state.predictor = predictor
         if owns_redis:
-            from redis.asyncio import Redis
-
-            app.state.redis = Redis.from_url(settings.redis_url)
+            app.state.redis = redis_client(settings)
         else:
             app.state.redis = redis
         app.state.reserve = app.state.redis.register_script(RESERVE_LUA)
@@ -206,6 +249,7 @@ def create_app(settings: Settings | None = None, predictor=None, redis=None, clo
             await app.state.redis.aclose()
 
     app = FastAPI(title="llm-reserve", version="0.1.0", lifespan=lifespan)
+    app.add_middleware(ServerTiming)
 
     def window_now() -> int:
         return int(clock() // settings.window_seconds)
@@ -218,7 +262,9 @@ def create_app(settings: Settings | None = None, predictor=None, redis=None, clo
         await request.app.state.redis.ping()
         p = request.app.state.predictor
         return {"status": "ok", "winner": p.spec["winner"], "models": len(p.models), "budget": settings.budget,
-                "window_seconds": settings.window_seconds, "cap_margin": settings.cap_margin}
+                "window_seconds": settings.window_seconds, "cap_margin": settings.cap_margin,
+                "encoder": getattr(p, "encoder_precision", None), "predict_threads": settings.predict_threads,
+                "workers": int(os.environ.get("WEB_CONCURRENCY", 1))}
 
     @app.get("/budget")
     async def budget(request: Request) -> dict:

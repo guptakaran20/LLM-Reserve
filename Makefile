@@ -2,7 +2,7 @@ PYTHON ?= python3.12
 VENV := .venv
 PY := $(VENV)/bin/python
 
-.PHONY: setup lock data explore baselines features models mlp eval sim sweep mispredict onnx serve demo down test clean-data
+.PHONY: setup lock data explore baselines features models mlp eval sim sweep mispredict onnx int8-served serve demo bench down test clean-data
 
 # Create the virtualenv from the pinned requirements.
 setup: $(VENV)/.installed
@@ -74,10 +74,19 @@ mispredict: setup
 
 # Day-11 ONNX bundle of the frozen winner (MiniLM-128 encoder, MLP, XGBoost) -> data/models/onnx/, and the
 # parity check on 1,000 test prompts with ONNX Runtime alone -> docs/figures/onnx_parity.json. Needs `make eval`.
+# Then the Day-13 int8 encoder and its coverage check on validation and test -> docs/figures/int8_check.json.
 onnx: setup
 	nice $(PY) -m llm_reserve.export torch
 	nice $(PY) -m llm_reserve.export xgb
 	nice $(PY) -m llm_reserve.export check
+	nice $(PY) -m llm_reserve.quantize
+
+# Day-13 int8 coverage check on the embeddings the service image itself computes: ONNX Runtime's int8 kernels
+# on Linux arm64 differ from macOS's (findings 44). Needs `make onnx`; adds int8_served to int8_check.json.
+int8-served: setup
+	$(PY) -m llm_reserve.quantize texts
+	docker compose run --build --rm --no-deps -v "$(CURDIR)/data/onnx_parity:/app/check" api python -m llm_reserve.quantize embed /app/check
+	nice $(PY) -m llm_reserve.quantize served
 
 # Day-12 service: the API (FastAPI + ONNX Runtime) and Redis in docker compose on http://localhost:8000.
 # Needs `make onnx` (the image copies data/models/onnx/). `make demo` runs predict -> reserve -> settle with curl.
@@ -86,6 +95,11 @@ serve:
 
 demo:
 	./scripts/demo.sh
+
+# Day-13 load test and latency benchmark against the running service (`make serve` first) -> docs/figures/bench*.
+# Saves the run under the service's configuration; ENCODER, PREDICT_THREADS and WEB_CONCURRENCY pick it.
+bench: setup
+	nice $(PY) -m llm_reserve.bench
 
 down:
 	docker compose down

@@ -20,6 +20,9 @@ services:
       BUDGET_TOKENS: ${BUDGET_TOKENS:-200000}
       WINDOW_SECONDS: ${WINDOW_SECONDS:-60}
       CAP_MARGIN: ${CAP_MARGIN:-1.5}
+      ENCODER: ${ENCODER:-int8}
+      PREDICT_THREADS: ${PREDICT_THREADS:-2}
+      WEB_CONCURRENCY: ${WEB_CONCURRENCY:-1}  # uvicorn workers; Redis keeps reserve atomic across them
     depends_on:
       redis:
         condition: service_healthy
