@@ -419,11 +419,17 @@ The one item left from days 1–6 is the Day-4 hour on quantile regression and p
 
 ### Day 12: The service
 
-- [ ] FastAPI `POST /predict`, `/reserve` and `/settle`.
-- [ ] Redis Lua script for atomic reserve; settle with `INCRBY` by (actual − reserved).
-- [ ] `docker-compose.yml` with the API and Redis. **Install Docker Desktop or OrbStack before this day; neither is on the laptop yet (rev 2).**
+- [x] FastAPI `POST /predict`, `/reserve` and `/settle`.
+- [x] Redis Lua script for atomic reserve; settle with `INCRBY` by (actual − reserved).
+- [x] `docker-compose.yml` with the API and Redis. **Install Docker Desktop or OrbStack before this day; neither is on the laptop yet (rev 2).**
 
 **Done when:** predict → reserve → settle works with curl after `docker compose up`.
+
+**Done, 5 Nov 2026.** `make serve` (`docker compose up --build`) starts the API (`src/llm_reserve/service.py`, FastAPI on `serving.Predictor`) and Redis 7.4; `make demo` runs predict → reserve → settle with curl, and 127 of 127 tests pass (19 new). Details in [findings.md](findings.md#day-12-the-service-5-nov-2026). Three notes:
+
+- **`/reserve` does no inference.** The gateway calls `/predict`, then `/reserve` with the bound, so the 5 ms `/reserve` target covers one Redis round trip and the 15 ms one covers the model. `/reserve` applies the Day-10 default itself: it holds and returns `max_tokens = min(ceil(bound × 1.5), max_tokens)`, so a request that honours it cannot overshoot. Without a bound it holds the full `max_tokens`.
+- **Both Redis steps are Lua scripts, and settle is one too:** it applies `INCRBY` (actual − reserved) and deletes the reservation atomically, so a retried settle gets a 404 instead of refunding twice. The window index is in the reservation id (billing to the admitting window, as the simulator does) and is a hash tag, so a script's keys share a Redis Cluster slot.
+- **The image is 761 MB** with no torch, xgboost or scikit-learn (onnxruntime, numpy, pandas, tokenizers and the 94.5 MB bundle), installed with `requirements.txt` as constraints. 300 parallel reserves against the compose Redis admitted exactly as many as fit; Day 13 runs the 1,000-request version and the latency benchmark.
 
 ### Day 13: Tests and benchmarks
 
