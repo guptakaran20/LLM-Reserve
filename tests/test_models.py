@@ -107,6 +107,7 @@ def test_model_rows_are_validation_only_and_at_matched_coverage():
         assert len(r["curve"]) == 20
     if (MODELS_DIR / "manifest.json").exists():
         manifest = json.loads((MODELS_DIR / "manifest.json").read_text())
-        for name, m in manifest["models"].items():
+        for name in summary["methods"]:  # Day 6 adds its own entries, checked in test_mlp.py
+            m = manifest["models"][name]
             assert m["shift"] == summary["methods"][name]["theta"]
             assert (MODELS_DIR / m["file"]).exists()

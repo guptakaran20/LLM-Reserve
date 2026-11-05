@@ -2,7 +2,7 @@ PYTHON ?= python3.12
 VENV := .venv
 PY := $(VENV)/bin/python
 
-.PHONY: setup lock data explore baselines features models test clean-data
+.PHONY: setup lock data explore baselines features models mlp test clean-data
 
 # Create the virtualenv from the pinned requirements.
 setup: $(VENV)/.installed
@@ -43,6 +43,10 @@ features: setup
 # Day-5 linear and XGBoost quantile models, tuned to 95% coverage on validation -> docs/figures/ and data/models/.
 models: setup
 	$(PY) -m llm_reserve.models
+
+# Day-6 PyTorch MLP (pinball loss), its configuration sweep and the winning model, on validation -> docs/figures/, data/models/.
+mlp: setup
+	$(PY) -m llm_reserve.mlp
 
 test: setup
 	$(PY) -m pytest -q

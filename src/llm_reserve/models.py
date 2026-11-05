@@ -19,7 +19,8 @@ validation, the same protocol as the baselines. Early stopping and θ both use v
 never loaded here (Day 7 scores it once, with the frozen models and shifts in data/models/).
 
 Writes docs/figures/models_validate.json, models_curve.png and feature_importance.png, and the
-fitted models plus their frozen shifts to data/models/. Run with `make models`.
+fitted models plus their frozen shifts to data/models/, with the serving model's validation
+predictions for Day 6. Run with `make models`.
 """
 
 from __future__ import annotations
@@ -63,6 +64,7 @@ XGB_ROUNDS = 4000
 XGB_EARLY_STOP = 100
 
 SERVING = f"xgb_minilm{SERVING_LENGTH}"  # the serving candidate: hand-built + PCA of MiniLM-128
+VALIDATION_PREDICTIONS = f"{SERVING}_validate_pred.npz"  # its log predictions, row-aligned with load_features
 # Palette slots 6-8 for the models; the baselines keep their Day-3 colors (COLORS).
 MODEL_COLORS = {"linear": "#008300", "xgb_hand": "#6250d6", SERVING: "#e34948"}
 
@@ -313,10 +315,12 @@ def main() -> None:
         booster = fit_xgb(A_tr, ytr_log, A_va, yva_log, cols)
         fit_s = time.time() - t
         del A_tr
-        pred_or = predict_xgb(booster, design(Xor, mor, block)[0], cols)
-        record(fs.name, fs.label, predict_xgb(booster, A_va, cols), pred_or,
+        pred_va, pred_or = predict_xgb(booster, A_va, cols), predict_xgb(booster, design(Xor, mor, block)[0], cols)
+        record(fs.name, fs.label, pred_va, pred_or,
                {"n_features": len(cols), "train_rows": len(ytr), "best_iteration": booster.best_iteration,
                 "fit_seconds": fit_s})
+        if fs.name == SERVING:  # Day 6 averages these with the MLP without loading xgboost next to torch
+            np.savez(MODELS_DIR / VALIDATION_PREDICTIONS, sanitized=pred_va, original=pred_or)
         importances[fs.name] = grouped_importance(booster)
         results[fs.name]["importance"] = importances[fs.name]
         booster.save_model(MODELS_DIR / f"{fs.name}.ubj")
@@ -333,7 +337,11 @@ def main() -> None:
                "linear_sample": LINEAR_SAMPLE, "xgb_params": XGB_PARAMS,
                "bar_ratio": bar, "oracle_ratio": oracle, "methods": results}
     (FIG_DIR / "models_validate.json").write_text(json.dumps(summary, indent=2) + "\n")
-    (MODELS_DIR / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
+    path = MODELS_DIR / "manifest.json"
+    if path.exists():  # keep later stages' entries (Day 6 adds the MLP and the winner)
+        old = json.loads(path.read_text())
+        manifest = {**old, **manifest, "models": {**old.get("models", {}), **manifest["models"]}}
+    path.write_text(json.dumps(manifest, indent=2) + "\n")
     plot_curve(results, baselines, FIG_DIR / "models_curve.png")
     plot_importance({n: importances[n] for n in ("xgb_hand", SERVING)},
                     {fs.name: fs.label for fs in feature_sets}, FIG_DIR / "feature_importance.png")
