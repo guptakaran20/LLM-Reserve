@@ -2,7 +2,7 @@ PYTHON ?= python3.12
 VENV := .venv
 PY := $(VENV)/bin/python
 
-.PHONY: setup lock data explore baselines features models mlp eval test clean-data
+.PHONY: setup lock data explore baselines features models mlp eval sim test clean-data
 
 # Create the virtualenv from the pinned requirements.
 setup: $(VENV)/.installed
@@ -56,6 +56,11 @@ eval: setup
 	$(PY) -m llm_reserve.lodo xgb
 	$(PY) -m llm_reserve.lodo mlp
 	$(PY) -m llm_reserve.holdout
+
+# Day-8 budget-gateway simulator on the test split (original config): the max_tokens policy end to end,
+# 3 seeds -> docs/figures/sim_max_tokens.json and sim_windows.png.
+sim: setup
+	$(PY) -m llm_reserve.simulate
 
 test: setup
 	$(PY) -m pytest -q

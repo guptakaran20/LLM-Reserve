@@ -359,12 +359,18 @@ The one item left from days 1–6 is the Day-4 hour on quantile regression and p
 
 ### Day 8: Simulator core
 
-- [ ] Event loop with `heapq` for arrival and completion events.
-- [ ] Request generator: sample test prompts, draw each actual length from its completions **in the `original` config, clipped at `max_tokens` = 4,096 (rev 2)**, Poisson arrivals.
-- [ ] Token budget per window (start at 200,000 tokens per minute): admit if the reservation fits, else 429; settle on completion, with duration = output tokens ÷ tokens per second.
-- [ ] Run the `max_tokens` policy end to end.
+- [x] Event loop with `heapq` for arrival and completion events.
+- [x] Request generator: sample test prompts, draw each actual length from its completions **in the `original` config, clipped at `max_tokens` = 4,096 (rev 2)**, Poisson arrivals.
+- [x] Token budget per window (start at 200,000 tokens per minute): admit if the reservation fits, else 429; settle on completion, with duration = output tokens ÷ tokens per second.
+- [x] Run the `max_tokens` policy end to end.
 
 **Done when:** one policy prints admitted, rejected and overshoot counts.
+
+**Done, 4 Nov 2026.** `make sim` runs the `max_tokens` policy on 3 seeds in about 1 second, and 79 of 79 tests pass. **At 4 requests per second, 200,000 tokens per minute and 50 tokens per second, it admits 83.3% of requests (12,075 of 14,489 per hour) with zero overshoot, while only 63.5% of the budget is really spent**: reservations are 6.84× real cost. Details in [findings.md](findings.md#day-8-simulator-core-4-nov-2026). Three notes:
+
+- **A request is billed to the window that admitted it,** even if it settles in the next one: the Redis design of Day 12 (reserve and settle on the same window key). Rejected requests are dropped, not retried.
+- **Decode speed moves the `max_tokens` admit rate from 61% (25 tokens/s) to 96% (100 tokens/s)**, because settling is what frees a reservation. 50 tokens/s is an assumption, so Day 9 also reports 25 and 100.
+- **Policies are functions from the trace to one output bound per request,** and the trace keeps each request's row in `load_features("test", "original")`, so Day 9 plugs in the saved predictions directly. Under-reserved tokens are already summed per model and per dataset; `max_tokens` admits every dataset at 82–84%, and Day 9 reports the same for the learned policy.
 
 ### Day 9: Policies and sweeps
 

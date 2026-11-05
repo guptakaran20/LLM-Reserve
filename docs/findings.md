@@ -424,3 +424,42 @@ Held out of training, the winner still beats its bar on 6 of the 7 datasets, but
 **So:** "the model learned what prompts ask for" is half true. It keeps a real gain on 6 of 7 benchmarks it never saw, but about half of its test gain comes from recognizing CASTILLO's seven templates. The −21.8% headline is for CASTILLO-like traffic. On a new kind of prompt, expect about −10% and a coverage shortfall until the quantile is re-tuned on that traffic. This goes in the README next to the headline. Day 10's overdraft buffer has to absorb a coverage drop on unfamiliar traffic, not just runaways, and the January plan's online adaptation of the quantile (v2 item 3) moves from a nice-to-have to the fix for this.
 
 **Gate: model frozen.** The served model is Day 6's average of `mlp.pt` and `xgb_minilm128.ubj`, both on `pca_minilm128_32.npz`, with the shift +0.034 from `data/models/manifest.json`. Their sha256 hashes are in `test_results.json`, so Days 8–13 can check they serve what test scored. Nothing changes from here on because of a test number.
+
+## Day 8: Simulator core (4 Nov 2026)
+
+**Scope.** A discrete-event simulator of a budget gateway (`src/llm_reserve/simulate.py`), run end to end with the `max_tokens` policy. A `heapq` loop processes arrival and completion events. Requests arrive as a Poisson process; each is a test (prompt, model) sample drawn uniformly, and what it actually produces is one of its 10 completions drawn uniformly from the **`original` config, degenerate runs included**. Each request carries `max_tokens` = 4,096, so its real cost is input + min(y, 4,096). The gateway holds **200,000 tokens per fixed one-minute window**. A request is admitted if input + min(bound, 4,096) fits in what is left of the window, else it gets a 429 and is dropped (no retries). It runs for output tokens ÷ 50 tokens per second, then settles: its window is charged the real cost instead of the reservation. This is the Day-12 Redis design (reserve with `INCRBY` on the window's key, settle with `INCRBY` by actual − reserved on the same key), so a request that finishes after its window closed is still billed to the window that admitted it. Every policy runs on the same trace. Rebuild with `make sim` (about 1 second); the numbers come from [`figures/sim_max_tokens.json`](figures/sim_max_tokens.json).
+
+Default run: 4 requests per second for 60 minutes, which is 76.7% of the budget in real cost if every request got in (mean cost 639 tokens: 223 input, 416 output after clipping). Means over 3 seeds:
+
+| Policy | Requests | Admitted | Rejected (429) | Admit rate | Truncated at `max_tokens` | Windows over budget | Largest overshoot | Real spend ÷ budget | Reserved ÷ used |
+|---|---|---|---|---|---|---|---|---|---|
+| `max_tokens` = 4,096 | 14,489 | 12,075 | 2,414 | 83.3% | 24.7 | 0 | 0.00% | 63.5% | 6.84 |
+
+Per seed: 12,040 / 12,039 / 12,147 admitted out of 14,468 / 14,452 / 14,547.
+
+![The max_tokens policy, window by window](figures/sim_windows.png)
+
+### 25. Worst-case reservations turn away 1 request in 6 while a third of the budget goes unspent
+
+Reservations fill each window to the budget fast: the first 429 comes a median 28 seconds into the minute (14–40 s, seed 0), and from then on the gateway turns away whatever does not fit. But once the window's requests settle, only **63.5% of the budget was really spent**: reserved tokens are 6.84× the tokens used (input included; on output alone the offline ratio was 9.9). So 16.7% of requests are rejected by a gateway that would have had room for all of them: demand was 76.7% of the budget. This is the problem the PRD describes, reproduced on CASTILLO's real lengths. At most 48 requests are in flight at once, about 200,000 ÷ 4,319 (the mean reservation): the budget, not the arrivals, caps concurrency.
+
+**`max_tokens` never overshoots**, by construction: no request can cost more than its reservation once the provider stops at 4,096. About 25 admitted requests per run (0.2%) are cut off there; those are the runaways of finding 23. So the overshoot columns are all zero today and become informative on Day 9, when bounds below `max_tokens` can be beaten. The simulator already sums under-reserved tokens (actual − reserved, when positive) per target model and per source dataset, which is where Day 7 said to look (finding 22).
+
+### 26. The admit rate depends on decode speed as much as on the budget
+
+Settling is what gives budget back: a request that reserved 4,319 tokens and used 639 frees the difference only when it finishes. So the decode speed decides how much of each window is locked in reservations at any moment. One knob at a time, 3 seeds each, `max_tokens` policy:
+
+| Setting | Admit rate | Real spend ÷ budget | Demand ÷ budget |
+|---|---|---|---|
+| 25 tokens/s | 61.3% | 46.2% | 76.7% |
+| **50 tokens/s (default)** | **83.3%** | **63.5%** | **76.7%** |
+| 100 tokens/s | 95.8% | 73.4% | 76.7% |
+| 2 requests/s | 100.0% | 38.7% | 38.7% |
+| **4 requests/s (default)** | **83.3%** | **63.5%** | **76.7%** |
+| 8 requests/s | 46.2% | 69.4% | 153.4% |
+
+Halving the decode speed costs `max_tokens` 22 points of admit rate; doubling it gains 12. At 2 requests per second the budget never binds and every policy will admit everything. At 8, demand is 1.5× the budget, so even a perfect predictor must reject a third of the requests. **So:** Day 9 sweeps the arrival rate and the budget as planned, and also reports the result at 25 and 100 tokens per second. A learned policy's edge is largest when requests are slow, because that is when an oversized reservation is held longest. The 50 tokens/s default is an assumption, not a measurement: CASTILLO's `gen_time` column is label-derived and never read (Day 1).
+
+### 27. Under worst-case reservations every kind of request is equally likely to be turned away
+
+The admit rate is 82.2–84.0% for every source dataset and 82.1–84.6% for every target model. `max_tokens` reserves the same 4,096 output tokens for everyone, so the only difference is the input length (Apps has the longest prompts and the lowest rate). **So:** Day 9 reports the learned policy's admit rate per dataset and per model next to its totals. A policy that reserves by predicted length will admit short requests more readily than long ones, and that is a fairness cost worth showing, not hiding.

@@ -1,0 +1,699 @@
+{
+  "split": "test",
+  "config": "original",
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "settings": {
+    "budget": 200000,
+    "window": 60.0,
+    "rate": 4.0,
+    "duration": 3600.0,
+    "tokens_per_second": 50.0,
+    "max_tokens": 4096,
+    "seed": 0
+  },
+  "policies": {
+    "max_tokens": {
+      "seeds": [
+        {
+          "requests": 14468,
+          "admitted": 12040,
+          "rejected": 2428,
+          "admit_rate": 0.8321813657727398,
+          "admitted_per_minute": 200.66666666666666,
+          "truncated": 20,
+          "overshoot_windows": 0,
+          "overshoot_max_tokens": 0,
+          "overshoot_max_share": 0.0,
+          "under_reserved_requests": 0,
+          "under_reserved_tokens": 0,
+          "utilization": 0.6338608333333333,
+          "reserved_per_used": 6.827133190382221,
+          "demand_per_budget": 0.76658275,
+          "peak_in_flight": 48,
+          "seed": 0
+        },
+        {
+          "requests": 14452,
+          "admitted": 12039,
+          "rejected": 2413,
+          "admit_rate": 0.8330334901743703,
+          "admitted_per_minute": 200.65,
+          "truncated": 32,
+          "overshoot_windows": 0,
+          "overshoot_max_tokens": 0,
+          "overshoot_max_share": 0.0,
+          "under_reserved_requests": 0,
+          "under_reserved_tokens": 0,
+          "utilization": 0.6339095833333334,
+          "reserved_per_used": 6.821149703920709,
+          "demand_per_budget": 0.7689423333333333,
+          "peak_in_flight": 47,
+          "seed": 1
+        },
+        {
+          "requests": 14547,
+          "admitted": 12147,
+          "rejected": 2400,
+          "admit_rate": 0.8350175293875026,
+          "admitted_per_minute": 202.45,
+          "truncated": 22,
+          "overshoot_windows": 0,
+          "overshoot_max_tokens": 0,
+          "overshoot_max_share": 0.0,
+          "under_reserved_requests": 0,
+          "under_reserved_tokens": 0,
+          "utilization": 0.6357656666666667,
+          "reserved_per_used": 6.868717876660006,
+          "demand_per_budget": 0.7655995,
+          "peak_in_flight": 49,
+          "seed": 2
+        }
+      ],
+      "by_model": [
+        {
+          "Llama-3.1-8B-Instruct": {
+            "requests": 1138,
+            "admitted": 942,
+            "admit_rate": 0.827768014059754,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 616007
+          },
+          "Llama-3.2-1B-Instruct": {
+            "requests": 1110,
+            "admitted": 936,
+            "admit_rate": 0.8432432432432433,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 622308
+          },
+          "Llama-3.2-3B-Instruct": {
+            "requests": 1194,
+            "admitted": 982,
+            "admit_rate": 0.8224455611390284,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 555796
+          },
+          "Llama-3.3-70B-Instruct": {
+            "requests": 1152,
+            "admitted": 971,
+            "admit_rate": 0.8428819444444444,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 610152
+          },
+          "Ministral-8B-Instruct-2410": {
+            "requests": 1154,
+            "admitted": 953,
+            "admit_rate": 0.8258232235701907,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 644702
+          },
+          "Mistral-7B-Instruct-v0.3": {
+            "requests": 1095,
+            "admitted": 907,
+            "admit_rate": 0.828310502283105,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 551491
+          },
+          "Mixtral-8x7B-Instruct-v0.1": {
+            "requests": 1116,
+            "admitted": 938,
+            "admit_rate": 0.8405017921146953,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 577281
+          },
+          "Phi-4-mini-instruct": {
+            "requests": 1110,
+            "admitted": 929,
+            "admit_rate": 0.8369369369369369,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 517927
+          },
+          "Qwen2.5-14B-Instruct": {
+            "requests": 1119,
+            "admitted": 933,
+            "admit_rate": 0.8337801608579088,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 577922
+          },
+          "Qwen2.5-32B-Instruct": {
+            "requests": 1127,
+            "admitted": 923,
+            "admit_rate": 0.8189884649511979,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 583871
+          },
+          "Qwen2.5-7B-Instruct-1M": {
+            "requests": 1142,
+            "admitted": 962,
+            "admit_rate": 0.8423817863397548,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 611786
+          },
+          "gemma-3-12b-it": {
+            "requests": 831,
+            "admitted": 699,
+            "admit_rate": 0.8411552346570397,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 456945
+          },
+          "gemma-3-4b-it": {
+            "requests": 1180,
+            "admitted": 965,
+            "admit_rate": 0.8177966101694916,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 680142
+          }
+        },
+        {
+          "Llama-3.1-8B-Instruct": {
+            "requests": 1125,
+            "admitted": 937,
+            "admit_rate": 0.8328888888888889,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 622036
+          },
+          "Llama-3.2-1B-Instruct": {
+            "requests": 1132,
+            "admitted": 956,
+            "admit_rate": 0.8445229681978799,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 675224
+          },
+          "Llama-3.2-3B-Instruct": {
+            "requests": 1103,
+            "admitted": 940,
+            "admit_rate": 0.8522212148685403,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 548113
+          },
+          "Llama-3.3-70B-Instruct": {
+            "requests": 1177,
+            "admitted": 967,
+            "admit_rate": 0.8215802888700084,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 620128
+          },
+          "Ministral-8B-Instruct-2410": {
+            "requests": 1169,
+            "admitted": 957,
+            "admit_rate": 0.8186484174508126,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 646087
+          },
+          "Mistral-7B-Instruct-v0.3": {
+            "requests": 1148,
+            "admitted": 963,
+            "admit_rate": 0.8388501742160279,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 568569
+          },
+          "Mixtral-8x7B-Instruct-v0.1": {
+            "requests": 1092,
+            "admitted": 913,
+            "admit_rate": 0.8360805860805861,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 540899
+          },
+          "Phi-4-mini-instruct": {
+            "requests": 1137,
+            "admitted": 940,
+            "admit_rate": 0.8267370272647317,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 555773
+          },
+          "Qwen2.5-14B-Instruct": {
+            "requests": 1103,
+            "admitted": 938,
+            "admit_rate": 0.8504079782411604,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 580732
+          },
+          "Qwen2.5-32B-Instruct": {
+            "requests": 1125,
+            "admitted": 915,
+            "admit_rate": 0.8133333333333334,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 553981
+          },
+          "Qwen2.5-7B-Instruct-1M": {
+            "requests": 1134,
+            "admitted": 939,
+            "admit_rate": 0.828042328042328,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 577596
+          },
+          "gemma-3-12b-it": {
+            "requests": 835,
+            "admitted": 688,
+            "admit_rate": 0.8239520958083832,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 456093
+          },
+          "gemma-3-4b-it": {
+            "requests": 1172,
+            "admitted": 986,
+            "admit_rate": 0.841296928327645,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 661684
+          }
+        },
+        {
+          "Llama-3.1-8B-Instruct": {
+            "requests": 1117,
+            "admitted": 949,
+            "admit_rate": 0.8495971351835273,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 602638
+          },
+          "Llama-3.2-1B-Instruct": {
+            "requests": 1122,
+            "admitted": 924,
+            "admit_rate": 0.8235294117647058,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 615206
+          },
+          "Llama-3.2-3B-Instruct": {
+            "requests": 1111,
+            "admitted": 937,
+            "admit_rate": 0.8433843384338434,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 551049
+          },
+          "Llama-3.3-70B-Instruct": {
+            "requests": 1145,
+            "admitted": 943,
+            "admit_rate": 0.8235807860262009,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 568591
+          },
+          "Ministral-8B-Instruct-2410": {
+            "requests": 1143,
+            "admitted": 939,
+            "admit_rate": 0.821522309711286,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 608700
+          },
+          "Mistral-7B-Instruct-v0.3": {
+            "requests": 1147,
+            "admitted": 960,
+            "admit_rate": 0.8369659982563208,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 590920
+          },
+          "Mixtral-8x7B-Instruct-v0.1": {
+            "requests": 1144,
+            "admitted": 957,
+            "admit_rate": 0.8365384615384616,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 563884
+          },
+          "Phi-4-mini-instruct": {
+            "requests": 1151,
+            "admitted": 950,
+            "admit_rate": 0.8253692441355344,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 574425
+          },
+          "Qwen2.5-14B-Instruct": {
+            "requests": 1123,
+            "admitted": 959,
+            "admit_rate": 0.8539626001780944,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 607947
+          },
+          "Qwen2.5-32B-Instruct": {
+            "requests": 1173,
+            "admitted": 975,
+            "admit_rate": 0.8312020460358056,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 574276
+          },
+          "Qwen2.5-7B-Instruct-1M": {
+            "requests": 1170,
+            "admitted": 982,
+            "admit_rate": 0.8393162393162393,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 653511
+          },
+          "gemma-3-12b-it": {
+            "requests": 831,
+            "admitted": 699,
+            "admit_rate": 0.8411552346570397,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 453102
+          },
+          "gemma-3-4b-it": {
+            "requests": 1170,
+            "admitted": 973,
+            "admit_rate": 0.8316239316239317,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 664939
+          }
+        }
+      ],
+      "by_dataset": [
+        {
+          "Alpaca": {
+            "requests": 2594,
+            "admitted": 2148,
+            "admit_rate": 0.8280647648419429,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 819682
+          },
+          "Apps": {
+            "requests": 2583,
+            "admitted": 2128,
+            "admit_rate": 0.8238482384823849,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 2278026
+          },
+          "BigCodeBench": {
+            "requests": 1509,
+            "admitted": 1293,
+            "admit_rate": 0.856858846918489,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 783160
+          },
+          "DS1000": {
+            "requests": 1313,
+            "admitted": 1103,
+            "admit_rate": 0.8400609291698401,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 709621
+          },
+          "DollyDataset": {
+            "requests": 2656,
+            "admitted": 2190,
+            "admit_rate": 0.8245481927710844,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 926166
+          },
+          "Mbpp": {
+            "requests": 1309,
+            "admitted": 1083,
+            "admit_rate": 0.8273491214667685,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 488542
+          },
+          "ShareGPT": {
+            "requests": 2504,
+            "admitted": 2095,
+            "admit_rate": 0.8366613418530351,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 1601133
+          }
+        },
+        {
+          "Alpaca": {
+            "requests": 2576,
+            "admitted": 2175,
+            "admit_rate": 0.844332298136646,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 848176
+          },
+          "Apps": {
+            "requests": 2519,
+            "admitted": 2060,
+            "admit_rate": 0.8177848352520841,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 2214319
+          },
+          "BigCodeBench": {
+            "requests": 1571,
+            "admitted": 1309,
+            "admit_rate": 0.8332272437937619,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 812316
+          },
+          "DS1000": {
+            "requests": 1332,
+            "admitted": 1118,
+            "admit_rate": 0.8393393393393394,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 717906
+          },
+          "DollyDataset": {
+            "requests": 2688,
+            "admitted": 2240,
+            "admit_rate": 0.8333333333333334,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 917191
+          },
+          "Mbpp": {
+            "requests": 1304,
+            "admitted": 1075,
+            "admit_rate": 0.8243865030674846,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 494516
+          },
+          "ShareGPT": {
+            "requests": 2462,
+            "admitted": 2062,
+            "admit_rate": 0.8375304630381804,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 1602491
+          }
+        },
+        {
+          "Alpaca": {
+            "requests": 2571,
+            "admitted": 2142,
+            "admit_rate": 0.8331388564760793,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 820213
+          },
+          "Apps": {
+            "requests": 2627,
+            "admitted": 2164,
+            "admit_rate": 0.8237533307955843,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 2276804
+          },
+          "BigCodeBench": {
+            "requests": 1475,
+            "admitted": 1218,
+            "admit_rate": 0.8257627118644068,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 746673
+          },
+          "DS1000": {
+            "requests": 1303,
+            "admitted": 1095,
+            "admit_rate": 0.8403683806600154,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 722183
+          },
+          "DollyDataset": {
+            "requests": 2773,
+            "admitted": 2343,
+            "admit_rate": 0.844933285250631,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 969441
+          },
+          "Mbpp": {
+            "requests": 1312,
+            "admitted": 1097,
+            "admit_rate": 0.8361280487804879,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 490142
+          },
+          "ShareGPT": {
+            "requests": 2486,
+            "admitted": 2088,
+            "admit_rate": 0.8399034593724859,
+            "under_reserved_requests": 0,
+            "under_reserved_tokens": 0,
+            "used_tokens": 1603732
+          }
+        }
+      ],
+      "mean": {
+        "requests": 14489.0,
+        "admitted": 12075.333333333334,
+        "rejected": 2413.6666666666665,
+        "admit_rate": 0.8334107951115376,
+        "admitted_per_minute": 201.25555555555556,
+        "truncated": 24.666666666666668,
+        "overshoot_windows": 0.0,
+        "overshoot_max_tokens": 0.0,
+        "overshoot_max_share": 0.0,
+        "under_reserved_requests": 0.0,
+        "under_reserved_tokens": 0.0,
+        "utilization": 0.6345120277777777,
+        "reserved_per_used": 6.839000256987646,
+        "demand_per_budget": 0.7670415277777778,
+        "peak_in_flight": 48.0
+      }
+    }
+  },
+  "sensitivity": {
+    "tokens_per_second": {
+      "25.0": {
+        "requests": 14489.0,
+        "admitted": 8880.0,
+        "rejected": 5609.0,
+        "admit_rate": 0.6128692260384404,
+        "admitted_per_minute": 148.0,
+        "truncated": 19.666666666666668,
+        "overshoot_windows": 0.0,
+        "overshoot_max_tokens": 0.0,
+        "overshoot_max_share": 0.0,
+        "under_reserved_requests": 0.0,
+        "under_reserved_tokens": 0.0,
+        "utilization": 0.4623495555555555,
+        "reserved_per_used": 6.892531870930779,
+        "demand_per_budget": 0.7670415277777778,
+        "peak_in_flight": 67.0
+      },
+      "50.0": {
+        "requests": 14489.0,
+        "admitted": 12075.333333333334,
+        "rejected": 2413.6666666666665,
+        "admit_rate": 0.8334107951115376,
+        "admitted_per_minute": 201.25555555555556,
+        "truncated": 24.666666666666668,
+        "overshoot_windows": 0.0,
+        "overshoot_max_tokens": 0.0,
+        "overshoot_max_share": 0.0,
+        "under_reserved_requests": 0.0,
+        "under_reserved_tokens": 0.0,
+        "utilization": 0.6345120277777777,
+        "reserved_per_used": 6.839000256987646,
+        "demand_per_budget": 0.7670415277777778,
+        "peak_in_flight": 48.0
+      },
+      "100.0": {
+        "requests": 14489.0,
+        "admitted": 13876.0,
+        "rejected": 613.0,
+        "admit_rate": 0.9576949532170828,
+        "admitted_per_minute": 231.26666666666668,
+        "truncated": 31.666666666666668,
+        "overshoot_windows": 0.0,
+        "overshoot_max_tokens": 0.0,
+        "overshoot_max_share": 0.0,
+        "under_reserved_requests": 0.0,
+        "under_reserved_tokens": 0.0,
+        "utilization": 0.7335998611111112,
+        "reserved_per_used": 6.801718417201282,
+        "demand_per_budget": 0.7670415277777778,
+        "peak_in_flight": 34.0
+      }
+    },
+    "rate": {
+      "2.0": {
+        "requests": 7261.333333333333,
+        "admitted": 7260.666666666667,
+        "rejected": 0.6666666666666666,
+        "admit_rate": 0.999908210564964,
+        "admitted_per_minute": 121.0111111111111,
+        "truncated": 16.0,
+        "overshoot_windows": 0.0,
+        "overshoot_max_tokens": 0.0,
+        "overshoot_max_share": 0.0,
+        "under_reserved_requests": 0.0,
+        "under_reserved_tokens": 0.0,
+        "utilization": 0.38721658333333336,
+        "reserved_per_used": 6.748978368540904,
+        "demand_per_budget": 0.3872713055555555,
+        "peak_in_flight": 33.666666666666664
+      },
+      "4.0": {
+        "requests": 14489.0,
+        "admitted": 12075.333333333334,
+        "rejected": 2413.6666666666665,
+        "admit_rate": 0.8334107951115376,
+        "admitted_per_minute": 201.25555555555556,
+        "truncated": 24.666666666666668,
+        "overshoot_windows": 0.0,
+        "overshoot_max_tokens": 0.0,
+        "overshoot_max_share": 0.0,
+        "under_reserved_requests": 0.0,
+        "under_reserved_tokens": 0.0,
+        "utilization": 0.6345120277777777,
+        "reserved_per_used": 6.839000256987646,
+        "demand_per_budget": 0.7670415277777778,
+        "peak_in_flight": 48.0
+      },
+      "8.0": {
+        "requests": 28950.333333333332,
+        "admitted": 13376.666666666666,
+        "rejected": 15573.666666666666,
+        "admit_rate": 0.4620673946058689,
+        "admitted_per_minute": 222.94444444444443,
+        "truncated": 24.333333333333332,
+        "overshoot_windows": 0.0,
+        "overshoot_max_tokens": 0.0,
+        "overshoot_max_share": 0.0,
+        "under_reserved_requests": 0.0,
+        "under_reserved_tokens": 0.0,
+        "utilization": 0.69366875,
+        "reserved_per_used": 6.917828543654753,
+        "demand_per_budget": 1.5341800833333334,
+        "peak_in_flight": 57.0
+      }
+    }
+  }
+}
