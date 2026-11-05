@@ -695,3 +695,28 @@ pytest runs the same burst through the API on fakeredis (`tests/test_bench.py`),
 ### 48. `/reserve`: 0.45 ms p99 at one client; one worker saturates at ~3,600 reserve-and-settle pairs a second
 
 uvicorn's pure-Python `h11` parser and the default asyncio loop were the next limit. With `uvloop` and `httptools` (pinned; uvicorn uses them when installed), one worker went from about 2,700 to 3,600 pairs a second, and the 16-client p99 from 12.7 ms to 3.1 ms in the same pair of runs. **The 5 ms target holds at one client (0.45 ms p99, 0.15 ms of it in the app) and, in some runs, at 16 (3.1 ms; 7.6 ms in the final default run).** At 16 clients the app's own p99 is 1.7 ms; the rest is queueing in one event loop, Docker's port forward and a client that all share the laptop's cores. At 64 clients it is saturation: 22 ms p99, close to Little's law (64 / 3,555 per second ≈ 18 ms mean). Two workers (`WEB_CONCURRENCY=2`; the Lua scripts keep them atomic, as the burst shows) reach 5,300 pairs a second and 2.6 ms p99 at 16 clients, but still 25 ms at 64. **The gap: past about 16 concurrent callers per worker, `/reserve` queues.** Since Redis keeps it correct across workers, the fix is more workers or replicas. The default stays at one worker, so the laptop keeps cores for `/predict`. The image now also carries the int8 encoder (the bundle is 154 MB, against 94.5 MB on Day 12; 898 MB in all, as `docker images` reports).
+
+## Day 14: Ship (5 Nov 2026)
+
+**Scope.** The PRD's fresh-clone test: `git clone` of `day-14` into an empty directory, then `make setup data train eval sim sweep mispredict onnx test serve demo down` with nothing copied in (the dataset downloaded again, a new virtualenv, a new image), `OMP_NUM_THREADS=4` and `nice`. Then `git diff` in the clone against the committed `docs/figures/`. The run was interrupted once by the session, a few minutes into `make train` after the features had been written, and resumed from `make models`; nothing was rerun or skipped.
+
+| Stage | Time | Result |
+|---|---|---|
+| `make setup` | 6 min | new `.venv` from `requirements.txt` |
+| `make data` | 60 min | almost all of it the ~600 MB download at the pinned revision |
+| `make train` | about 11 min | features under 3 min, models 6.5 min (4 threads), MLP 2.3 min |
+| `make eval` | 4.9 min | |
+| `make sim`, `sweep`, `mispredict` | 2 s, 23 s, 2.4 min | |
+| `make onnx` | 1.5 min | parity and int8 checks pass |
+| `make test` | 8 s | 142 of 142 |
+| `make serve`, `demo`, `down` | 2.3 min, under 1 s, 1 s | image built from scratch; predict → reserve → settle with curl |
+
+### 49. A fresh clone reproduces every number; only timings differ
+
+Every regenerated JSON matches the committed one except fields that are wall-clock times: `test_results.json` (−21.8% frozen, −20.4% matched, 95.81% coverage), both validation tables, the simulator sweeps, and every ONNX parity error. XGBoost on 4 threads produced the same models as the original all-core run. The one byte-level difference is the exported encoder, 91.23 MB instead of 91.07 MB: the torch export is not byte-identical between runs, but its outputs agree to the same 2.5e-7 and the bundle's `serving.json` hashes are written from the files it ships, so the service checks what it loads. The figures (PNG) did not change.
+
+### 50. What the fresh clone caught in the repo
+
+- **The PRD's command didn't exist:** there was no `make train`. It is now `features models mlp`.
+- **Two simulator JSONs in git were from before Day 10:** `sim_max_tokens.json` and `sim_policies.json` lacked the truncation fields `simulate.py` has written since Day 10. Regenerating them adds those fields and changes no existing value; the regenerated files are committed.
+- **`make onnx` resets the container-side int8 check:** it rewrites `int8_check.json` with `served_embeddings: null`, and only `make int8-served` (which needs Docker) fills it again. The committed file keeps the Day-13 result; the README's run order now lists `make int8-served` after `make onnx`.
