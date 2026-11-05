@@ -1,0 +1,191 @@
+{
+  "rule": {
+    "split": "validate",
+    "max_coverage_drop": 0.001,
+    "max_ratio_rise": 0.005,
+    "shift": 0.03353160619735718,
+    "shift_retuned": false
+  },
+  "variants": {
+    "fp32": "Day-11 encoder, on this machine",
+    "int8": "per-channel int8, on this machine",
+    "int8_per_tensor": "per-tensor int8, on this machine (rejected)",
+    "int8_served": "per-channel int8 embeddings computed inside the service image"
+  },
+  "served_embeddings": {
+    "encoder": "int8",
+    "threads": 2,
+    "machine": "aarch64",
+    "system": "Linux",
+    "onnxruntime": "1.31.1",
+    "prompts": 3396,
+    "seconds": 15.637958841
+  },
+  "validate": {
+    "prompts": 2266,
+    "requests": 27780,
+    "completions": 277351,
+    "fp32": {
+      "coverage": 0.950001983046753,
+      "ratio": 1.7558464509539229,
+      "seconds": 12.049843540997244
+    },
+    "int8": {
+      "coverage": 0.9499298722557337,
+      "ratio": 1.7561400286227529,
+      "seconds": 12.338795957999537,
+      "coverage_change_points": -0.007211079101931972,
+      "ratio_change_pct": 0.01672000810040153,
+      "embedding_cosine": {
+        "min": 0.9954056739807129,
+        "p01": 0.9975536465644836,
+        "mean": 0.9986066818237305
+      },
+      "log_pred_abs_diff": {
+        "mean": 0.006968122819415779,
+        "p99": 0.04490327835083008,
+        "max": 0.14502286911010742
+      },
+      "bounds_moved_share": 0.8958243340532758,
+      "bound_rel_change": {
+        "p01": -0.03514974657311931,
+        "p99": 0.032328184131330394,
+        "min": -0.13477088948787064,
+        "max": 0.1450381679389312
+      }
+    },
+    "int8_per_tensor": {
+      "coverage": 0.9449253833589928,
+      "ratio": 1.7316939063470975,
+      "seconds": 12.314619374999893,
+      "coverage_change_points": -0.5076599687760197,
+      "ratio_change_pct": -1.375549928850761,
+      "embedding_cosine": {
+        "min": 0.8772543668746948,
+        "p01": 0.9310152530670166,
+        "mean": 0.9635995626449585
+      },
+      "log_pred_abs_diff": {
+        "mean": 0.03221881245433898,
+        "p99": 0.18846158027648893,
+        "max": 0.4575209617614746
+      },
+      "bounds_moved_share": 0.9768538516918647,
+      "bound_rel_change": {
+        "p01": -0.16575691891086158,
+        "p99": 0.09328063241106693,
+        "min": -0.3669902912621359,
+        "max": 0.2905982905982907
+      }
+    },
+    "int8_served": {
+      "coverage": 0.9501678378660975,
+      "ratio": 1.756153166099333,
+      "seconds": 1.107804125000257,
+      "coverage_change_points": 0.016585481934450197,
+      "ratio_change_pct": 0.01746822139507831,
+      "embedding_cosine": {
+        "min": 0.9815605878829956,
+        "p01": 0.9888107776641846,
+        "mean": 0.9946054220199585
+      },
+      "log_pred_abs_diff": {
+        "mean": 0.014241735638260755,
+        "p99": 0.09430629730224598,
+        "max": 0.31855297088623047
+      },
+      "bounds_moved_share": 0.9491360691144708,
+      "bound_rel_change": {
+        "p01": -0.07843137254901966,
+        "p99": 0.06359831472215978,
+        "min": -0.20898876404494382,
+        "max": 0.3742690058479532
+      }
+    }
+  },
+  "test": {
+    "prompts": 1130,
+    "requests": 14047,
+    "completions": 140276,
+    "fp32": {
+      "coverage": 0.958139667512618,
+      "ratio": 1.8080591964896309,
+      "seconds": 5.96652908300166
+    },
+    "int8": {
+      "coverage": 0.9580968946933189,
+      "ratio": 1.808290977497136,
+      "seconds": 6.121488333999878,
+      "coverage_change_points": -0.0042772819299097264,
+      "ratio_change_pct": 0.01281932626737703,
+      "embedding_cosine": {
+        "min": 0.9958349466323853,
+        "p01": 0.9972793459892273,
+        "mean": 0.9986012578010559
+      },
+      "log_pred_abs_diff": {
+        "mean": 0.007102870852902936,
+        "p99": 0.045949811935424766,
+        "max": 0.1009821891784668
+      },
+      "bounds_moved_share": 0.9063145155549227,
+      "bound_rel_change": {
+        "p01": -0.035377839006079305,
+        "p99": 0.03983252829390397,
+        "min": -0.08080808080808077,
+        "max": 0.10748560460652601
+      }
+    },
+    "int8_per_tensor": {
+      "coverage": 0.9549031908523197,
+      "ratio": 1.7855209873560267,
+      "seconds": 6.1112290829914855,
+      "coverage_change_points": -0.32364766602983597,
+      "ratio_change_pct": -1.2465415500423016,
+      "embedding_cosine": {
+        "min": 0.8765780329704285,
+        "p01": 0.932440459728241,
+        "mean": 0.9636332988739014
+      },
+      "log_pred_abs_diff": {
+        "mean": 0.03207684231965391,
+        "p99": 0.18715746879577533,
+        "max": 0.44270896911621094
+      },
+      "bounds_moved_share": 0.9777888517121094,
+      "bound_rel_change": {
+        "p01": -0.17081435643564355,
+        "p99": 0.08183066035192564,
+        "min": -0.3573883161512027,
+        "max": 0.18758434547908243
+      }
+    },
+    "int8_served": {
+      "coverage": 0.9580826370868859,
+      "ratio": 1.8071093948539612,
+      "seconds": 0.5299716659937985,
+      "coverage_change_points": -0.005703042573212969,
+      "ratio_change_pct": -0.05253155635135398,
+      "embedding_cosine": {
+        "min": 0.9765062928199768,
+        "p01": 0.9893290996551514,
+        "mean": 0.9945498108863831
+      },
+      "log_pred_abs_diff": {
+        "mean": 0.013499228446994667,
+        "p99": 0.07522964477539058,
+        "max": 0.15976619720458984
+      },
+      "bounds_moved_share": 0.9461094895707268,
+      "bound_rel_change": {
+        "p01": -0.06650545403691965,
+        "p99": 0.059166403179908796,
+        "min": -0.14835164835164838,
+        "max": 0.13963963963963955
+      }
+    }
+  },
+  "accepted": true,
+  "per_tensor_accepted": false,
+  "served_accepted": true
+}

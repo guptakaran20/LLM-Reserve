@@ -433,11 +433,19 @@ The one item left from days 1–6 is the Day-4 hour on quantile regression and p
 
 ### Day 13: Tests and benchmarks
 
-- [ ] Concurrency test: 1,000 parallel reserves never push spend past the cap.
-- [ ] Latency benchmark with a small asyncio client: p50 and p99 for `/predict` and `/reserve`.
-- [ ] Fix anything over target, or document the gap.
+- [x] Concurrency test: 1,000 parallel reserves never push spend past the cap.
+- [x] Latency benchmark with a small asyncio client: p50 and p99 for `/predict` and `/reserve`.
+- [x] Fix anything over target, or document the gap.
 
 **Done when:** the non-functional targets are met or their gaps are written down.
+
+**Done, 5 Nov 2026.** `make bench` runs the latency benchmark and the 1,000-request burst against the compose service in about a minute. `make int8-served` checks the served encoder's coverage. 142 of 142 tests pass (15 new). **With the new defaults (an int8 encoder on 2 ONNX threads, one worker), both targets are met at one client: `/predict` p99 12.8 ms (target 15), `/reserve` p99 0.45 ms (target 5). 1,000 parallel reserves never pushed a window past its cap**, in every configuration. Details in [findings.md](findings.md#day-13-tests-and-benchmarks-5-nov-2026). Five notes:
+
+- **In Docker, the fp32 `/predict` measured 33 ms p99, not Day 11's 12.5 ms (finding 42).** On macOS, ONNX Runtime uses the M5's SME units, which Docker's Linux VM doesn't expose. The planned int8 fallback fixed it, behind a coverage rule written before the first run (at most 0.1 point less coverage and 0.5% more reservation on validation, shift frozen). Per-tensor int8 failed it (−0.51 point). Per-channel passed (−0.007 point, +0.017%), and passed again on the embeddings the container itself computes, which differ from macOS's (findings 43–44). Test: 95.81% at 1.807, unchanged from fp32.
+- **The burst found a real bug (finding 47):** 511 of 1,000 simultaneous requests got a 500, because redis-py's default pool raises instead of waiting. A blocking pool fixed it. After that, 147 of 1,000 reserves were admitted (199,977 of 200,000 tokens), every 429 was rightful, and a race of 1,000 reserves against the settles never reported more than 200,000. The counter matched to the token, with one worker or two.
+- **Gap: `/predict` misses 15 ms under concurrent load (finding 45):** 21 ms p99 at 4 clients and 33 ms at 8, because each request holds two of the laptop's ten cores. The target holds for one caller at a time; meeting it under load needs more cores or replicas, not tried.
+- **Gap: `/reserve` queues past ~16 concurrent callers per worker (finding 48):** one worker saturates at ~3,600 reserve-and-settle pairs a second (after `uvloop` and `httptools`, +35%). p99 is 3.1–7.6 ms at 16 clients and 22 ms at 64. Two workers stay exact and reach 5,300 pairs a second, so the fix is more workers or replicas.
+- **The benchmark's first client was the bottleneck (finding 46):** httpx capped it near 400 requests/s. `bench.Client` is a 0.1 ms keep-alive asyncio client.
 
 ### Day 14: Ship
 
