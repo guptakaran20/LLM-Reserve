@@ -374,12 +374,19 @@ The one item left from days 1–6 is the Day-4 hour on quantile regression and p
 
 ### Day 9: Policies and sweeps
 
-- [ ] Add the fixed-percentile and model policies, using precomputed predictions.
-- [ ] Add the wrongful-rejection metric: requests whose actual cost would have fit.
-- [ ] Sweep budget sizes and arrival rates, 3 random seeds each.
-- [ ] **(rev 2)** Report admitted requests vs. both `max_tokens` and the fixed per-model p95 policy.
+- [x] Add the fixed-percentile and model policies, using precomputed predictions.
+- [x] Add the wrongful-rejection metric: requests whose actual cost would have fit.
+- [x] Sweep budget sizes and arrival rates, 3 random seeds each.
+- [x] **(rev 2)** Report admitted requests vs. both `max_tokens` and the fixed per-model p95 policy.
 
 **Done when:** a comparison table and a plot of admitted requests vs. arrival rate exist.
+
+**Done, 4 Nov 2026.** `make sweep` runs 5 policies over 35 settings (arrival rate × budget, and arrival rate × decode speed), 3 seeds each, in about 25 seconds, and 88 of 88 tests pass. Every bound reproduces Day 7's test coverage and ratio on the original config before it is simulated. **At the default setting every policy but `max_tokens` admits everything (1.20× `max_tokens`); at 8 requests/s the winner admits 1.49× `max_tokens` and 1.027× the per-model p95.** Details in [findings.md](findings.md#day-9-policies-and-sweeps-4-nov-2026). Four notes:
+
+- **The ≥1.5× target holds only past saturation:** from about 1.5–2.3× demand over budget at 50 tokens/s, at every overloaded setting at 25 tokens/s (up to 2.27×), and never at 100 tokens/s (at most 1.19×). The per-model p95 alone gets to 1.45×; 85% of `max_tokens`'s 429s are wrongful.
+- **The winner's 1–10% edge over the bar is mostly in which requests it admits, not in spend:** both reach ~100% of the budget under overload (the winner 0.1–1.3% more), and the winner's admitted requests are cheaper. It halves wrongful 429s.
+- **Every sub-`max_tokens` policy overshoots once the budget binds:** in all 19 binding settings, up to 5.6–6.1% of a window at 8 requests/s and 8.8% at worst; the oracle reaches 2.2%. The ≤1% overshoot target needs Day 10.
+- **The winner evens out models (66–70%, where the bar turns Gemma away at 61–62%) but widens datasets (63% Apps to 73% Alpaca, vs. the bar's 63–69%).** Day 10 or the README should make favouring cheap requests an explicit choice.
 
 ### Day 10: Misprediction strategies
 

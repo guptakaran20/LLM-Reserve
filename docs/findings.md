@@ -463,3 +463,62 @@ Halving the decode speed costs `max_tokens` 22 points of admit rate; doubling it
 ### 27. Under worst-case reservations every kind of request is equally likely to be turned away
 
 The admit rate is 82.2–84.0% for every source dataset and 82.1–84.6% for every target model. `max_tokens` reserves the same 4,096 output tokens for everyone, so the only difference is the input length (Apps has the longest prompts and the lowest rate). **So:** Day 9 reports the learned policy's admit rate per dataset and per model next to its totals. A policy that reserves by predicted length will admit short requests more readily than long ones, and that is a fairness cost worth showing, not hiding.
+
+## Day 9: Policies and sweeps (4 Nov 2026)
+
+**Scope.** Every reservation policy in the Day-8 simulator (`src/llm_reserve/sweep.py`): `max_tokens`, the global and per-model p95 (the bar), the frozen winner (MLP + XGBoost average), and the oracle as a ceiling. Nothing is tuned. Each bound is computed on the test split's `original` config at the knob Day 7 scored, and must reproduce Day 7's coverage and reservation ratio there to 1e-9 before any simulation runs (it does for all five). The winner comes from the predictions `make eval` saved, so this process never loads torch. A new metric, **wrongful rejection**, counts 429s whose real cost would have fit in what was left of the window at that moment: the gateway turned the request away only because of the size of its reservation. The grid is arrival rate (1–16 requests/s) × budget (100k, 200k, 400k tokens per minute) at 50 tokens/s, plus arrival rate × decode speed (25, 50, 100 tokens/s) at 200k: 35 settings, 3 seeds each, every policy on the same traces. Rebuild with `make sweep` (about 25 seconds, one core); the numbers come from [`figures/sim_policies.json`](figures/sim_policies.json).
+
+Default setting (4 requests/s, 200,000 tokens per minute, 50 tokens/s), means over 3 seeds:
+
+| Policy | Admitted | Admit rate | ÷ `max_tokens` | ÷ per-model p95 | Wrongful 429s | Windows over budget | Largest overshoot | Real spend ÷ budget | Reserved ÷ used |
+|---|---|---|---|---|---|---|---|---|---|
+| `max_tokens` = 4,096 | 12,075 | 83.3% | 1.000× | 0.833× | 2,074 | 0 | 0.00% | 63.5% | 6.84 |
+| Global p95 | 14,489 | 100.0% | 1.200× | 1.000× | 0 | 0 | 0.00% | 76.7% | 1.88 |
+| Per-model p95 (the bar) | 14,489 | 100.0% | 1.200× | 1.000× | 0 | 0 | 0.00% | 76.7% | 1.85 |
+| **Learned bound (the winner)** | **14,489** | **100.0%** | **1.200×** | **1.000×** | **0** | **0** | **0.00%** | **76.7%** | **1.52** |
+| Oracle (not deployable) | 14,489 | 100.0% | 1.200× | 1.000× | 0 | 0 | 0.00% | 76.7% | 1.24 |
+
+Overloaded setting (8 requests/s, the same budget and speed; demand is 153% of the budget):
+
+| Policy | Admitted | Admit rate | ÷ `max_tokens` | ÷ per-model p95 | Wrongful 429s | Windows over budget | Largest overshoot | Real spend ÷ budget | Mean admitted cost |
+|---|---|---|---|---|---|---|---|---|---|
+| `max_tokens` = 4,096 | 13,377 | 46.2% | 1.000× | 0.689× | 13,244 | 0 | 0.00% | 69.4% | 622 |
+| Global p95 | 19,437 | 67.1% | 1.453× | 1.000× | 4,135 | 40.0 of 60 | 6.09% | 101.0% | 624 |
+| Per-model p95 (the bar) | 19,428 | 67.1% | 1.452× | 1.000× | 3,909 | 36.7 of 60 | 5.74% | 100.6% | 622 |
+| **Learned bound (the winner)** | **19,953** | **68.9%** | **1.492×** | **1.027×** | **2,414** | **39.0 of 60** | **5.64%** | **100.9%** | **607** |
+| Oracle (not deployable) | 20,140 | 69.6% | 1.506× | 1.037× | 635 | 6.0 of 60 | 0.61% | 99.6% | 593 |
+
+Across seeds the winner ÷ bar ratio at 8 requests/s is 1.025–1.029, so the ordering is not noise.
+
+![Admitted requests vs. arrival rate](figures/sim_policies.png)
+
+The winner's admit rate across the grid (the full table, with every policy, is printed by `make sweep`):
+
+| Setting | 1 | 2 | 4 | 6 | 8 | 12 | 16 requests/s |
+|---|---|---|---|---|---|---|---|
+| Winner ÷ `max_tokens`, 100k budget | 1.00× | 1.25× | 1.52× | 1.54× | 1.56× | 1.61× | 1.66× |
+| Winner ÷ `max_tokens`, 200k budget | 1.00× | 1.00× | 1.20× | 1.46× | 1.49× | 1.51× | 1.53× |
+| Winner ÷ `max_tokens`, 400k budget | 1.00× | 1.00× | 1.00× | 1.02× | 1.18× | 1.44× | 1.47× |
+| Winner ÷ `max_tokens`, 200k, 25 tokens/s | 1.00× | 1.03× | 1.63× | 2.01× | 2.11× | 2.22× | 2.27× |
+| Winner ÷ `max_tokens`, 200k, 100 tokens/s | 1.00× | 1.00× | 1.04× | 1.19× | 1.17× | 1.16× | 1.16× |
+| Winner ÷ the bar, 200k budget | 1.000× | 1.000× | 1.000× | 1.015× | 1.027× | 1.041× | 1.056× |
+
+### 28. The 1.5× target over `max_tokens` is met only past saturation, and the per-model p95 gets most of the way there
+
+At the default setting every policy except `max_tokens` admits every request, so the learned bound is 1.20× `max_tokens`: that is all the room there is (demand is 76.7% of the budget). The PRD's ≥1.5× is reached once demand is about 1.5–2.3× the budget at 50 tokens/s (from 4 requests/s at 100k, from 12 at 200k, never within 16 at 400k), at every overloaded setting at 25 tokens/s (up to 2.27×), and **never at 100 tokens/s** (at most 1.19×), because fast decoding returns `max_tokens`'s oversized reservations before they cost much. So the target holds for slow or overloaded gateways, not in general, and the README must say which.
+
+**Most of the gain is the per-model p95's, not the model's.** The bar alone is 1.45× `max_tokens` at 8 requests/s; the winner adds 2.7% on top. Reserving a p95 instead of the worst case is what fixes `max_tokens`'s problem (finding 25): 85% of `max_tokens`'s 429s are wrongful, at the default and under overload alike.
+
+### 29. Where the budget binds, the winner admits 1–10% more than the bar, mostly by admitting cheaper requests
+
+Below saturation the winner and the bar admit exactly the same requests, since both fit everything: the 22% offline saving in reserved tokens (finding 21) buys nothing until the budget binds. Above it, the winner admits 1.5–5.6% more requests than the bar at 200k and 50 tokens/s, up to 9.2% at 25 tokens/s and 10.1% at 100k. It also halves wrongful 429s (0.47–0.65× the bar's).
+
+But the extra requests are not extra spend. In every overloaded setting both policies drive real spend to about 100% of the budget, and the winner's is only 0.1–1.3% higher. The rest of its edge, 1–10%, is that the requests it admits are cheaper (607 vs. 622 tokens each at 8 requests/s): a tight bound makes a request look cheap when it is, so short requests fill the gaps a window has left. So measured in tokens served, the winner and the bar are within about 1% once the budget binds; measured in requests, the winner wins by up to 10%, and that difference is a choice about which requests to serve (finding 31), not a larger budget.
+
+### 30. Once the budget binds, every policy below `max_tokens` overshoots it, by up to 9% of a window
+
+At the default setting no window overshoots, because real spend stays at 76.7%. But in all 19 of the 35 settings where the budget binds, the global p95, the bar and the winner overshoot in most windows (37–40 of 60 at 8 requests/s), by up to 5.6–6.1% of the budget at 8 requests/s and 8.5–8.8% at its worst (100k, 12 requests/s). The winner is no worse than the bar: they cover about the same 95.7–95.9% of completions on the original config, and once reservations fill a window to the budget every under-reservation becomes overshoot. Even the oracle reaches 2.2%. **The PRD's overshoot ≤1% of a window is not met by any learned policy under overload.** This is what Day 10's two strategies are for: capping `max_tokens` at the bound (zero overshoot, some truncation) or an overdraft buffer sized from the expected misses.
+
+### 31. The winner evens out admission across target models but widens it across kinds of prompt
+
+At 8 requests/s the bar admits the two Gemma models at 61.4% and 61.9% and every other model at 66–69%, because their per-model p95 is the highest (1,792 and 1,368 on train: terse on code, verbose on chat, finding 2), so every Gemma request reserves a lot. The winner admits every model at 66.3–70.1%: it reserves for the prompt, not the model. Across source datasets it goes the other way: the bar spans 63.5–69.4%, the winner 63.2% (Apps, long code answers) to 73.3% (Alpaca, short ones), and the oracle 62.9–76.5%. A tighter bound favours requests that are cheap to serve. That is the right call for a gateway maximizing requests per budget, but it is a choice, and it should be a flag, not a side effect: in the overloaded case, a user asking for long code solutions gets turned away more often than one asking a short question. `max_tokens` treats every request the same (44.0–47.5% per dataset) only because it over-reserves for all of them.

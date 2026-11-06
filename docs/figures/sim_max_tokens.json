@@ -24,6 +24,8 @@
           "rejected": 2428,
           "admit_rate": 0.8321813657727398,
           "admitted_per_minute": 200.66666666666666,
+          "wrongful_rejections": 2108,
+          "wrongful_rejection_rate": 0.14570085706386507,
           "truncated": 20,
           "overshoot_windows": 0,
           "overshoot_max_tokens": 0,
@@ -32,6 +34,7 @@
           "under_reserved_tokens": 0,
           "utilization": 0.6338608333333333,
           "reserved_per_used": 6.827133190382221,
+          "mean_admitted_cost": 631.7549833887043,
           "demand_per_budget": 0.76658275,
           "peak_in_flight": 48,
           "seed": 0
@@ -42,6 +45,8 @@
           "rejected": 2413,
           "admit_rate": 0.8330334901743703,
           "admitted_per_minute": 200.65,
+          "wrongful_rejections": 2038,
+          "wrongful_rejection_rate": 0.14101854414613893,
           "truncated": 32,
           "overshoot_windows": 0,
           "overshoot_max_tokens": 0,
@@ -50,6 +55,7 @@
           "under_reserved_tokens": 0,
           "utilization": 0.6339095833333334,
           "reserved_per_used": 6.821149703920709,
+          "mean_admitted_cost": 631.8560511670405,
           "demand_per_budget": 0.7689423333333333,
           "peak_in_flight": 47,
           "seed": 1
@@ -60,6 +66,8 @@
           "rejected": 2400,
           "admit_rate": 0.8350175293875026,
           "admitted_per_minute": 202.45,
+          "wrongful_rejections": 2077,
+          "wrongful_rejection_rate": 0.1427785797758988,
           "truncated": 22,
           "overshoot_windows": 0,
           "overshoot_max_tokens": 0,
@@ -68,6 +76,7 @@
           "under_reserved_tokens": 0,
           "utilization": 0.6357656666666667,
           "reserved_per_used": 6.868717876660006,
+          "mean_admitted_cost": 628.0717872725776,
           "demand_per_budget": 0.7655995,
           "peak_in_flight": 49,
           "seed": 2
@@ -79,6 +88,7 @@
             "requests": 1138,
             "admitted": 942,
             "admit_rate": 0.827768014059754,
+            "wrongful_rejections": 164,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 616007
@@ -87,6 +97,7 @@
             "requests": 1110,
             "admitted": 936,
             "admit_rate": 0.8432432432432433,
+            "wrongful_rejections": 153,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 622308
@@ -95,6 +106,7 @@
             "requests": 1194,
             "admitted": 982,
             "admit_rate": 0.8224455611390284,
+            "wrongful_rejections": 192,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 555796
@@ -103,6 +115,7 @@
             "requests": 1152,
             "admitted": 971,
             "admit_rate": 0.8428819444444444,
+            "wrongful_rejections": 152,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 610152
@@ -111,6 +124,7 @@
             "requests": 1154,
             "admitted": 953,
             "admit_rate": 0.8258232235701907,
+            "wrongful_rejections": 177,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 644702
@@ -119,6 +133,7 @@
             "requests": 1095,
             "admitted": 907,
             "admit_rate": 0.828310502283105,
+            "wrongful_rejections": 165,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 551491
@@ -127,6 +142,7 @@
             "requests": 1116,
             "admitted": 938,
             "admit_rate": 0.8405017921146953,
+            "wrongful_rejections": 157,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 577281
@@ -135,6 +151,7 @@
             "requests": 1110,
             "admitted": 929,
             "admit_rate": 0.8369369369369369,
+            "wrongful_rejections": 157,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 517927
@@ -143,6 +160,7 @@
             "requests": 1119,
             "admitted": 933,
             "admit_rate": 0.8337801608579088,
+            "wrongful_rejections": 162,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 577922
@@ -151,6 +169,7 @@
             "requests": 1127,
             "admitted": 923,
             "admit_rate": 0.8189884649511979,
+            "wrongful_rejections": 177,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 583871
@@ -159,6 +178,7 @@
             "requests": 1142,
             "admitted": 962,
             "admit_rate": 0.8423817863397548,
+            "wrongful_rejections": 156,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 611786
@@ -167,6 +187,7 @@
             "requests": 831,
             "admitted": 699,
             "admit_rate": 0.8411552346570397,
+            "wrongful_rejections": 114,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 456945
@@ -175,6 +196,7 @@
             "requests": 1180,
             "admitted": 965,
             "admit_rate": 0.8177966101694916,
+            "wrongful_rejections": 182,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 680142
@@ -185,6 +207,7 @@
             "requests": 1125,
             "admitted": 937,
             "admit_rate": 0.8328888888888889,
+            "wrongful_rejections": 158,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 622036
@@ -193,6 +216,7 @@
             "requests": 1132,
             "admitted": 956,
             "admit_rate": 0.8445229681978799,
+            "wrongful_rejections": 147,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 675224
@@ -201,6 +225,7 @@
             "requests": 1103,
             "admitted": 940,
             "admit_rate": 0.8522212148685403,
+            "wrongful_rejections": 145,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 548113
@@ -209,6 +234,7 @@
             "requests": 1177,
             "admitted": 967,
             "admit_rate": 0.8215802888700084,
+            "wrongful_rejections": 173,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 620128
@@ -217,6 +243,7 @@
             "requests": 1169,
             "admitted": 957,
             "admit_rate": 0.8186484174508126,
+            "wrongful_rejections": 175,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 646087
@@ -225,6 +252,7 @@
             "requests": 1148,
             "admitted": 963,
             "admit_rate": 0.8388501742160279,
+            "wrongful_rejections": 163,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 568569
@@ -233,6 +261,7 @@
             "requests": 1092,
             "admitted": 913,
             "admit_rate": 0.8360805860805861,
+            "wrongful_rejections": 156,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 540899
@@ -241,6 +270,7 @@
             "requests": 1137,
             "admitted": 940,
             "admit_rate": 0.8267370272647317,
+            "wrongful_rejections": 158,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 555773
@@ -249,6 +279,7 @@
             "requests": 1103,
             "admitted": 938,
             "admit_rate": 0.8504079782411604,
+            "wrongful_rejections": 136,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 580732
@@ -257,6 +288,7 @@
             "requests": 1125,
             "admitted": 915,
             "admit_rate": 0.8133333333333334,
+            "wrongful_rejections": 182,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 553981
@@ -265,6 +297,7 @@
             "requests": 1134,
             "admitted": 939,
             "admit_rate": 0.828042328042328,
+            "wrongful_rejections": 168,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 577596
@@ -273,6 +306,7 @@
             "requests": 835,
             "admitted": 688,
             "admit_rate": 0.8239520958083832,
+            "wrongful_rejections": 126,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 456093
@@ -281,6 +315,7 @@
             "requests": 1172,
             "admitted": 986,
             "admit_rate": 0.841296928327645,
+            "wrongful_rejections": 151,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 661684
@@ -291,6 +326,7 @@
             "requests": 1117,
             "admitted": 949,
             "admit_rate": 0.8495971351835273,
+            "wrongful_rejections": 145,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 602638
@@ -299,6 +335,7 @@
             "requests": 1122,
             "admitted": 924,
             "admit_rate": 0.8235294117647058,
+            "wrongful_rejections": 174,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 615206
@@ -307,6 +344,7 @@
             "requests": 1111,
             "admitted": 937,
             "admit_rate": 0.8433843384338434,
+            "wrongful_rejections": 151,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 551049
@@ -315,6 +353,7 @@
             "requests": 1145,
             "admitted": 943,
             "admit_rate": 0.8235807860262009,
+            "wrongful_rejections": 172,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 568591
@@ -323,6 +362,7 @@
             "requests": 1143,
             "admitted": 939,
             "admit_rate": 0.821522309711286,
+            "wrongful_rejections": 183,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 608700
@@ -331,6 +371,7 @@
             "requests": 1147,
             "admitted": 960,
             "admit_rate": 0.8369659982563208,
+            "wrongful_rejections": 167,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 590920
@@ -339,6 +380,7 @@
             "requests": 1144,
             "admitted": 957,
             "admit_rate": 0.8365384615384616,
+            "wrongful_rejections": 165,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 563884
@@ -347,6 +389,7 @@
             "requests": 1151,
             "admitted": 950,
             "admit_rate": 0.8253692441355344,
+            "wrongful_rejections": 173,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 574425
@@ -355,6 +398,7 @@
             "requests": 1123,
             "admitted": 959,
             "admit_rate": 0.8539626001780944,
+            "wrongful_rejections": 138,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 607947
@@ -363,6 +407,7 @@
             "requests": 1173,
             "admitted": 975,
             "admit_rate": 0.8312020460358056,
+            "wrongful_rejections": 168,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 574276
@@ -371,6 +416,7 @@
             "requests": 1170,
             "admitted": 982,
             "admit_rate": 0.8393162393162393,
+            "wrongful_rejections": 158,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 653511
@@ -379,6 +425,7 @@
             "requests": 831,
             "admitted": 699,
             "admit_rate": 0.8411552346570397,
+            "wrongful_rejections": 114,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 453102
@@ -387,6 +434,7 @@
             "requests": 1170,
             "admitted": 973,
             "admit_rate": 0.8316239316239317,
+            "wrongful_rejections": 169,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 664939
@@ -399,6 +447,7 @@
             "requests": 2594,
             "admitted": 2148,
             "admit_rate": 0.8280647648419429,
+            "wrongful_rejections": 408,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 819682
@@ -407,6 +456,7 @@
             "requests": 2583,
             "admitted": 2128,
             "admit_rate": 0.8238482384823849,
+            "wrongful_rejections": 358,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 2278026
@@ -415,6 +465,7 @@
             "requests": 1509,
             "admitted": 1293,
             "admit_rate": 0.856858846918489,
+            "wrongful_rejections": 191,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 783160
@@ -423,6 +474,7 @@
             "requests": 1313,
             "admitted": 1103,
             "admit_rate": 0.8400609291698401,
+            "wrongful_rejections": 181,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 709621
@@ -431,6 +483,7 @@
             "requests": 2656,
             "admitted": 2190,
             "admit_rate": 0.8245481927710844,
+            "wrongful_rejections": 430,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 926166
@@ -439,6 +492,7 @@
             "requests": 1309,
             "admitted": 1083,
             "admit_rate": 0.8273491214667685,
+            "wrongful_rejections": 202,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 488542
@@ -447,6 +501,7 @@
             "requests": 2504,
             "admitted": 2095,
             "admit_rate": 0.8366613418530351,
+            "wrongful_rejections": 338,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 1601133
@@ -457,6 +512,7 @@
             "requests": 2576,
             "admitted": 2175,
             "admit_rate": 0.844332298136646,
+            "wrongful_rejections": 351,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 848176
@@ -465,6 +521,7 @@
             "requests": 2519,
             "admitted": 2060,
             "admit_rate": 0.8177848352520841,
+            "wrongful_rejections": 364,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 2214319
@@ -473,6 +530,7 @@
             "requests": 1571,
             "admitted": 1309,
             "admit_rate": 0.8332272437937619,
+            "wrongful_rejections": 215,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 812316
@@ -481,6 +539,7 @@
             "requests": 1332,
             "admitted": 1118,
             "admit_rate": 0.8393393393393394,
+            "wrongful_rejections": 194,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 717906
@@ -489,6 +548,7 @@
             "requests": 2688,
             "admitted": 2240,
             "admit_rate": 0.8333333333333334,
+            "wrongful_rejections": 397,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 917191
@@ -497,6 +557,7 @@
             "requests": 1304,
             "admitted": 1075,
             "admit_rate": 0.8243865030674846,
+            "wrongful_rejections": 197,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 494516
@@ -505,6 +566,7 @@
             "requests": 2462,
             "admitted": 2062,
             "admit_rate": 0.8375304630381804,
+            "wrongful_rejections": 320,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 1602491
@@ -515,6 +577,7 @@
             "requests": 2571,
             "admitted": 2142,
             "admit_rate": 0.8331388564760793,
+            "wrongful_rejections": 395,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 820213
@@ -523,6 +586,7 @@
             "requests": 2627,
             "admitted": 2164,
             "admit_rate": 0.8237533307955843,
+            "wrongful_rejections": 367,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 2276804
@@ -531,6 +595,7 @@
             "requests": 1475,
             "admitted": 1218,
             "admit_rate": 0.8257627118644068,
+            "wrongful_rejections": 219,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 746673
@@ -539,6 +604,7 @@
             "requests": 1303,
             "admitted": 1095,
             "admit_rate": 0.8403683806600154,
+            "wrongful_rejections": 179,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 722183
@@ -547,6 +613,7 @@
             "requests": 2773,
             "admitted": 2343,
             "admit_rate": 0.844933285250631,
+            "wrongful_rejections": 391,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 969441
@@ -555,6 +622,7 @@
             "requests": 1312,
             "admitted": 1097,
             "admit_rate": 0.8361280487804879,
+            "wrongful_rejections": 201,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 490142
@@ -563,6 +631,7 @@
             "requests": 2486,
             "admitted": 2088,
             "admit_rate": 0.8399034593724859,
+            "wrongful_rejections": 325,
             "under_reserved_requests": 0,
             "under_reserved_tokens": 0,
             "used_tokens": 1603732
@@ -575,6 +644,8 @@
         "rejected": 2413.6666666666665,
         "admit_rate": 0.8334107951115376,
         "admitted_per_minute": 201.25555555555556,
+        "wrongful_rejections": 2074.3333333333335,
+        "wrongful_rejection_rate": 0.1431659936619676,
         "truncated": 24.666666666666668,
         "overshoot_windows": 0.0,
         "overshoot_max_tokens": 0.0,
@@ -583,6 +654,7 @@
         "under_reserved_tokens": 0.0,
         "utilization": 0.6345120277777777,
         "reserved_per_used": 6.839000256987646,
+        "mean_admitted_cost": 630.5609406094409,
         "demand_per_budget": 0.7670415277777778,
         "peak_in_flight": 48.0
       }
@@ -596,6 +668,8 @@
         "rejected": 5609.0,
         "admit_rate": 0.6128692260384404,
         "admitted_per_minute": 148.0,
+        "wrongful_rejections": 4768.666666666667,
+        "wrongful_rejection_rate": 0.3291258128947577,
         "truncated": 19.666666666666668,
         "overshoot_windows": 0.0,
         "overshoot_max_tokens": 0.0,
@@ -604,6 +678,7 @@
         "under_reserved_tokens": 0.0,
         "utilization": 0.4623495555555555,
         "reserved_per_used": 6.892531870930779,
+        "mean_admitted_cost": 624.8180153171648,
         "demand_per_budget": 0.7670415277777778,
         "peak_in_flight": 67.0
       },
@@ -613,6 +688,8 @@
         "rejected": 2413.6666666666665,
         "admit_rate": 0.8334107951115376,
         "admitted_per_minute": 201.25555555555556,
+        "wrongful_rejections": 2074.3333333333335,
+        "wrongful_rejection_rate": 0.1431659936619676,
         "truncated": 24.666666666666668,
         "overshoot_windows": 0.0,
         "overshoot_max_tokens": 0.0,
@@ -621,6 +698,7 @@
         "under_reserved_tokens": 0.0,
         "utilization": 0.6345120277777777,
         "reserved_per_used": 6.839000256987646,
+        "mean_admitted_cost": 630.5609406094409,
         "demand_per_budget": 0.7670415277777778,
         "peak_in_flight": 48.0
       },
@@ -630,6 +708,8 @@
         "rejected": 613.0,
         "admit_rate": 0.9576949532170828,
         "admitted_per_minute": 231.26666666666668,
+        "wrongful_rejections": 541.3333333333334,
+        "wrongful_rejection_rate": 0.03735823235336274,
         "truncated": 31.666666666666668,
         "overshoot_windows": 0.0,
         "overshoot_max_tokens": 0.0,
@@ -638,6 +718,7 @@
         "under_reserved_tokens": 0.0,
         "utilization": 0.7335998611111112,
         "reserved_per_used": 6.801718417201282,
+        "mean_admitted_cost": 634.4248483557461,
         "demand_per_budget": 0.7670415277777778,
         "peak_in_flight": 34.0
       }
@@ -649,6 +730,8 @@
         "rejected": 0.6666666666666666,
         "admit_rate": 0.999908210564964,
         "admitted_per_minute": 121.0111111111111,
+        "wrongful_rejections": 0.6666666666666666,
+        "wrongful_rejection_rate": 9.178943503602734e-05,
         "truncated": 16.0,
         "overshoot_windows": 0.0,
         "overshoot_max_tokens": 0.0,
@@ -657,6 +740,7 @@
         "under_reserved_tokens": 0.0,
         "utilization": 0.38721658333333336,
         "reserved_per_used": 6.748978368540904,
+        "mean_admitted_cost": 639.9943079890226,
         "demand_per_budget": 0.3872713055555555,
         "peak_in_flight": 33.666666666666664
       },
@@ -666,6 +750,8 @@
         "rejected": 2413.6666666666665,
         "admit_rate": 0.8334107951115376,
         "admitted_per_minute": 201.25555555555556,
+        "wrongful_rejections": 2074.3333333333335,
+        "wrongful_rejection_rate": 0.1431659936619676,
         "truncated": 24.666666666666668,
         "overshoot_windows": 0.0,
         "overshoot_max_tokens": 0.0,
@@ -674,6 +760,7 @@
         "under_reserved_tokens": 0.0,
         "utilization": 0.6345120277777777,
         "reserved_per_used": 6.839000256987646,
+        "mean_admitted_cost": 630.5609406094409,
         "demand_per_budget": 0.7670415277777778,
         "peak_in_flight": 48.0
       },
@@ -683,6 +770,8 @@
         "rejected": 15573.666666666666,
         "admit_rate": 0.4620673946058689,
         "admitted_per_minute": 222.94444444444443,
+        "wrongful_rejections": 13243.666666666666,
+        "wrongful_rejection_rate": 0.45745642080420046,
         "truncated": 24.333333333333332,
         "overshoot_windows": 0.0,
         "overshoot_max_tokens": 0.0,
@@ -691,6 +780,7 @@
         "under_reserved_tokens": 0.0,
         "utilization": 0.69366875,
         "reserved_per_used": 6.917828543654753,
+        "mean_admitted_cost": 622.3119458277514,
         "demand_per_budget": 1.5341800833333334,
         "peak_in_flight": 57.0
       }
