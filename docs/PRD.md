@@ -390,11 +390,18 @@ The one item left from days 1–6 is the Day-4 hour on quantile regression and p
 
 ### Day 10: Misprediction strategies
 
-- [ ] Strategy A: cap `max_tokens` at bound × margin; measure the truncation rate.
-- [ ] Strategy B: a shared overdraft buffer sized from expected misses; measure overshoot.
-- [ ] Choose the default and write the decision with its numbers. **Put A's truncation rate and B's overshoot in the same table: A has zero overshoot by construction (rev 2).**
+- [x] Strategy A: cap `max_tokens` at bound × margin; measure the truncation rate.
+- [x] Strategy B: a shared overdraft buffer sized from expected misses; measure overshoot.
+- [x] Choose the default and write the decision with its numbers. **Put A's truncation rate and B's overshoot in the same table: A has zero overshoot by construction (rev 2).**
 
 **Done when:** the trade-off plot and decision paragraph are written. **Gate: simulator results final.**
+
+**Done, 4 Nov 2026.** `make mispredict` applies both strategies to the bar and the winner over Day 9's 35 settings, 3 seeds each, in about 2.5 minutes on one core, and 99 of 99 tests pass. Both knobs are chosen on validation (seeds 10–12) before test runs: A's margin is the smallest that cuts at most 1% of real answers (×1.5 for both), B's buffer the smallest share whose worst window stays at or under 1% (8.5% for the winner, 10% for the bar). **Decision: A at ×1.5 is the default.** At 8 requests/s the winner with it admits 1.476× `max_tokens` (1.0% fewer than unprotected) with zero overshoot in every run, and cuts 0.62% of real answers short; B admits 1.376× and still overshoots by 2.56% at 100k. Details in [findings.md](findings.md#day-10-misprediction-strategies-4-nov-2026). Four notes:
+
+- **The overshoot target is met only by A, and only by construction.** B sized on validation missed it on test (2.56% at 100k tokens per minute, where one runaway is already 3.5% of a window), and its worst window does not fall smoothly as the buffer grows. B stays an opt-in for soft budgets, documented as a rate, not a bound.
+- **A truncates at every load,** 0.55–0.82% of admitted requests at all 35 settings, even where the budget never binds; most in ShareGPT (2.1%) and Apps (1.0%). Capping only when a window is nearly full, and streaming top-ups instead of a hard cap, go to v2.
+- **Under the same strategy the winner's edge over the bar doubles:** 1.052× with both at A ×1.5 (1.027× unprotected), up to 1.20× across the grid and never below 1.
+- **The ≥1.5× target over `max_tokens` with the cap:** from 6 requests/s at 100k, 12 at 200k, 4 at 25 tokens/s; never at 100 tokens/s or within 16 requests/s at 400k. The README states the conditions.
 
 ### Day 11: Export to ONNX
 

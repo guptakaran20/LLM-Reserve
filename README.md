@@ -19,6 +19,7 @@ make mlp       # Day-6 PyTorch MLP (pinball loss) and the winning model, on vali
 make eval      # Day-7 test split, scored once (frozen models), error analysis, leave-one-dataset-out -> docs/figures/
 make sim       # Day-8 budget-gateway simulator, max_tokens policy end to end -> docs/figures/
 make sweep     # Day-9 every policy over arrival rate, budget and decode speed, 3 seeds -> docs/figures/
+make mispredict # Day-10 misprediction strategies (cap at bound x margin, overdraft buffer), knobs from validation -> docs/figures/
 make test
 ```
 

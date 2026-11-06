@@ -2,7 +2,7 @@ PYTHON ?= python3.12
 VENV := .venv
 PY := $(VENV)/bin/python
 
-.PHONY: setup lock data explore baselines features models mlp eval sim sweep test clean-data
+.PHONY: setup lock data explore baselines features models mlp eval sim sweep mispredict test clean-data
 
 # Create the virtualenv from the pinned requirements.
 setup: $(VENV)/.installed
@@ -66,6 +66,11 @@ sim: setup
 # budget and decode speed, 3 seeds each -> docs/figures/sim_policies.json and sim_policies.png.
 sweep: setup
 	nice $(PY) -m llm_reserve.sweep
+
+# Day-10 misprediction strategies on the bar and the winner: A caps max_tokens at bound x margin, B holds back
+# a share of each window, sized on validation -> docs/figures/mispredict.json and mispredict.png.
+mispredict: setup
+	nice $(PY) -m llm_reserve.mispredict
 
 test: setup
 	$(PY) -m pytest -q
