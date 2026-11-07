@@ -6,4 +6,5 @@ fileWatcherType = "none"
 gatherUsageStats = false
 
 [theme]
-primaryColor = "#2b6cd6"
+primaryColor = "#2563eb"
+font = "sans serif"

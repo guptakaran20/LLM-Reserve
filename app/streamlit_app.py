@@ -22,13 +22,24 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))  # the app folder deploys without `pip install -e .`
 
 from llm_reserve.demo import (  # noqa: E402
-    EXAMPLES, MARGIN, MAX_TOKENS, POLICY_LABELS, Demo, estimate_input_tokens, reserved_per_policy, short_name,
+    EXAMPLES,
+    MARGIN,
+    MAX_TOKENS,
+    POLICY_LABELS,
+    Demo,
+    estimate_input_tokens,
+    fill_budget,
+    reserved_per_policy,
+    short_name,
 )
 
-st.set_page_config(page_title="llm-reserve", layout="wide")
+st.set_page_config(
+    page_title="llm-reserve",
+    layout="wide",
+)
 
 
-@st.cache_resource(show_spinner="Loading the model (63 MB, one time)…")
+@st.cache_resource(show_spinner="Loading the int8 model bundle (63 MB, one time)…")
 def load_demo() -> Demo:
     return Demo.load(ROOT / "app", threads=2)
 
@@ -46,64 +57,317 @@ def queue(prompts: tuple[str, ...], model: str, max_tokens: int):
 demo = load_demo()
 H = demo.headline
 
-GREY, AMBER, BLUE = "#9aa4b2", "#e0a030", "#2b6cd6"
+SLATE = "#64748b"
+AMBER = "#d97706"
+BLUE = "#2563eb"
+
 st.markdown(
     """
 <style>
-.block-container {padding-top: 2.4rem; max-width: 1150px;}
-.eyebrow {font-size:.78rem; letter-spacing:.14em; text-transform:uppercase; color:#6b7280; margin-bottom:.2rem;}
-.title {font-size:2.6rem; font-weight:700; letter-spacing:-.02em; line-height:1.1; margin:0 0 .6rem 0;}
-.lede {font-size:1.08rem; line-height:1.6; max-width: 46rem; margin:0 0 1.4rem 0; opacity:.85;}
-.lede code {background: rgba(128,128,128,.16); padding:0 .3rem; border-radius:3px;}
-.rule {border:0; border-top:1px solid rgba(128,128,128,.3); margin:0 0 1.2rem 0;}
-[data-testid="stMetric"] {background:transparent; border:0; border-left:3px solid #2b6cd6; border-radius:0;
-       padding:.1rem 0 .1rem .8rem;}
-[data-testid="stMetricValue"] {font-variant-numeric: tabular-nums; font-weight:650;}
-.ruler {margin: .5rem 0 1rem 0;}
-.ruler .lab {display:flex; justify-content:space-between; font-size:.9rem; margin-bottom:.25rem;}
-.ruler .track {background: rgba(128,128,128,.16); height: 10px;}
-.ruler .fill {height: 100%;}
-.chips {display:flex; flex-wrap:wrap; gap:3px; margin:.25rem 0 .9rem 0;}
-.chip {width:14px; height:14px; border-radius:2px;}
-.chip.ok {background:#2b6cd6;} .chip.no {background:rgba(128,128,128,.25);}
-.chiprow {font-size:.9rem; margin-top:.6rem;}
-.live {font-size:.9rem; color:#6b7280; margin:.4rem 0 .8rem 0;}
-.live b {color:#2b6cd6;}
-</style>
-<div class="eyebrow">Output-length prediction for LLM spend gateways</div>
-<div class="title">llm-reserve</div>
-<div class="lede">A gateway has to hold budget for a request before it knows how long the answer will be, so it holds the
-worst case, <code>max_tokens</code>, and turns away requests it could have served. This predicts a tight 95% bound on the
-answer's length from the prompt alone, so it can hold what the request will likely cost.</div>
-<hr class="rule">
+/* Base container: clean clearance below Streamlit navbar, no clipping */
+.block-container {
+    padding-top: 3.8rem !important;
+    padding-bottom: 3rem !important;
+    max-width: 1140px;
+}
 
+/* Typography */
+html, body, [class*="css"] {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.mono {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+/* Header */
+.eyebrow {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #64748b;
+    margin-bottom: 0.35rem;
+}
+
+.title {
+    font-size: 2.25rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.15;
+    margin: 0 0 0.5rem 0;
+}
+
+.lede {
+    font-size: 1.02rem;
+    line-height: 1.6;
+    max-width: 52rem;
+    margin: 0 0 1.2rem 0;
+    opacity: 0.9;
+}
+
+.lede code {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    background: rgba(128, 128, 128, 0.12);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 0.88em;
+}
+
+.rule {
+    border: 0;
+    border-top: 1px solid rgba(128, 128, 128, 0.2);
+    margin: 0 0 1.25rem 0;
+}
+
+/* Metric Cards: clean, restrained engineering dashboard */
+[data-testid="stMetric"] {
+    background: rgba(128, 128, 128, 0.04);
+    border: 1px solid rgba(128, 128, 128, 0.15);
+    border-left: 3px solid #2563eb;
+    border-radius: 4px;
+    padding: 0.75rem 1rem;
+}
+
+[data-testid="stMetricLabel"] {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace !important;
+    font-size: 0.7rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+    opacity: 0.75 !important;
+    margin-bottom: 0.2rem !important;
+}
+
+[data-testid="stMetricValue"] {
+    font-variant-numeric: tabular-nums !important;
+    font-weight: 700 !important;
+    font-size: 1.65rem !important;
+    letter-spacing: -0.02em !important;
+}
+
+/* Status line */
+.status-bar {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.82rem;
+    color: #64748b;
+    padding: 0.5rem 0.8rem;
+    background: rgba(128, 128, 128, 0.05);
+    border: 1px solid rgba(128, 128, 128, 0.15);
+    border-radius: 4px;
+    margin: 0.6rem 0 1.1rem 0;
+}
+
+.status-bar b {
+    color: #2563eb;
+}
+
+/* Gauge panel */
+.gauge-panel {
+    background: rgba(128, 128, 128, 0.03);
+    border: 1px solid rgba(128, 128, 128, 0.14);
+    border-radius: 4px;
+    padding: 1rem 1.15rem;
+    margin: 0.9rem 0 1.3rem 0;
+}
+
+.gauge-panel-title {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.74rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #64748b;
+    margin-bottom: 0.75rem;
+    display: flex;
+    justify-content: space-between;
+}
+
+.gauge-row {
+    margin-bottom: 0.75rem;
+}
+
+.gauge-row:last-child {
+    margin-bottom: 0;
+}
+
+.gauge-row-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.86rem;
+    margin-bottom: 0.25rem;
+}
+
+.gauge-row-label {
+    font-weight: 550;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.gauge-tag {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.68rem;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-weight: 600;
+}
+
+.gauge-tag.blue { background: rgba(37, 99, 235, 0.1); color: #2563eb; }
+.gauge-tag.amber { background: rgba(217, 119, 6, 0.1); color: #d97706; }
+.gauge-tag.slate { background: rgba(100, 116, 139, 0.1); color: #64748b; }
+
+.gauge-row-val {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+    font-weight: 650;
+    font-size: 0.88rem;
+}
+
+.gauge-track {
+    background: rgba(128, 128, 128, 0.14);
+    height: 8px;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.gauge-fill {
+    height: 100%;
+    border-radius: 2px;
+}
+
+/* Queue chips visualizer */
+.chips-panel {
+    background: rgba(128, 128, 128, 0.03);
+    border: 1px solid rgba(128, 128, 128, 0.14);
+    border-radius: 4px;
+    padding: 0.9rem 1.1rem;
+    margin: 0.9rem 0 1.2rem 0;
+}
+
+.chiprow {
+    font-size: 0.88rem;
+    font-weight: 600;
+    margin-top: 0.75rem;
+    margin-bottom: 0.3rem;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.chiprow:first-child {
+    margin-top: 0.2rem;
+}
+
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    margin: 0.2rem 0 0.65rem 0;
+}
+
+.chip {
+    width: 13px;
+    height: 13px;
+    border-radius: 2px;
+}
+
+.chip.ok {
+    background: #2563eb;
+}
+
+.chip.no {
+    background: rgba(128, 128, 128, 0.22);
+}
+
+/* Method pipeline */
+.method-box {
+    background: rgba(128, 128, 128, 0.03);
+    border: 1px solid rgba(128, 128, 128, 0.14);
+    border-radius: 4px;
+    padding: 0.85rem 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.method-title {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.8rem;
+    font-weight: 650;
+    color: #2563eb;
+    margin-bottom: 0.25rem;
+}
+</style>
+
+<div class="eyebrow">Systems Research · Output-Length Prediction for LLM Gateways</div>
+<div class="title">llm-reserve</div>
+<div class="lede">
+    An LLM gateway (LiteLLM, Cloudflare AI Gateway, Portkey) has to hold rate-limit budget before it knows how long an
+    answer will be. Holding worst-case <code>max_tokens</code> turns away requests it could have served. This predicts a
+    tight 95% bound from the prompt alone in &lt;13 ms, so the gateway can reserve what calls actually cost.
+</div>
+<hr class="rule">
 """,
     unsafe_allow_html=True,
 )
 
 
-def ruler(label: str, tokens: int, full: int, color: str) -> str:
-    pct = min(100, 100 * tokens / full)
-    return (f'<div class="ruler"><div class="lab"><span>{html.escape(label)}</span><b>{tokens:,} tokens</b></div>'
-            f'<div class="track"><div class="fill" style="width:{pct:.1f}%;background:{color}"></div></div></div>')
+def ruler(label: str, tokens: int, full: int, color: str, tag_cls: str, tag_text: str = "") -> str:
+    pct = min(100.0, max(2.0, 100.0 * tokens / max(1, full)))
+    tag_html = f'<span class="gauge-tag {tag_cls}">{html.escape(tag_text)}</span>' if tag_text else ""
+    return (
+        f'<div class="gauge-row">'
+        f'<div class="gauge-row-info">'
+        f'<span class="gauge-row-label">{html.escape(label)} {tag_html}</span>'
+        f'<span class="gauge-row-val">{tokens:,} tokens</span>'
+        f"</div>"
+        f'<div class="gauge-track">'
+        f'<div class="gauge-fill" style="width:{pct:.1f}%;background:{color};"></div>'
+        f"</div>"
+        f"</div>"
+    )
 
 
 def chips(admitted: list[bool]) -> str:
-    return '<div class="chips">' + "".join(f'<div class="chip {"ok" if a else "no"}"></div>' for a in admitted) + "</div>"
+    return (
+        '<div class="chips">'
+        + "".join(
+            f'<div class="chip {"ok" if a else "no"}" title="Request {i+1}: {"Admitted" if a else "Rejected"}"></div>'
+            for i, a in enumerate(admitted)
+        )
+        + "</div>"
+    )
 
 
+# Headline Metrics
 c1, c2, c3, c4 = st.columns(4)
-c1.metric("Fewer tokens reserved vs. p95", f"{-H['vs_bar_matched']:.1%}",
-          help="Fewer reserved tokens than a fixed per-model 95th percentile. Test split, scored once, both methods re-tuned to exactly 95% coverage. "
-               f"{-H['vs_bar']:.1%} at the knobs frozen on validation.")
-c2.metric("Oracle gap closed", f"{H['gap_closed']:.0%}",
-          help="The oracle knows each prompt's true length distribution; it is the ceiling, not a method.")
-c3.metric("Admitted vs. max_tokens", f"{demo.headline_ratio():.3f}×",
-          help="Simulator at 8 requests/s, 200k tokens/min, 50 tokens/s, with the 1.5× cap: demand is 153% of budget.")
-c4.metric("Coverage (test)", f"{H['winner']['coverage']:.1%}", help="Share of completions inside their bound.")
+c1.metric(
+    "Fewer tokens reserved vs. p95",
+    f"{-H['vs_bar_matched']:.1%}",
+    help="Fewer reserved tokens than a fixed per-model 95th percentile. Test split, scored once, both methods re-tuned to exactly 95% coverage. "
+    f"{-H['vs_bar']:.1%} at the knobs frozen on validation.",
+)
+c2.metric(
+    "Oracle gap closed",
+    f"{H['gap_closed']:.0%}",
+    help="The oracle knows each prompt's true length distribution; it is the ceiling, not a deployable method.",
+)
+c3.metric(
+    "Admitted vs. max_tokens",
+    f"{demo.headline_ratio():.3f}×",
+    help="Simulator at 8 requests/s, 200k tokens/min, 50 tokens/s, with the 1.5× cap: demand is 153% of budget.",
+)
+c4.metric(
+    "Coverage (test)",
+    f"{H['winner']['coverage']:.1%}",
+    help="Share of completions inside their predicted 95% bound across 140,276 held-out test completions.",
+)
 
 tab_try, tab_budget, tab_sim, tab_about = st.tabs(["Try a prompt", "Budget demo", "Simulator", "Results and limits"])
 
+# --------------------------------------------------------------------------------------------------------------
+# Tab 1: Try a prompt (Live Quantile Prediction)
 # --------------------------------------------------------------------------------------------------------------
 with tab_try:
     st.session_state.setdefault("prompt_text", "")
@@ -116,42 +380,91 @@ with tab_try:
 
     left, right = st.columns([3, 2])
     with left:
-        st.selectbox("Or start from an example", ["(my own)"] + list(EXAMPLES), key="pick", on_change=_load_example)
+        st.selectbox(
+            "Or start from an example",
+            ["(my own)"] + list(EXAMPLES),
+            key="pick",
+            on_change=_load_example,
+        )
         with st.form("prompt-form", border=False):
-            st.text_area("Your prompt", key="prompt_text", height=140,
-                         placeholder="Type any prompt here, then press Compute…",
-                         help="Only the text is used, and it is scored live by the model on this page. Nothing leaves it.")
+            st.text_area(
+                "Your prompt",
+                key="prompt_text",
+                height=140,
+                placeholder="Type any prompt here, then press Compute reservation…",
+                help="Only the text is used, and it is scored live by the model on this page. Nothing leaves it.",
+            )
             go = st.form_submit_button("Compute reservation", type="primary")
         if go:
             st.session_state["committed"] = st.session_state["prompt_text"]
+
     prompt = st.session_state["committed"]
     with right:
-        model_key = st.selectbox("Target model", demo.models, index=demo.models.index("meta-llama--Llama-3.1-8B-Instruct"),
-                                 format_func=short_name)
-        max_tokens = st.number_input("Client's max_tokens", 64, 15000, MAX_TOKENS, step=256,
-                                     help="What the gateway would hold without a prediction.")
-        n_in = st.number_input("Input tokens", 1, 100_000, max(1, estimate_input_tokens(prompt)),
-                               key=f"n_in-{hash(prompt)}",
-                               help="Estimated at 4 characters a token here; a real gateway knows the exact count.")
+        model_key = st.selectbox(
+            "Target model",
+            demo.models,
+            index=demo.models.index("meta-llama--Llama-3.1-8B-Instruct"),
+            format_func=short_name,
+        )
+        max_tokens = st.number_input(
+            "Client's max_tokens",
+            64,
+            15000,
+            MAX_TOKENS,
+            step=256,
+            help="What the gateway would hold without a prediction.",
+        )
+        n_in = st.number_input(
+            "Input tokens",
+            1,
+            100_000,
+            max(1, estimate_input_tokens(prompt)),
+            key=f"n_in-{hash(prompt)}",
+            help="Estimated at ~4 characters a token here; a real gateway knows the exact count from the tokenizer.",
+        )
 
     if not prompt.strip():
-        st.info("Type a prompt above and press **Compute reservation**, or pick an example. The model runs live on "
-                "whatever you write.")
+        st.info(
+            "Type a prompt above and press **Compute reservation**, or pick an example. The model runs live on whatever you write."
+        )
     else:
         t0 = time.perf_counter()
         table = demo.compare(prompt, int(n_in), int(max_tokens))
         ms = (time.perf_counter() - t0) * 1000
         row = table[table.key == model_key].iloc[0]
-        st.markdown(f'<div class="live"><b>Live:</b> scored by the int8 ONNX model in {ms:.0f} ms for all {len(table)} '
-                    "models. Nothing is precomputed for your text.</div>", unsafe_allow_html=True)
+
+        st.markdown(
+            f'<div class="status-bar">'
+            f"<b>Live:</b> scored by the int8 ONNX model in {ms:.0f} ms for all {len(table)} models. "
+            f"Local in-process execution, nothing precomputed."
+            f"</div>",
+            unsafe_allow_html=True,
+        )
+
         m1, m2, m3, m4 = st.columns(4)
-        m1.metric("Predicted 95% bound", f"{row.bound:,} tokens", help="95 of 100 answers should be at most this long.")
-        m2.metric("Learned reserve", f"{row.reserve_learned:,}", help=f"min(⌈{MARGIN} × bound⌉, max_tokens), what /reserve holds "
-                                                                       "and sends as max_tokens.")
-        m3.metric("Fixed per-model p95", f"{row.reserve_bar:,}", delta=f"{-row.saved_vs_bar:.0%} with the learned bound",
-                  delta_color="inverse", help="The same 1.5× cap on the per-model 95th percentile of training answers.")
-        m4.metric("Plain max_tokens", f"{row.reserve_max:,}", delta=f"{-row.saved_vs_max:.0%} with the learned bound",
-                  delta_color="inverse")
+        m1.metric(
+            "Predicted 95% bound",
+            f"{row.bound:,} tokens",
+            help="95 of 100 answers should be at most this long.",
+        )
+        m2.metric(
+            "Learned reserve",
+            f"{row.reserve_learned:,}",
+            help=f"min(⌈{MARGIN} × bound⌉, max_tokens), what /reserve holds and sends as max_tokens.",
+        )
+        m3.metric(
+            "Fixed per-model p95",
+            f"{row.reserve_bar:,}",
+            delta=f"{-row.saved_vs_bar:.0%} with the learned bound",
+            delta_color="inverse",
+            help="The same 1.5× cap on the per-model 95th percentile of training answers.",
+        )
+        m4.metric(
+            "Plain max_tokens",
+            f"{row.reserve_max:,}",
+            delta=f"{-row.saved_vs_max:.0%} with the learned bound",
+            delta_color="inverse",
+        )
 
         with st.expander("Fixed per-model p95 vs. learned bound: what is the difference?"):
             st.markdown(
@@ -163,28 +476,66 @@ with tab_try:
                 "Both aim at the same 95% coverage. The learned one wastes less because it varies per prompt: "
                 f"{-H['vs_bar_matched']:.1%} fewer reserved tokens on held-out test data."
             )
-        st.markdown("**How much budget each policy holds for this one request**")
-        st.markdown(ruler("Reserve max_tokens", int(row.reserve_max), int(row.reserve_max), GREY)
-                    + ruler("Fixed per-model p95", int(row.reserve_bar), int(row.reserve_max), AMBER)
-                    + ruler("Learned bound (llm-reserve)", int(row.reserve_learned), int(row.reserve_max), BLUE),
-                    unsafe_allow_html=True)
 
-        st.caption("Same prompt sent to each target model (tokens held before the call). Lower means more "
-                   "requests fit in the same budget.")
+        saved_tokens = int(row.reserve_max - row.reserve_learned)
+        st.markdown(
+            f'<div class="gauge-panel">'
+            f'<div class="gauge-panel-title">'
+            f"<span>Budget held for this request</span>"
+            f'<span>Headroom saved: {saved_tokens:,} tokens ({row.saved_vs_max:.0%})</span>'
+            f"</div>"
+            + ruler("Plain max_tokens", int(row.reserve_max), int(row.reserve_max), SLATE, "slate", "Worst-case")
+            + ruler(
+                "Fixed per-model p95",
+                int(row.reserve_bar),
+                int(row.reserve_max),
+                AMBER,
+                "amber",
+                f"-{row.saved_vs_bar:.0%}",
+            )
+            + ruler(
+                "Learned bound (llm-reserve)",
+                int(row.reserve_learned),
+                int(row.reserve_max),
+                BLUE,
+                "blue",
+                f"-{row.saved_vs_max:.0%}",
+            )
+            + f"</div>",
+            unsafe_allow_html=True,
+        )
+
+        st.caption(
+            "Same prompt sent to each target model (tokens held before the call). Lower means more requests fit in the same budget."
+        )
         chart = table.set_index("model")[["reserve_learned", "reserve_bar"]].rename(
-            columns={"reserve_learned": "Learned bound", "reserve_bar": "Fixed per-model p95"})
+            columns={"reserve_learned": "Learned bound", "reserve_bar": "Fixed per-model p95"}
+        )
         st.bar_chart(chart, height=320, color=[BLUE, AMBER])
+
         with st.expander("Numbers for every model"):
             st.dataframe(
-                table[["model", "bound", "bar", "reserve_learned", "reserve_bar", "reserve_max"]].rename(columns={
-                    "model": "Model", "bound": "Learned 95% bound", "bar": "Per-model p95",
-                    "reserve_learned": "Learned reserve", "reserve_bar": "p95 reserve", "reserve_max": "max_tokens"}),
-                hide_index=True, use_container_width=True)
+                table[["model", "bound", "bar", "reserve_learned", "reserve_bar", "reserve_max"]].rename(
+                    columns={
+                        "model": "Model",
+                        "bound": "Learned 95% bound",
+                        "bar": "Per-model p95",
+                        "reserve_learned": "Learned reserve",
+                        "reserve_bar": "p95 reserve",
+                        "reserve_max": "max_tokens",
+                    }
+                ),
+                hide_index=True,
+                use_container_width=True,
+            )
+
         st.caption(
             "This is a 95% bound, so about 1 answer in 20 is longer. The gateway caps the call at the reserve, so "
             "it can never overspend; in the Day-10 test 0.62% of real answers were cut short by that cap."
         )
 
+# --------------------------------------------------------------------------------------------------------------
+# Tab 2: Budget demo (Rate Limiting Simulation)
 # --------------------------------------------------------------------------------------------------------------
 with tab_budget:
     st.markdown(
@@ -192,13 +543,25 @@ with tab_budget:
         "per request and admits it only if it still fits. **Same budget, same requests**; the only difference is how "
         "much each policy holds back. **Edit the queue below** (one prompt per line) to try your own."
     )
-    queue_text = st.text_area("Request queue, one prompt per line (up to 60)", value="\n".join(EXAMPLES.values()),
-                              height=130, key="queue_text")
+
+    queue_text = st.text_area(
+        "Request queue, one prompt per line (up to 60)",
+        value="\n".join(EXAMPLES.values()),
+        height=130,
+        key="queue_text",
+    )
+
     b1, b2, b3 = st.columns(3)
     budget = b1.slider("Budget for the window (tokens)", 5_000, 60_000, 30_000, step=1_000)
-    model_b = b2.selectbox("Target model ", demo.models, index=demo.models.index("meta-llama--Llama-3.1-8B-Instruct"),
-                           format_func=short_name, key="model_b")
+    model_b = b2.selectbox(
+        "Target model ",
+        demo.models,
+        index=demo.models.index("meta-llama--Llama-3.1-8B-Instruct"),
+        format_func=short_name,
+        key="model_b",
+    )
     rounds = b3.slider("Repeat the queue", 1, 6, 3, help="More repeats, a longer queue and a fuller window.")
+
     prompts = [ln.strip() for ln in queue_text.splitlines() if ln.strip()][:60]
     if not prompts:
         st.info("Add at least one prompt to the queue.")
@@ -206,22 +569,50 @@ with tab_budget:
         q = demo.queue(prompts, model_b, MAX_TOKENS)
         q = pd.concat([q] * rounds, ignore_index=True)
         summary = reserved_per_policy(q, budget)
+
         cols = st.columns(3)
         for col, (_, r) in zip(cols, summary.iterrows(), strict=True):
-            col.metric(r.policy, f"{r.admitted} of {r['of']}", delta=f"{r.share:.0%} of the budget held",
-                       delta_color="off")
-        from llm_reserve.demo import fill_budget
-        st.markdown("**Requests admitted out of the queue (each square is a request: green admitted, grey turned away)**")
-        for p, color in zip(POLICY_LABELS, (GREY, AMBER, BLUE), strict=True):
+            col.metric(
+                r.policy,
+                f"{r.admitted} of {r['of']}",
+                delta=f"{r.share:.0%} of the budget held",
+                delta_color="off",
+            )
+
+        st.markdown(
+            '<div class="chips-panel">'
+            '<div style="font-weight:600;font-size:0.88rem;margin-bottom:0.4rem;">'
+            "Requests admitted out of the queue (blue: admitted, grey: turned away)"
+            "</div>",
+            unsafe_allow_html=True,
+        )
+
+        for p, color in zip(POLICY_LABELS, (SLATE, AMBER, BLUE), strict=True):
             f = fill_budget(q[p].tolist(), budget)
-            st.markdown(f'<div class="chiprow"><span style="color:{color}">●</span> {POLICY_LABELS[p]}'
-                        f' — {f["count"]} of {len(q)}</div>' + chips(f["admitted"]), unsafe_allow_html=True)
+            st.markdown(
+                f'<div class="chiprow"><span style="color:{color}">●</span> {POLICY_LABELS[p]}'
+                f' — {f["count"]} of {len(q)}</div>' + chips(f["admitted"]),
+                unsafe_allow_html=True,
+            )
+        st.markdown("</div>", unsafe_allow_html=True)
+
         st.bar_chart(summary.set_index("policy")[["admitted"]], height=220, color=BLUE)
+
         order = [p for p in POLICY_LABELS]
         detail = q.assign(prompt=q.prompt.str.slice(0, 70)).rename(
-            columns={"max_tokens": POLICY_LABELS["max_tokens"], "bar": POLICY_LABELS["bar"], "learned": POLICY_LABELS["learned"]})
+            columns={
+                "max_tokens": POLICY_LABELS["max_tokens"],
+                "bar": POLICY_LABELS["bar"],
+                "learned": POLICY_LABELS["learned"],
+            }
+        )
         with st.expander("Each request's reservation"):
-            st.dataframe(detail[["prompt", *[POLICY_LABELS[p] for p in order]]], hide_index=True, use_container_width=True)
+            st.dataframe(
+                detail[["prompt", *[POLICY_LABELS[p] for p in order]]],
+                hide_index=True,
+                use_container_width=True,
+            )
+
     st.caption(
         "Reservations only: the demo does not know how long each real answer will be, so nothing is refunded. In the "
         "service, `/settle` returns the unused part, which is why a tight reservation matters most when many "
@@ -229,54 +620,119 @@ with tab_budget:
     )
 
 # --------------------------------------------------------------------------------------------------------------
+# Tab 3: Simulator (Discrete-Event Benchmark Replay)
+# --------------------------------------------------------------------------------------------------------------
 with tab_sim:
     st.markdown(
-        "Unlike the other tabs, this one replays results that `make sweep` and `make mispredict` computed offline (a full simulation takes minutes). A discrete-event simulation of a gateway with a token budget per 60-second window, replaying the held-out "
-        "test split (13 models, 1,130 prompts), 3 seeds per setting. Each request is billed to the window that "
+        "Unlike the other tabs, this one replays results that `make sweep` and `make mispredict` computed offline "
+        "(a full simulation takes minutes). A discrete-event simulation of a gateway with a token budget per 60-second window, "
+        "replaying the held-out test split (13 models, 1,130 prompts), 3 seeds per setting. Each request is billed to the window that "
         "admitted it, and rejected requests are dropped."
     )
+
     scen = demo.scenarios()
     s1, s2, s3 = st.columns([2, 2, 2])
     name = s1.selectbox("Budget and decode speed", list(scen), index=1)
-    metric = s2.selectbox("Show", ["Admitted requests, as a multiple of max_tokens", "Admitted requests",
-                                   "Largest overshoot of the budget (% of a window)", "Wrongful rejections"])
-    capped = s3.toggle("With the 1.5× cap (the default)", value=True,
-                       help="The cap sends each call with max_tokens = 1.5 × the bound, so no request can cost "
-                            "more than it reserved: zero overshoot by construction.")
+    metric = s2.selectbox(
+        "Show",
+        [
+            "Admitted requests, as a multiple of max_tokens",
+            "Admitted requests",
+            "Largest overshoot of the budget (% of a window)",
+            "Wrongful rejections",
+        ],
+    )
+    capped = s3.toggle(
+        "With the 1.5× cap (the default)",
+        value=True,
+        help="The cap sends each call with max_tokens = 1.5 × the bound, so no request can cost more than it reserved: zero overshoot by construction.",
+    )
+
     sweep = demo.sweep(**scen[name])
-    keep = {"max_tokens": "max_tokens", "bar_capped" if capped else "bar": "Fixed per-model p95",
-            "winner_capped" if capped else "winner": "Learned bound"}
+    keep = {
+        "max_tokens": "max_tokens",
+        "bar_capped" if capped else "bar": "Fixed per-model p95",
+        "winner_capped" if capped else "winner": "Learned bound",
+    }
     sweep = sweep[sweep.policy.isin(keep)].assign(policy=lambda d: d.policy.map(keep))
-    col = {"Admitted requests, as a multiple of max_tokens": "vs_max_tokens", "Admitted requests": "admitted",
-           "Largest overshoot of the budget (% of a window)": "overshoot_max_share",
-           "Wrongful rejections": "wrongful_rejections"}[metric]
+    col = {
+        "Admitted requests, as a multiple of max_tokens": "vs_max_tokens",
+        "Admitted requests": "admitted",
+        "Largest overshoot of the budget (% of a window)": "overshoot_max_share",
+        "Wrongful rejections": "wrongful_rejections",
+    }[metric]
     sweep = sweep.assign(value=sweep[col] * (100 if col == "overshoot_max_share" else 1))
     wide = sweep.pivot(index="rate", columns="policy", values="value")
     wide.index.name = "Arrival rate (requests per second)"
-    st.line_chart(wide, height=380, color=[AMBER, BLUE, GREY])
+
+    st.line_chart(wide, height=380, color=[AMBER, BLUE, SLATE])
+
     st.caption(
         "Below saturation every policy but max_tokens admits everything, so the lines meet at 1. The learned bound "
         "pulls ahead only once the budget binds. At 100 tokens/s the gain over max_tokens stays small because fast "
         "decoding returns oversized reservations before they cost much. Without the cap, every bound below "
         "max_tokens overshoots once the budget binds, by up to 10.9% of a window."
     )
+
     with st.expander("Table"):
         st.dataframe(wide.reset_index(), hide_index=True, use_container_width=True)
 
+# --------------------------------------------------------------------------------------------------------------
+# Tab 4: Results and limits (Held-out Test & Architecture)
 # --------------------------------------------------------------------------------------------------------------
 with tab_about:
     st.subheader("Held-out test results")
     st.markdown(
         f"On the test split ({H['prompts']:,} prompts, {H['completions']:,} completions), scored once with every choice "
         f"frozen on validation:\n\n"
-        f"| | Coverage | Reserved ÷ used |\n|---|---|---|\n"
-        f"| Fixed per-model p95 (the bar) | {H['bar']['coverage']:.2%} | {H['bar']['ratio']:.3f} |\n"
-        f"| **Learned bound (average of an MLP and XGBoost)** | **{H['winner']['coverage']:.2%}** | **{H['winner']['ratio']:.3f}** |\n"
-        f"| Oracle (not deployable) | 95.00% | {H['oracle_ratio']:.3f} |\n\n"
+        f"| Method | Deployable | Coverage | Reserved ÷ used |\n"
+        f"|:---|:---:|:---:|:---:|\n"
+        f"| `max_tokens` = 4,096 | yes | 99.93% | 9.916 |\n"
+        f"| Fixed per-model p95 (the bar) | yes | {H['bar']['coverage']:.2%} | {H['bar']['ratio']:.3f} |\n"
+        f"| **Learned bound (average of MLP and XGBoost)** | **yes** | **{H['winner']['coverage']:.2%}** | **{H['winner']['ratio']:.3f}** |\n"
+        f"| Oracle (not deployable) | no | 95.00% | {H['oracle_ratio']:.3f} |\n\n"
         f"That is **{-H['vs_bar']:.1%} fewer reserved tokens than the bar** ({-H['vs_bar_matched']:.1%} when both are "
         f"re-tuned to exactly 95%), closing {H['gap_closed']:.0%} of the gap to the oracle, and "
         f"{1 - H['vs_max_tokens']:.0%} fewer than `max_tokens` = 4,096."
     )
+
+    st.subheader("How it works")
+    c_p1, c_p2 = st.columns(2)
+    with c_p1:
+        st.markdown(
+            '<div class="method-box">'
+            '<div class="method-title">1. Features (29 hand-built + 32 PCA)</div>'
+            "29 prompt structural features (size, code fences, regex length hints like 'in 500 words', "
+            "cue words, log input tokens) and a 13-model one-hot, plus a MiniLM-L6-v2 embedding projected onto 32 PCA dimensions."
+            "</div>",
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            '<div class="method-box">'
+            '<div class="method-title">2. Dual Quantile Regressors</div>'
+            "Two quantile models trained independently with pinball loss at τ=0.95 on log1p(output tokens): XGBoost "
+            "and a small PyTorch MLP (256 → 64 with input dropout)."
+            "</div>",
+            unsafe_allow_html=True,
+        )
+    with c_p2:
+        st.markdown(
+            '<div class="method-box">'
+            '<div class="method-title">3. Log-Space Ensembling</div>'
+            "The prediction is the geometric average of both models in log space, plus an additive shift tuned on "
+            "validation to reach 95% coverage: <code>⌈expm1(prediction + shift)⌉</code>."
+            "</div>",
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            '<div class="method-box">'
+            '<div class="method-title">4. 1.5× Safety Cap</div>'
+            "The gateway issues the LLM call with <code>max_tokens = min(⌈1.5 × bound⌉, client_max_tokens)</code>, "
+            "preventing budget overshoots by mathematical construction."
+            "</div>",
+            unsafe_allow_html=True,
+        )
+
     st.subheader("What it does not do")
     st.warning(
         f"**On kinds of prompt it never saw, the saving falls to about {-H['unseen_dataset']['matched_vs_bar']:.0%}** "
@@ -293,5 +749,8 @@ with tab_about:
         "- **This page** runs the int8 ONNX model in-process, with no Redis. The service in the repo is the real "
         "gateway component."
     )
-    st.markdown("Code, method and every number: [github.com/guptakaran20/LLM-Reserve](https://github.com/guptakaran20/LLM-Reserve)"
-                " · data: [CASTILLO](https://huggingface.co/datasets/danfperam/castillo) (CC BY 4.0)")
+    st.markdown("---")
+    st.markdown(
+        "Code, method and every number: [github.com/guptakaran20/LLM-Reserve](https://github.com/guptakaran20/LLM-Reserve)"
+        " · data: [CASTILLO](https://huggingface.co/datasets/danfperam/castillo) (CC BY 4.0)"
+    )
