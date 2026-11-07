@@ -3,6 +3,8 @@
 # transitive ones included, is the one pinned for the rest of the project.
 fastapi
 uvicorn
+uvloop  # uvicorn picks these up on its own: ~35% more /reserve throughput (Day 13, findings 48)
+httptools
 redis
 onnxruntime
 tokenizers

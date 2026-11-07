@@ -630,3 +630,68 @@ The PRD asked for a Lua reserve and an `INCRBY` settle. A bare `INCRBY` would ap
 ### 41. A 761 MB image without the training stack
 
 The image installs only `requirements-serve.in` (FastAPI, uvicorn, redis, onnxruntime, tokenizers, numpy, pandas) with `requirements.txt` as a constraints file, so every version is the one pinned for training and nothing is pinned twice. torch, xgboost and scikit-learn are absent (checked in the container). Moving `data.py`'s `huggingface_hub` import into the download function keeps the service's imports light, though `tokenizers` installs `huggingface_hub` anyway. 761 MB is mostly onnxruntime, numpy and pandas on `python:3.12-slim` plus the 94.5 MB bundle; pandas is only there because `features.py` imports it at the top. A rebuild after a code change takes about 30 seconds.
+
+## Day 13: Tests and benchmarks (5 Nov 2026)
+
+**Scope.** A load test and a latency benchmark of the compose service (`make serve`, then `make bench`; `src/llm_reserve/bench.py`), run from the laptop through Docker's port forward with a small asyncio client: 1,000 random test prompts (one model each), `/predict` at 1, 4 and 8 closed-loop clients and `/reserve` at 1, 16 and 64, then the 1,000-request burst. Every response carries `Server-Timing: app;dur=…`, so client latency splits into time inside the app and time outside it. The first benchmark missed `/predict`'s target by more than 2×, so the day also produced an int8 encoder (`src/llm_reserve/quantize.py`) with its own coverage check, a Redis fix the burst exposed, and a faster HTTP stack. **The default service (int8 encoder, 2 ONNX threads, 1 worker) meets both targets at one client: `/predict` p99 12.8 ms (target 15), `/reserve` p99 0.45 ms (target 5). Under concurrent load neither holds on this laptop; the gaps are below.** 142 tests pass (15 new).
+
+| Call, default config | Clients | p50 | p99 | p99.9 | Inside the app, p99 | Requests/s |
+|---|---|---|---|---|---|---|
+| `/predict` | 1 | 7.0 ms | **12.8 ms** | 14.8 ms | 12.4 ms | 169 |
+| `/predict` | 4 | 13.1 ms | 21.4 ms | 24.0 ms | 20.9 ms | 351 |
+| `/predict` | 8 | 18.9 ms | 33.3 ms | 37.6 ms | 32.8 ms | 457 |
+| `/reserve` | 1 | 0.32 ms | **0.45 ms** | 0.54 ms | 0.15 ms | 1,510 |
+| `/reserve` | 16 | 2.1 ms | 7.6 ms | 13.1 ms | 1.7 ms | 3,618 |
+| `/reserve` | 64 | 8.5 ms | 22.4 ms | 95 ms | 14.4 ms | 3,555 |
+
+`/reserve` requests/s count reserve-and-settle pairs (each worker settles its reservation, untimed, before its next request). Full results per configuration are in `docs/figures/bench_runs/`, the default in `bench.json`, all four in `bench.png`.
+
+### 42. Day 11's latency was a property of macOS, not of the model: Docker's VM has no SME
+
+The first benchmark of the Day-12 image measured `/predict` at 23.5 ms p50 and 33 ms p99 inside the app, with one client. Day 11 measured the same pipeline at 6.5 ms and 12.5 ms on the laptop. The image is native arm64 (no emulation), and the difference is all in the encoder: a 128-token prompt takes 6.8 ms on macOS and 28 ms in the container, on one thread. The laptop is an Apple M5. ONNX Runtime on macOS runs fp32 matrix products on its SME/SME2 units, and the Linux VM that Docker Desktop runs does not expose SME (its CPU flags have `asimddp`, `i8mm` and `bf16`, but no `sme`). The outputs are the same to 1.9e-7; only the speed differs. More threads don't rescue fp32 there: 15.3 ms at two threads, 10.0 ms p50 and 15.0 ms p99 at four. So the PRD's fallback, int8 quantization of the encoder, was needed after all. A Linux x86 server would differ again, so the number to quote is the one measured where the service runs.
+
+### 43. An int8 encoder: per tensor failed the coverage rule, per channel passed
+
+The rule was written before the first run (`quantize.py`): **an int8 encoder is accepted if, on validation with the frozen shift θ, its coverage is at most 0.1 point below the fp32 encoder's and its reservation ratio at most 0.5% above.** It isn't re-tuned, and test is only reported. The first variant, `quantize_dynamic` with signed int8 weights per tensor, failed: embeddings at mean cosine 0.964 to fp32, validation coverage −0.51 point and the ratio −1.38% (the bounds slid down). The second variant was chosen after seeing that, without labels. Four alternatives were compared on embedding cosine to fp32 over 500 validation prompts and on container latency (128 tokens):
+
+| int8 variant | Cosine to fp32, mean (min) | Container, 1 thread | 2 threads |
+|---|---|---|---|
+| All 36 weight MatMuls, per tensor (rejected) | 0.964 (0.928) | 11.8 ms | 6.9 ms |
+| **All 36, per channel (served)** | **0.9986 (0.9966)** | **11.9 ms** | **6.9 ms** |
+| Attention and first FFN layer, per channel | 0.9989 (0.9976) | 17.2 ms | 9.6 ms |
+| FFN layers only, per channel | 0.9995 (0.9990) | 17.4 ms | 9.8 ms |
+| Attention only, per tensor | 0.9987 (0.9974) | 22.7 ms | 12.6 ms |
+
+Per channel over all weights is as fast as per tensor and nearly as close as the slower partial variants. Under the same rule it passed: on validation, coverage −0.007 point and ratio +0.017%. On test it gives 95.81% at 1.8083, against fp32's 95.81% at 1.8081 (Day 7: 1.808 at 95.8%). The same check reproduces the fp32 pipeline's tuned 95.00% on validation, so the scoring is the Day-7 one. The file is 58.5 MB, because the token embedding table stays fp32. It sits next to the fp32 encoder in the bundle and in `serving.json`, with its hash.
+
+### 44. int8 kernels differ between macOS and Linux, so the check was repeated on the container's own embeddings
+
+fp32 gives the same numbers on both platforms; int8 doesn't. On 300 test requests, the container's `/predict` differed from the laptop's int8 pipeline by 0.013 in log1p tokens on average (0.105 at most), and 277 of 300 bounds moved, by up to 106 tokens. The container's int8 embeddings sit at mean cosine 0.9946 to fp32, against 0.9986 on macOS; thread count changes nothing. So the coverage check on the laptop didn't cover what is served. `make int8-served` has the service image embed all 3,396 validation and test prompts with its own encoder (16 s), then scores them on the laptop. **Under the same rule they pass:** on validation, coverage +0.017 point and ratio +0.017%; on test, 95.81% at 1.8071. The noise is larger (the 1st–99th percentile of a bound's change is −7.8% to +6.4%, against ±3.5% on macOS), but it doesn't move coverage. This is the decision the service default rests on.
+
+### 45. `/predict`: int8 on two threads meets 15 ms at one client; concurrent requests miss it on this laptop
+
+| Configuration | `/predict` p99, 1 client | 4 clients | 8 clients |
+|---|---|---|---|
+| fp32, 1 thread (Day 12) | 33.0 ms | 39.6 ms | 55.1 ms |
+| int8, 1 thread | 16.8 ms | 21.0 ms | 29.1 ms |
+| **int8, 2 threads (default)** | **12.8 ms** | 21.4 ms | 33.3 ms |
+| int8, 2 threads, 2 workers | 12.7 ms | 23.3 ms | 42.4 ms |
+
+One thread of int8 still misses. Two threads make it with 2.2 ms to spare: p99.9 is 14.8 ms and the slowest of 1,000 requests 15.1 ms. HTTP, Docker's port forward and the client add about 0.4 ms. **The gap: from 4 concurrent requests the p99 is 21 ms or more.** Throughput goes from 169 to 457 requests/s, but each request holds two of the laptop's ten cores, which it shares with the client and Docker, so requests queue for CPU. A second worker doesn't help, because the work is CPU, not the event loop. Meeting 15 ms under concurrent load takes more cores per replica, more replicas, or a smaller encoder. None of those was tried; the number is honest for one caller at a time.
+
+### 46. The benchmark's first client was the bottleneck
+
+The first runs used httpx. At 16 and 64 clients, `/reserve` showed 100–370 ms p99 while the app's own p99 stayed under 4 ms. Throughput was flat at about 400 requests/s, with the API at 19% CPU and the client at 60%. A raw keep-alive client did 6,500 requests/s through the same port forward (0.43 ms p99 on one connection), so httpx's connection pool was what was measured. `bench.Client` is a keep-alive HTTP/1.1 connection per worker on asyncio streams, about 0.1 ms per request. The tests still drive the benchmark functions through httpx's ASGI transport, which has no pool to saturate.
+
+### 47. 1,000 parallel reserves found a bug: redis-py's pool fails instead of waiting
+
+With the faster client, the burst put all 1,000 requests in flight at once, and 511 got a 500: `MaxConnectionsError: Too many connections` from redis-py's default async pool. httpx had hidden this, because it never had more than a few hundred requests in flight. The service now uses a `BlockingConnectionPool` (64 connections; a request waits up to 5 s for one, `REDIS_MAX_CONNECTIONS` and `REDIS_POOL_TIMEOUT`). After the fix, in every configuration (four runs, one of them with two worker processes):
+
+- **Burst:** 1,000 reserves asking for 1.43M tokens against a 200,000-token window. 147 admitted (199,977 tokens), 853 refused, none of them wrongly: every 429 asked for more than was left when it ran. No response ever reported the window over budget, and the counter equals the sum of the admitted reservations exactly.
+- **Settle race:** the 147 settles (charging each answer's real length, cut at the cap as a provider would: 96,291 tokens, freeing 103,686) raced 1,000 new reserves. 111 got in (103,425 tokens). The highest spend any response reported was exactly 200,000, never over, and the final counter is the real cost settled plus the new reservations, to the token.
+
+pytest runs the same burst through the API on fakeredis (`tests/test_bench.py`), and the script-level race now uses 1,000 requests instead of 300.
+
+### 48. `/reserve`: 0.45 ms p99 at one client; one worker saturates at ~3,600 reserve-and-settle pairs a second
+
+uvicorn's pure-Python `h11` parser and the default asyncio loop were the next limit. With `uvloop` and `httptools` (pinned; uvicorn uses them when installed), one worker went from about 2,700 to 3,600 pairs a second, and the 16-client p99 from 12.7 ms to 3.1 ms in the same pair of runs. **The 5 ms target holds at one client (0.45 ms p99, 0.15 ms of it in the app) and, in some runs, at 16 (3.1 ms; 7.6 ms in the final default run).** At 16 clients the app's own p99 is 1.7 ms; the rest is queueing in one event loop, Docker's port forward and a client that all share the laptop's cores. At 64 clients it is saturation: 22 ms p99, close to Little's law (64 / 3,555 per second ≈ 18 ms mean). Two workers (`WEB_CONCURRENCY=2`; the Lua scripts keep them atomic, as the burst shows) reach 5,300 pairs a second and 2.6 ms p99 at 16 clients, but still 25 ms at 64. **The gap: past about 16 concurrent callers per worker, `/reserve` queues.** Since Redis keeps it correct across workers, the fix is more workers or replicas. The default stays at one worker, so the laptop keeps cores for `/predict`. The image now also carries the int8 encoder (the bundle is 154 MB, against 94.5 MB on Day 12; 898 MB in all, as `docker images` reports).

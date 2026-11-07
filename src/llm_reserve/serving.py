@@ -28,6 +28,7 @@ from llm_reserve.features import text_features
 BUNDLE_DIR = ROOT / "data" / "models" / "onnx"
 SPEC = "serving.json"
 THREADS = 1  # per session: one request at a time, and room for the rest of the gateway
+ENCODERS = ("fp32", "int8")
 
 
 def sha256(path: Path) -> str:
@@ -60,7 +61,11 @@ class Prediction:
 class Predictor:
     """Loads the ONNX bundle once; `predict` is one request, `predict_many` loops it for evaluation."""
 
-    def __init__(self, bundle: Path = BUNDLE_DIR, threads: int = THREADS, verify: bool = True):
+    def __init__(self, bundle: Path = BUNDLE_DIR, threads: int = THREADS, verify: bool = True,
+                 encoder: str = "fp32"):
+        """`encoder` is "fp32" (the Day-11 export) or "int8" (its dynamic quantization, Day 13: needs
+        `make onnx` to have run llm_reserve.quantize, which adds it to serving.json).
+        """
         import onnxruntime as ort
         from tokenizers import Tokenizer
 
@@ -78,10 +83,15 @@ class Predictor:
             return ort.InferenceSession(str(self.bundle / file), opts, providers=["CPUExecutionProvider"])
 
         enc = self.spec["encoder"]
+        if encoder not in ENCODERS:
+            raise ValueError(f"encoder must be one of {ENCODERS}, not {encoder!r}")
+        if encoder != "fp32" and encoder not in enc:
+            raise ValueError(f"the bundle has no {encoder} encoder: run `python -m llm_reserve.quantize`")
+        self.encoder_precision = encoder
         self.tokenizer = Tokenizer.from_file(str(self.bundle / enc["tokenizer"]))
         self.tokenizer.no_padding()
         self.tokenizer.enable_truncation(enc["max_length"])
-        self.encoder = session(enc["file"])
+        self.encoder = session(enc["file"] if encoder == "fp32" else enc[encoder]["file"])
         self.heads = {name: session(m["file"]) for name, m in self.spec["members"].items()}
         pca = np.load(self.bundle / self.spec["pca"]["file"])
         self.pca_mean, self.pca_components = pca["mean"], pca["components"]
@@ -118,9 +128,13 @@ class Predictor:
     def member_logs(self, X: np.ndarray) -> dict[str, np.ndarray]:
         return {name: s.run(None, {"x": X})[0].reshape(-1) for name, s in self.heads.items()}
 
-    def predict_rows(self, text: str, models: list[str], input_sizes: list[int]) -> dict[str, np.ndarray]:
-        """Every member's and the winner's log predictions plus the bounds, for one prompt and many models."""
-        members = self.member_logs(self.design_rows(text, models, input_sizes))
+    def predict_rows(self, text: str, models: list[str], input_sizes: list[int],
+                     embedding: np.ndarray | None = None) -> dict[str, np.ndarray]:
+        """Every member's and the winner's log predictions plus the bounds, for one prompt and many models.
+
+        `embedding` replaces the encoder's (Day 13 scores embeddings computed inside the service image).
+        """
+        members = self.member_logs(self.design_rows(text, models, input_sizes, embedding=embedding))
         # float32, member order mlp then xgb, as holdout.winner_log_pred computes the Day-7 test predictions
         log_pred = sum(members[n] for n in self.spec["members"]) / np.float32(len(members))
         return {**members, "winner": log_pred, "bound": bounds(log_pred, self.shift)}

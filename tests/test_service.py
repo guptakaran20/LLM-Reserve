@@ -76,11 +76,12 @@ def test_settle_after_the_window_expired_adjusts_nothing(r):
 
 
 def test_concurrent_reserves_never_pass_the_budget():
-    # The race the Lua script exists for. Day 13 repeats this with 1,000 requests against real Redis.
+    # The race the Lua script exists for: 1,000 at once. tests/test_bench.py runs the same through the API,
+    # and `make bench` against the compose Redis (findings 47).
     async def run():
         r = fakeredis.FakeAsyncRedis()
         script = r.register_script(service.RESERVE_LUA)
-        costs = np.random.default_rng(0).integers(50, 400, size=300)
+        costs = np.random.default_rng(0).integers(50, 400, size=1000)
 
         async def one(i, cost):
             return await script(keys=[S.window_key(0), S.reservation_key(0, str(i))],
@@ -255,11 +256,13 @@ def test_settle_rejects_malformed_and_unknown_ids():
     assert bad.status_code == 422 and unknown.status_code == 404
 
 
-def test_healthz():
+def test_healthz(monkeypatch):
+    monkeypatch.delenv("WEB_CONCURRENCY", raising=False)
     resp, = asyncio.run(call(make_app(), [("GET", "/healthz", None)]))
     assert resp.status_code == 200
     assert resp.json() == {"status": "ok", "winner": "stub", "models": 2, "budget": S.budget,
-                           "window_seconds": 60, "cap_margin": 1.5}
+                           "window_seconds": 60, "cap_margin": 1.5, "encoder": None,
+                           "predict_threads": S.predict_threads, "workers": 1}
 
 
 @pytest.mark.skipif(not HAS_BUNDLE, reason="ONNX bundle not built (make onnx)")

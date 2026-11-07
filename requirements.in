@@ -17,6 +17,8 @@ onnxscript  # torch.onnx.export(dynamo=True)
 tokenizers  # the serving tokenizer, without transformers
 fastapi  # the Day-12 service (requirements-serve.in lists what its image installs)
 uvicorn
+uvloop  # Day 13: uvicorn's faster event loop and HTTP parser (findings 48)
+httptools
 redis
 httpx  # FastAPI's test client
 fakeredis[lua]  # the Lua scripts under pytest, without a Redis server
