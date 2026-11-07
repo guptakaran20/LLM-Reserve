@@ -20,6 +20,7 @@ make eval      # Day-7 test split, scored once (frozen models), error analysis, 
 make sim       # Day-8 budget-gateway simulator, max_tokens policy end to end -> docs/figures/
 make sweep     # Day-9 every policy over arrival rate, budget and decode speed, 3 seeds -> docs/figures/
 make mispredict # Day-10 misprediction strategies (cap at bound x margin, overdraft buffer), knobs from validation -> docs/figures/
+make onnx      # Day-11 ONNX bundle of the winner -> data/models/onnx/, parity on 1,000 test prompts -> docs/figures/
 make test
 ```
 

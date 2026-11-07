@@ -2,7 +2,7 @@ PYTHON ?= python3.12
 VENV := .venv
 PY := $(VENV)/bin/python
 
-.PHONY: setup lock data explore baselines features models mlp eval sim sweep mispredict test clean-data
+.PHONY: setup lock data explore baselines features models mlp eval sim sweep mispredict onnx test clean-data
 
 # Create the virtualenv from the pinned requirements.
 setup: $(VENV)/.installed
@@ -72,8 +72,15 @@ sweep: setup
 mispredict: setup
 	nice $(PY) -m llm_reserve.mispredict
 
+# Day-11 ONNX bundle of the frozen winner (MiniLM-128 encoder, MLP, XGBoost) -> data/models/onnx/, and the
+# parity check on 1,000 test prompts with ONNX Runtime alone -> docs/figures/onnx_parity.json. Needs `make eval`.
+onnx: setup
+	nice $(PY) -m llm_reserve.export torch
+	nice $(PY) -m llm_reserve.export xgb
+	nice $(PY) -m llm_reserve.export check
+
 test: setup
 	$(PY) -m pytest -q
 
 clean-data:
-	rm -rf data/raw data/processed data/features data/predictions data/lodo
+	rm -rf data/raw data/processed data/features data/predictions data/lodo data/onnx_parity

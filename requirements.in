@@ -10,3 +10,8 @@ sentence-transformers
 scikit-learn
 xgboost; sys_platform == "darwin"
 xgboost-cpu; sys_platform == "linux"  # same package without the CUDA/NCCL dependency
+onnx
+onnxruntime
+onnxmltools  # XGBoost -> ONNX
+onnxscript  # torch.onnx.export(dynamo=True)
+tokenizers  # the serving tokenizer, without transformers
