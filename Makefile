@@ -2,7 +2,7 @@ PYTHON ?= python3.12
 VENV := .venv
 PY := $(VENV)/bin/python
 
-.PHONY: setup lock data explore baselines features models mlp train eval sim sweep mispredict onnx int8-served serve demo bench down test clean-data
+.PHONY: setup lock data explore baselines features models mlp train eval sim sweep mispredict onnx int8-served serve demo bench down test clean-data demo-assets app app-test
 
 # Create the virtualenv from the pinned requirements.
 setup: $(VENV)/.installed
@@ -107,6 +107,23 @@ bench: setup
 
 down:
 	docker compose down
+
+# Day-15 Streamlit demo. `demo-assets` packs the int8 ONNX bundle, the per-model bar and the simulator results into app/
+# (needs `make data onnx sweep mispredict eval`); `app` runs the page from its own small venv, the same dependencies a
+# free host installs (app/requirements.txt: no torch or xgboost); `app-test` runs the page headless in that venv.
+demo-assets: setup
+	$(PY) -m llm_reserve.demo_assets
+
+.venv-app/.installed: app/requirements.txt
+	$(PYTHON) -m venv .venv-app
+	.venv-app/bin/python -m pip install -r app/requirements.txt pytest
+	touch $@
+
+app: .venv-app/.installed
+	OMP_NUM_THREADS=2 .venv-app/bin/streamlit run app/streamlit_app.py
+
+app-test: .venv-app/.installed
+	OMP_NUM_THREADS=2 PYTHONPATH=src .venv-app/bin/python -m pytest tests/test_demo.py --noconftest -q
 
 test: setup
 	$(PY) -m pytest -q

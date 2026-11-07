@@ -1,0 +1,20 @@
+{
+ "theta": 0.9538879990577698,
+ "split": "train",
+ "config": "sanitized",
+ "bounds": {
+  "Qwen--Qwen2.5-14B-Instruct": 813,
+  "Qwen--Qwen2.5-32B-Instruct": 768,
+  "Qwen--Qwen2.5-7B-Instruct-1M": 998,
+  "google--gemma-3-12b-it": 1812,
+  "google--gemma-3-4b-it": 1388,
+  "meta-llama--Llama-3.1-8B-Instruct": 865,
+  "meta-llama--Llama-3.2-1B-Instruct": 875,
+  "meta-llama--Llama-3.2-3B-Instruct": 796,
+  "meta-llama--Llama-3.3-70B-Instruct": 853,
+  "microsoft--Phi-4-mini-instruct": 859,
+  "mistralai--Ministral-8B-Instruct-2410": 922,
+  "mistralai--Mistral-7B-Instruct-v0.3": 827,
+  "mistralai--Mixtral-8x7B-Instruct-v0.1": 878
+ }
+}

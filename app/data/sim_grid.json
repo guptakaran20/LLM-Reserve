@@ -1,0 +1,2035 @@
+{
+ "seeds": [
+  0,
+  1,
+  2
+ ],
+ "default": {
+  "budget": 200000,
+  "window": 60.0,
+  "rate": 4.0,
+  "duration": 3600.0,
+  "tokens_per_second": 50.0,
+  "max_tokens": 4096,
+  "seed": 0
+ },
+ "grid": {
+  "rates": [
+   1.0,
+   2.0,
+   4.0,
+   6.0,
+   8.0,
+   12.0,
+   16.0
+  ],
+  "budgets": [
+   100000,
+   200000,
+   400000
+  ],
+  "tokens_per_second": [
+   25.0,
+   50.0,
+   100.0
+  ]
+ },
+ "margin": 1.5,
+ "rows": [
+  {
+   "rate": 1.0,
+   "budget": 100000,
+   "tokens_per_second": 50.0,
+   "policies": {
+    "max_tokens": {
+     "admitted": 3612.3333333333335,
+     "admit_rate": 0.9974088369156403,
+     "rejected": 9.333333333333334,
+     "wrongful_rejections": 9.333333333333334,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.3913735,
+     "truncated_clean_rate": 0.001017046759725104,
+     "demand_per_budget": 0.3923416111111111
+    },
+    "bar": {
+     "admitted": 3621.6666666666665,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.3923416111111111,
+     "truncated_clean_rate": 0.0010143813948576984,
+     "demand_per_budget": 0.3923416111111111
+    },
+    "winner": {
+     "admitted": 3621.6666666666665,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.3923416111111111,
+     "truncated_clean_rate": 0.0010143813948576984,
+     "demand_per_budget": 0.3923416111111111
+    },
+    "bar_capped": {
+     "admitted": 3621.6666666666665,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.38511055555555557,
+     "truncated_clean_rate": 0.007654849253367406,
+     "demand_per_budget": 0.38511055555555557
+    },
+    "winner_capped": {
+     "admitted": 3621.6666666666665,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.3860363888888889,
+     "truncated_clean_rate": 0.006643984617456388,
+     "demand_per_budget": 0.3860363888888889
+    }
+   }
+  },
+  {
+   "rate": 2.0,
+   "budget": 100000,
+   "tokens_per_second": 50.0,
+   "policies": {
+    "max_tokens": {
+     "admitted": 5818.333333333333,
+     "admit_rate": 0.801291976115866,
+     "rejected": 1443.0,
+     "wrongful_rejections": 1241.6666666666667,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.6142135,
+     "truncated_clean_rate": 0.0008593794070946795,
+     "demand_per_budget": 0.774542611111111
+    },
+    "bar": {
+     "admitted": 7259.666666666667,
+     "admit_rate": 0.9997681965693093,
+     "rejected": 1.6666666666666667,
+     "wrongful_rejections": 0.3333333333333333,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.7742011111111111,
+     "truncated_clean_rate": 0.0008729330202175046,
+     "demand_per_budget": 0.774542611111111
+    },
+    "winner": {
+     "admitted": 7260.0,
+     "admit_rate": 0.9998145572554474,
+     "rejected": 1.3333333333333333,
+     "wrongful_rejections": 0.3333333333333333,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.7743064444444444,
+     "truncated_clean_rate": 0.0008728878280886565,
+     "demand_per_budget": 0.774542611111111
+    },
+    "bar_capped": {
+     "admitted": 7210.333333333333,
+     "admit_rate": 0.9929641983559948,
+     "rejected": 51.0,
+     "wrongful_rejections": 36.333333333333336,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.7557053333333332,
+     "truncated_clean_rate": 0.009295473509153556,
+     "demand_per_budget": 0.7616105555555555
+    },
+    "winner_capped": {
+     "admitted": 7235.0,
+     "admit_rate": 0.9963656710980772,
+     "rejected": 26.333333333333332,
+     "wrongful_rejections": 14.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.7592467777777778,
+     "truncated_clean_rate": 0.008203193475014924,
+     "demand_per_budget": 0.7629113333333333
+    }
+   }
+  },
+  {
+   "rate": 4.0,
+   "budget": 100000,
+   "tokens_per_second": 50.0,
+   "policies": {
+    "max_tokens": {
+     "admitted": 6561.0,
+     "admit_rate": 0.4528211960634001,
+     "rejected": 7928.0,
+     "wrongful_rejections": 6691.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.6761147222222222,
+     "truncated_clean_rate": 0.0005603914946614016,
+     "demand_per_budget": 1.5340830555555556
+    },
+    "bar": {
+     "admitted": 9705.333333333334,
+     "admit_rate": 0.6698423117893214,
+     "rejected": 4783.666666666667,
+     "wrongful_rejections": 1976.3333333333333,
+     "overshoot_max_share": 0.06398666666666668,
+     "utilization": 1.0052264444444445,
+     "truncated_clean_rate": 0.0006183689413127763,
+     "demand_per_budget": 1.5340830555555556
+    },
+    "winner": {
+     "admitted": 9976.0,
+     "admit_rate": 0.6885233162989896,
+     "rejected": 4513.0,
+     "wrongful_rejections": 1248.3333333333333,
+     "overshoot_max_share": 0.06894,
+     "utilization": 1.0089667222222223,
+     "truncated_clean_rate": 0.0006015286331094368,
+     "demand_per_budget": 1.5340830555555556
+    },
+    "bar_capped": {
+     "admitted": 9363.333333333334,
+     "admit_rate": 0.6462374908536396,
+     "rejected": 5125.666666666667,
+     "wrongful_rejections": 3002.6666666666665,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.9467837777777778,
+     "truncated_clean_rate": 0.00683751481603722,
+     "demand_per_budget": 1.5109387222222221
+    },
+    "winner_capped": {
+     "admitted": 9836.333333333334,
+     "admit_rate": 0.6788830972127083,
+     "rejected": 4652.666666666667,
+     "wrongful_rejections": 2216.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.9607008333333334,
+     "truncated_clean_rate": 0.006643649662047683,
+     "demand_per_budget": 1.5125866666666667
+    }
+   }
+  },
+  {
+   "rate": 6.0,
+   "budget": 100000,
+   "tokens_per_second": 50.0,
+   "policies": {
+    "max_tokens": {
+     "admitted": 6693.666666666667,
+     "admit_rate": 0.307989629087895,
+     "rejected": 15039.333333333334,
+     "wrongful_rejections": 12548.666666666666,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.6887564444444445,
+     "truncated_clean_rate": 0.0005473350360580386,
+     "demand_per_budget": 2.305647222222222
+    },
+    "bar": {
+     "admitted": 9857.666666666666,
+     "admit_rate": 0.45358119891563325,
+     "rejected": 11875.333333333334,
+     "wrongful_rejections": 4520.666666666667,
+     "overshoot_max_share": 0.06516666666666666,
+     "utilization": 1.009713111111111,
+     "truncated_clean_rate": 0.0006427778190056288,
+     "demand_per_budget": 2.305647222222222
+    },
+    "winner": {
+     "admitted": 10292.0,
+     "admit_rate": 0.4735602454842753,
+     "rejected": 11441.0,
+     "wrongful_rejections": 2644.6666666666665,
+     "overshoot_max_share": 0.07395333333333333,
+     "utilization": 1.0116380555555555,
+     "truncated_clean_rate": 0.0005516302644538038,
+     "demand_per_budget": 2.305647222222222
+    },
+    "bar_capped": {
+     "admitted": 9684.666666666666,
+     "admit_rate": 0.4456136016416776,
+     "rejected": 12048.333333333334,
+     "wrongful_rejections": 7019.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.9639875,
+     "truncated_clean_rate": 0.006814591993615171,
+     "demand_per_budget": 2.2718139999999996
+    },
+    "winner_capped": {
+     "admitted": 10564.666666666666,
+     "admit_rate": 0.4861082786764042,
+     "rejected": 11168.333333333334,
+     "wrongful_rejections": 4913.666666666667,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.9799928888888889,
+     "truncated_clean_rate": 0.00549252095611506,
+     "demand_per_budget": 2.274453555555555
+    }
+   }
+  },
+  {
+   "rate": 8.0,
+   "budget": 100000,
+   "tokens_per_second": 50.0,
+   "policies": {
+    "max_tokens": {
+     "admitted": 6800.666666666667,
+     "admit_rate": 0.2349099254053777,
+     "rejected": 22149.666666666668,
+     "wrongful_rejections": 18361.333333333332,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.6954928333333333,
+     "truncated_clean_rate": 0.0004918322918969778,
+     "demand_per_budget": 3.068360166666667
+    },
+    "bar": {
+     "admitted": 10009.333333333334,
+     "admit_rate": 0.3457522928191421,
+     "rejected": 18941.0,
+     "wrongful_rejections": 6991.0,
+     "overshoot_max_share": 0.07503,
+     "utilization": 1.0116641666666666,
+     "truncated_clean_rate": 0.000663979498997426,
+     "demand_per_budget": 3.068360166666667
+    },
+    "winner": {
+     "admitted": 10611.666666666666,
+     "admit_rate": 0.3665593727132128,
+     "rejected": 18338.666666666668,
+     "wrongful_rejections": 3858.0,
+     "overshoot_max_share": 0.08049666666666666,
+     "utilization": 1.0137147222222223,
+     "truncated_clean_rate": 0.000500360623171892,
+     "demand_per_budget": 3.068360166666667
+    },
+    "bar_capped": {
+     "admitted": 9932.333333333334,
+     "admit_rate": 0.3430922636573875,
+     "rejected": 19018.0,
+     "wrongful_rejections": 10734.333333333334,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.9693615000000001,
+     "truncated_clean_rate": 0.007181344250085194,
+     "demand_per_budget": 3.023917611111111
+    },
+    "winner_capped": {
+     "admitted": 11032.333333333334,
+     "admit_rate": 0.38108584625513703,
+     "rejected": 17918.0,
+     "wrongful_rejections": 7347.666666666667,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.9853958888888888,
+     "truncated_clean_rate": 0.00591987508576109,
+     "demand_per_budget": 3.0287386111111108
+    }
+   }
+  },
+  {
+   "rate": 12.0,
+   "budget": 100000,
+   "tokens_per_second": 50.0,
+   "policies": {
+    "max_tokens": {
+     "admitted": 6854.666666666667,
+     "admit_rate": 0.15834340736464966,
+     "rejected": 36435.666666666664,
+     "wrongful_rejections": 30100.333333333332,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.702334388888889,
+     "truncated_clean_rate": 0.0008275427270552422,
+     "demand_per_budget": 4.625270111111111
+    },
+    "bar": {
+     "admitted": 10216.666666666666,
+     "admit_rate": 0.23600441767808852,
+     "rejected": 33073.666666666664,
+     "wrongful_rejections": 11732.0,
+     "overshoot_max_share": 0.08459333333333334,
+     "utilization": 1.0151882222222224,
+     "truncated_clean_rate": 0.0008809710877229629,
+     "demand_per_budget": 4.625270111111111
+    },
+    "winner": {
+     "admitted": 11016.333333333334,
+     "admit_rate": 0.2544752715146021,
+     "rejected": 32274.0,
+     "wrongful_rejections": 5846.0,
+     "overshoot_max_share": 0.08807,
+     "utilization": 1.0182499444444444,
+     "truncated_clean_rate": 0.0007560780184032607,
+     "demand_per_budget": 4.625270111111111
+    },
+    "bar_capped": {
+     "admitted": 10116.333333333334,
+     "admit_rate": 0.23368693909520796,
+     "rejected": 33174.0,
+     "wrongful_rejections": 17889.666666666668,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.9734832222222222,
+     "truncated_clean_rate": 0.007018659370981018,
+     "demand_per_budget": 4.552567388888889
+    },
+    "winner_capped": {
+     "admitted": 11725.666666666666,
+     "admit_rate": 0.2708640373740418,
+     "rejected": 31564.666666666668,
+     "wrongful_rejections": 11942.333333333334,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.9896190555555556,
+     "truncated_clean_rate": 0.006822173072548638,
+     "demand_per_budget": 4.560619444444445
+    }
+   }
+  },
+  {
+   "rate": 16.0,
+   "budget": 100000,
+   "tokens_per_second": 50.0,
+   "policies": {
+    "max_tokens": {
+     "admitted": 6874.0,
+     "admit_rate": 0.11922525695650558,
+     "rejected": 50782.0,
+     "wrongful_rejections": 41702.333333333336,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.7007507222222222,
+     "truncated_clean_rate": 0.0007291754325640781,
+     "demand_per_budget": 6.149775944444445
+    },
+    "bar": {
+     "admitted": 10345.333333333334,
+     "admit_rate": 0.17943156072533883,
+     "rejected": 47310.666666666664,
+     "wrongful_rejections": 16065.666666666666,
+     "overshoot_max_share": 0.07353,
+     "utilization": 1.0117019444444442,
+     "truncated_clean_rate": 0.0007398357541666458,
+     "demand_per_budget": 6.149775944444445
+    },
+    "winner": {
+     "admitted": 11389.666666666666,
+     "admit_rate": 0.19754454808838692,
+     "rejected": 46266.333333333336,
+     "wrongful_rejections": 8100.333333333333,
+     "overshoot_max_share": 0.06834333333333334,
+     "utilization": 1.013357777777778,
+     "truncated_clean_rate": 0.00043884571687602706,
+     "demand_per_budget": 6.149775944444445
+    },
+    "bar_capped": {
+     "admitted": 10246.0,
+     "admit_rate": 0.17770827862023753,
+     "rejected": 47410.0,
+     "wrongful_rejections": 24995.666666666668,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.975429,
+     "truncated_clean_rate": 0.0066662945718507435,
+     "demand_per_budget": 6.0562433888888885
+    },
+    "winner_capped": {
+     "admitted": 12269.333333333334,
+     "admit_rate": 0.21280184165556845,
+     "rejected": 45386.666666666664,
+     "wrongful_rejections": 16126.333333333334,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.9916973333333333,
+     "truncated_clean_rate": 0.006113589394032015,
+     "demand_per_budget": 6.0669865
+    }
+   }
+  },
+  {
+   "rate": 1.0,
+   "budget": 200000,
+   "tokens_per_second": 50.0,
+   "policies": {
+    "max_tokens": {
+     "admitted": 3621.6666666666665,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.19617080555555555,
+     "truncated_clean_rate": 0.0010143813948576984,
+     "demand_per_budget": 0.19617080555555555
+    },
+    "bar": {
+     "admitted": 3621.6666666666665,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.19617080555555555,
+     "truncated_clean_rate": 0.0010143813948576984,
+     "demand_per_budget": 0.19617080555555555
+    },
+    "winner": {
+     "admitted": 3621.6666666666665,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.19617080555555555,
+     "truncated_clean_rate": 0.0010143813948576984,
+     "demand_per_budget": 0.19617080555555555
+    },
+    "bar_capped": {
+     "admitted": 3621.6666666666665,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.19255527777777778,
+     "truncated_clean_rate": 0.007654849253367406,
+     "demand_per_budget": 0.19255527777777778
+    },
+    "winner_capped": {
+     "admitted": 3621.6666666666665,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.19301819444444446,
+     "truncated_clean_rate": 0.006643984617456388,
+     "demand_per_budget": 0.19301819444444446
+    }
+   }
+  },
+  {
+   "rate": 2.0,
+   "budget": 200000,
+   "tokens_per_second": 50.0,
+   "policies": {
+    "max_tokens": {
+     "admitted": 7260.666666666667,
+     "admit_rate": 0.999908210564964,
+     "rejected": 0.6666666666666666,
+     "wrongful_rejections": 0.6666666666666666,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.38721658333333336,
+     "truncated_clean_rate": 0.0008727830338713056,
+     "demand_per_budget": 0.3872713055555555
+    },
+    "bar": {
+     "admitted": 7261.333333333333,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.3872713055555555,
+     "truncated_clean_rate": 0.0008727071852815499,
+     "demand_per_budget": 0.3872713055555555
+    },
+    "winner": {
+     "admitted": 7261.333333333333,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.3872713055555555,
+     "truncated_clean_rate": 0.0008727071852815499,
+     "demand_per_budget": 0.3872713055555555
+    },
+    "bar_capped": {
+     "admitted": 7261.333333333333,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.3808052777777778,
+     "truncated_clean_rate": 0.009229238725702376,
+     "demand_per_budget": 0.38080527777777773
+    },
+    "winner_capped": {
+     "admitted": 7261.333333333333,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.38145566666666664,
+     "truncated_clean_rate": 0.008173113726228205,
+     "demand_per_budget": 0.38145566666666664
+    }
+   }
+  },
+  {
+   "rate": 4.0,
+   "budget": 200000,
+   "tokens_per_second": 50.0,
+   "policies": {
+    "max_tokens": {
+     "admitted": 12075.333333333334,
+     "admit_rate": 0.8334107951115376,
+     "rejected": 2413.6666666666665,
+     "wrongful_rejections": 2074.3333333333335,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.6345120277777777,
+     "truncated_clean_rate": 0.0004692039264694748,
+     "demand_per_budget": 0.7670415277777778
+    },
+    "bar": {
+     "admitted": 14489.0,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.7670415277777778,
+     "truncated_clean_rate": 0.0005521475329852236,
+     "demand_per_budget": 0.7670415277777778
+    },
+    "winner": {
+     "admitted": 14489.0,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.7670415277777778,
+     "truncated_clean_rate": 0.0005521475329852236,
+     "demand_per_budget": 0.7670415277777778
+    },
+    "bar_capped": {
+     "admitted": 14465.0,
+     "admit_rate": 0.998344665216517,
+     "rejected": 24.0,
+     "wrongful_rejections": 15.333333333333334,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.7541500555555555,
+     "truncated_clean_rate": 0.006960060705577768,
+     "demand_per_budget": 0.7554693611111111
+    },
+    "winner_capped": {
+     "admitted": 14474.0,
+     "admit_rate": 0.9989655530289236,
+     "rejected": 15.0,
+     "wrongful_rejections": 9.666666666666666,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.7553553055555554,
+     "truncated_clean_rate": 0.006380523945830719,
+     "demand_per_budget": 0.7562933333333334
+    }
+   }
+  },
+  {
+   "rate": 6.0,
+   "budget": 200000,
+   "tokens_per_second": 50.0,
+   "policies": {
+    "max_tokens": {
+     "admitted": 13031.666666666666,
+     "admit_rate": 0.5996152930091824,
+     "rejected": 8701.333333333334,
+     "wrongful_rejections": 7364.333333333333,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.6819376666666667,
+     "truncated_clean_rate": 0.0006151338469307743,
+     "demand_per_budget": 1.152823611111111
+    },
+    "bar": {
+     "admitted": 18799.666666666668,
+     "admit_rate": 0.8650253723746705,
+     "rejected": 2933.3333333333335,
+     "wrongful_rejections": 1360.3333333333333,
+     "overshoot_max_share": 0.039335,
+     "utilization": 0.9857903888888888,
+     "truncated_clean_rate": 0.0006561034061498885,
+     "demand_per_budget": 1.152823611111111
+    },
+    "winner": {
+     "admitted": 19087.0,
+     "admit_rate": 0.878245907271506,
+     "rejected": 2646.0,
+     "wrongful_rejections": 851.0,
+     "overshoot_max_share": 0.04265333333333333,
+     "utilization": 0.9908850277777778,
+     "truncated_clean_rate": 0.0006641232707893957,
+     "demand_per_budget": 1.152823611111111
+    },
+    "bar_capped": {
+     "admitted": 17913.666666666668,
+     "admit_rate": 0.824257643002482,
+     "rejected": 3819.3333333333335,
+     "wrongful_rejections": 2351.3333333333335,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.9223582777777778,
+     "truncated_clean_rate": 0.006566355222159581,
+     "demand_per_budget": 1.1359069999999998
+    },
+    "winner_capped": {
+     "admitted": 18449.666666666668,
+     "admit_rate": 0.8489197562277662,
+     "rejected": 3283.3333333333335,
+     "wrongful_rejections": 1660.3333333333333,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.9334501666666667,
+     "truncated_clean_rate": 0.005765594270018957,
+     "demand_per_budget": 1.1372267777777776
+    }
+   }
+  },
+  {
+   "rate": 8.0,
+   "budget": 200000,
+   "tokens_per_second": 50.0,
+   "policies": {
+    "max_tokens": {
+     "admitted": 13376.666666666666,
+     "admit_rate": 0.4620673946058689,
+     "rejected": 15573.666666666666,
+     "wrongful_rejections": 13243.666666666666,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.69366875,
+     "truncated_clean_rate": 0.000573595188599393,
+     "demand_per_budget": 1.5341800833333334
+    },
+    "bar": {
+     "admitted": 19428.0,
+     "admit_rate": 0.6711039635781507,
+     "rejected": 9522.333333333334,
+     "wrongful_rejections": 3909.0,
+     "overshoot_max_share": 0.057416666666666664,
+     "utilization": 1.0063453333333332,
+     "truncated_clean_rate": 0.0006161348328871382,
+     "demand_per_budget": 1.5341800833333334
+    },
+    "winner": {
+     "admitted": 19953.0,
+     "admit_rate": 0.6892370924779799,
+     "rejected": 8997.333333333334,
+     "wrongful_rejections": 2413.6666666666665,
+     "overshoot_max_share": 0.056386666666666675,
+     "utilization": 1.0093056111111112,
+     "truncated_clean_rate": 0.0006171714641153198,
+     "demand_per_budget": 1.5341800833333334
+    },
+    "bar_capped": {
+     "admitted": 18774.333333333332,
+     "admit_rate": 0.648518029746371,
+     "rejected": 10176.0,
+     "wrongful_rejections": 6080.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.9529563333333333,
+     "truncated_clean_rate": 0.007368708185547099,
+     "demand_per_budget": 1.5119588055555555
+    },
+    "winner_capped": {
+     "admitted": 19744.666666666668,
+     "admit_rate": 0.6820341584755454,
+     "rejected": 9205.666666666666,
+     "wrongful_rejections": 4287.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.9659529166666667,
+     "truncated_clean_rate": 0.006230381785291302,
+     "demand_per_budget": 1.5143693055555554
+    }
+   }
+  },
+  {
+   "rate": 12.0,
+   "budget": 200000,
+   "tokens_per_second": 50.0,
+   "policies": {
+    "max_tokens": {
+     "admitted": 13610.0,
+     "admit_rate": 0.3143909577224088,
+     "rejected": 29680.333333333332,
+     "wrongful_rejections": 24653.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.7043003055555556,
+     "truncated_clean_rate": 0.0007844655482141652,
+     "demand_per_budget": 2.3126350555555555
+    },
+    "bar": {
+     "admitted": 19753.666666666668,
+     "admit_rate": 0.45630692768415787,
+     "rejected": 23536.666666666668,
+     "wrongful_rejections": 8596.333333333334,
+     "overshoot_max_share": 0.047395,
+     "utilization": 1.0141821666666668,
+     "truncated_clean_rate": 0.00081015818989478,
+     "demand_per_budget": 2.3126350555555555
+    },
+    "winner": {
+     "admitted": 20555.333333333332,
+     "admit_rate": 0.47482703546337074,
+     "rejected": 22735.0,
+     "wrongful_rejections": 4968.666666666667,
+     "overshoot_max_share": 0.04913000000000001,
+     "utilization": 1.0158518333333333,
+     "truncated_clean_rate": 0.0007950486406549034,
+     "demand_per_budget": 2.3126350555555555
+    },
+    "bar_capped": {
+     "admitted": 19458.0,
+     "admit_rate": 0.44947830060073923,
+     "rejected": 23832.333333333332,
+     "wrongful_rejections": 13621.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.9694718611111112,
+     "truncated_clean_rate": 0.007605925389296783,
+     "demand_per_budget": 2.2762836944444444
+    },
+    "winner_capped": {
+     "admitted": 21026.666666666668,
+     "admit_rate": 0.48571577588056664,
+     "rejected": 22263.666666666668,
+     "wrongful_rejections": 9474.666666666666,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.9826561388888889,
+     "truncated_clean_rate": 0.006594879854037956,
+     "demand_per_budget": 2.2803097222222224
+    }
+   }
+  },
+  {
+   "rate": 16.0,
+   "budget": 200000,
+   "tokens_per_second": 50.0,
+   "policies": {
+    "max_tokens": {
+     "admitted": 13753.0,
+     "admit_rate": 0.23853491604649923,
+     "rejected": 43903.0,
+     "wrongful_rejections": 36432.666666666664,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.7071009722222223,
+     "truncated_clean_rate": 0.0005572261816896599,
+     "demand_per_budget": 3.0748879722222227
+    },
+    "bar": {
+     "admitted": 19963.333333333332,
+     "admit_rate": 0.3462490474764617,
+     "rejected": 37692.666666666664,
+     "wrongful_rejections": 13294.0,
+     "overshoot_max_share": 0.05970166666666666,
+     "utilization": 1.0148252222222223,
+     "truncated_clean_rate": 0.0006680427836730348,
+     "demand_per_budget": 3.0748879722222227
+    },
+    "winner": {
+     "admitted": 21079.333333333332,
+     "admit_rate": 0.3656041365294295,
+     "rejected": 36576.666666666664,
+     "wrongful_rejections": 7234.0,
+     "overshoot_max_share": 0.05373,
+     "utilization": 1.0156859722222225,
+     "truncated_clean_rate": 0.000648713552508268,
+     "demand_per_budget": 3.0748879722222227
+    },
+    "bar_capped": {
+     "admitted": 19766.333333333332,
+     "admit_rate": 0.34283221748388676,
+     "rejected": 37889.666666666664,
+     "wrongful_rejections": 20985.666666666668,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.97337725,
+     "truncated_clean_rate": 0.007252341526230795,
+     "demand_per_budget": 3.0281216944444442
+    },
+    "winner_capped": {
+     "admitted": 22046.0,
+     "admit_rate": 0.38237130828781646,
+     "rejected": 35610.0,
+     "wrongful_rejections": 14259.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.987838388888889,
+     "truncated_clean_rate": 0.006048180624756076,
+     "demand_per_budget": 3.03349325
+    }
+   }
+  },
+  {
+   "rate": 1.0,
+   "budget": 400000,
+   "tokens_per_second": 50.0,
+   "policies": {
+    "max_tokens": {
+     "admitted": 3621.6666666666665,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.09808540277777777,
+     "truncated_clean_rate": 0.0010143813948576984,
+     "demand_per_budget": 0.09808540277777777
+    },
+    "bar": {
+     "admitted": 3621.6666666666665,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.09808540277777777,
+     "truncated_clean_rate": 0.0010143813948576984,
+     "demand_per_budget": 0.09808540277777777
+    },
+    "winner": {
+     "admitted": 3621.6666666666665,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.09808540277777777,
+     "truncated_clean_rate": 0.0010143813948576984,
+     "demand_per_budget": 0.09808540277777777
+    },
+    "bar_capped": {
+     "admitted": 3621.6666666666665,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.09627763888888889,
+     "truncated_clean_rate": 0.007654849253367406,
+     "demand_per_budget": 0.09627763888888889
+    },
+    "winner_capped": {
+     "admitted": 3621.6666666666665,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.09650909722222223,
+     "truncated_clean_rate": 0.006643984617456388,
+     "demand_per_budget": 0.09650909722222223
+    }
+   }
+  },
+  {
+   "rate": 2.0,
+   "budget": 400000,
+   "tokens_per_second": 50.0,
+   "policies": {
+    "max_tokens": {
+     "admitted": 7261.333333333333,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.19363565277777775,
+     "truncated_clean_rate": 0.0008727071852815499,
+     "demand_per_budget": 0.19363565277777775
+    },
+    "bar": {
+     "admitted": 7261.333333333333,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.19363565277777775,
+     "truncated_clean_rate": 0.0008727071852815499,
+     "demand_per_budget": 0.19363565277777775
+    },
+    "winner": {
+     "admitted": 7261.333333333333,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.19363565277777775,
+     "truncated_clean_rate": 0.0008727071852815499,
+     "demand_per_budget": 0.19363565277777775
+    },
+    "bar_capped": {
+     "admitted": 7261.333333333333,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.1904026388888889,
+     "truncated_clean_rate": 0.009229238725702376,
+     "demand_per_budget": 0.19040263888888886
+    },
+    "winner_capped": {
+     "admitted": 7261.333333333333,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.19072783333333332,
+     "truncated_clean_rate": 0.008173113726228205,
+     "demand_per_budget": 0.19072783333333332
+    }
+   }
+  },
+  {
+   "rate": 4.0,
+   "budget": 400000,
+   "tokens_per_second": 50.0,
+   "policies": {
+    "max_tokens": {
+     "admitted": 14489.0,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.3835207638888889,
+     "truncated_clean_rate": 0.0005521475329852236,
+     "demand_per_budget": 0.3835207638888889
+    },
+    "bar": {
+     "admitted": 14489.0,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.3835207638888889,
+     "truncated_clean_rate": 0.0005521475329852236,
+     "demand_per_budget": 0.3835207638888889
+    },
+    "winner": {
+     "admitted": 14489.0,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.3835207638888889,
+     "truncated_clean_rate": 0.0005521475329852236,
+     "demand_per_budget": 0.3835207638888889
+    },
+    "bar_capped": {
+     "admitted": 14489.0,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.37773468055555554,
+     "truncated_clean_rate": 0.006948675996500314,
+     "demand_per_budget": 0.37773468055555554
+    },
+    "winner_capped": {
+     "admitted": 14489.0,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.3781466666666667,
+     "truncated_clean_rate": 0.006374142632052043,
+     "demand_per_budget": 0.3781466666666667
+    }
+   }
+  },
+  {
+   "rate": 6.0,
+   "budget": 400000,
+   "tokens_per_second": 50.0,
+   "policies": {
+    "max_tokens": {
+     "admitted": 21306.666666666668,
+     "admit_rate": 0.9803755566348465,
+     "rejected": 426.3333333333333,
+     "wrongful_rejections": 369.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.5645505972222223,
+     "truncated_clean_rate": 0.0006731601532251261,
+     "demand_per_budget": 0.5764118055555555
+    },
+    "bar": {
+     "admitted": 21733.0,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.5764118055555555,
+     "truncated_clean_rate": 0.000690357874503209,
+     "demand_per_budget": 0.5764118055555555
+    },
+    "winner": {
+     "admitted": 21733.0,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.5764118055555555,
+     "truncated_clean_rate": 0.000690357874503209,
+     "demand_per_budget": 0.5764118055555555
+    },
+    "bar_capped": {
+     "admitted": 21733.0,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.5679535,
+     "truncated_clean_rate": 0.006748851463962942,
+     "demand_per_budget": 0.5679534999999999
+    },
+    "winner_capped": {
+     "admitted": 21733.0,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.5686133888888888,
+     "truncated_clean_rate": 0.005844858569879214,
+     "demand_per_budget": 0.5686133888888888
+    }
+   }
+  },
+  {
+   "rate": 8.0,
+   "budget": 400000,
+   "tokens_per_second": 50.0,
+   "policies": {
+    "max_tokens": {
+     "admitted": 24618.0,
+     "admit_rate": 0.850369403594211,
+     "rejected": 4332.333333333333,
+     "wrongful_rejections": 3727.3333333333335,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.6491914027777778,
+     "truncated_clean_rate": 0.0006224094292311425,
+     "demand_per_budget": 0.7670900416666667
+    },
+    "bar": {
+     "admitted": 28950.333333333332,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.7670900416666667,
+     "truncated_clean_rate": 0.0006106016389402592,
+     "demand_per_budget": 0.7670900416666667
+    },
+    "winner": {
+     "admitted": 28950.333333333332,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.7670900416666667,
+     "truncated_clean_rate": 0.0006106016389402592,
+     "demand_per_budget": 0.7670900416666667
+    },
+    "bar_capped": {
+     "admitted": 28943.333333333332,
+     "admit_rate": 0.9997586409776741,
+     "rejected": 7.0,
+     "wrongful_rejections": 6.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.7557734166666666,
+     "truncated_clean_rate": 0.007439335019570959,
+     "demand_per_budget": 0.7559794027777778
+    },
+    "winner_capped": {
+     "admitted": 28949.0,
+     "admit_rate": 0.9999539983452941,
+     "rejected": 1.3333333333333333,
+     "wrongful_rejections": 0.6666666666666666,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.7571420416666665,
+     "truncated_clean_rate": 0.006378706364466374,
+     "demand_per_budget": 0.7571846527777777
+    }
+   }
+  },
+  {
+   "rate": 12.0,
+   "budget": 400000,
+   "tokens_per_second": 50.0,
+   "policies": {
+    "max_tokens": {
+     "admitted": 26439.666666666668,
+     "admit_rate": 0.6107547806390632,
+     "rejected": 16850.666666666668,
+     "wrongful_rejections": 14195.666666666666,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.6923558888888889,
+     "truncated_clean_rate": 0.0007318840927569942,
+     "demand_per_budget": 1.1563175277777777
+    },
+    "bar": {
+     "admitted": 37611.333333333336,
+     "admit_rate": 0.8688214149586074,
+     "rejected": 5679.0,
+     "wrongful_rejections": 2555.3333333333335,
+     "overshoot_max_share": 0.02396,
+     "utilization": 0.9920886805555554,
+     "truncated_clean_rate": 0.0007358758466184751,
+     "demand_per_budget": 1.1563175277777777
+    },
+    "winner": {
+     "admitted": 38086.0,
+     "admit_rate": 0.8797863222355634,
+     "rejected": 5204.333333333333,
+     "wrongful_rejections": 1644.3333333333333,
+     "overshoot_max_share": 0.027095833333333333,
+     "utilization": 0.9960377222222222,
+     "truncated_clean_rate": 0.0007268034161422792,
+     "demand_per_budget": 1.1563175277777777
+    },
+    "bar_capped": {
+     "admitted": 35930.666666666664,
+     "admit_rate": 0.8299970075208828,
+     "rejected": 7359.666666666667,
+     "wrongful_rejections": 4528.666666666667,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.9279462083333333,
+     "truncated_clean_rate": 0.007467813917114063,
+     "demand_per_budget": 1.1381418472222222
+    },
+    "winner_capped": {
+     "admitted": 36865.333333333336,
+     "admit_rate": 0.8515890271702733,
+     "rejected": 6425.0,
+     "wrongful_rejections": 3274.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.9387625,
+     "truncated_clean_rate": 0.006500918037734324,
+     "demand_per_budget": 1.1401548611111112
+    }
+   }
+  },
+  {
+   "rate": 16.0,
+   "budget": 400000,
+   "tokens_per_second": 50.0,
+   "policies": {
+    "max_tokens": {
+     "admitted": 26894.333333333332,
+     "admit_rate": 0.4664630043028641,
+     "rejected": 30761.666666666668,
+     "wrongful_rejections": 25891.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.7018862916666667,
+     "truncated_clean_rate": 0.0007809122011900367,
+     "demand_per_budget": 1.5374439861111113
+    },
+    "bar": {
+     "admitted": 38709.666666666664,
+     "admit_rate": 0.6713913839532902,
+     "rejected": 18946.333333333332,
+     "wrongful_rejections": 7669.0,
+     "overshoot_max_share": 0.0377575,
+     "utilization": 1.0092290972222224,
+     "truncated_clean_rate": 0.0006543431371323649,
+     "demand_per_budget": 1.5374439861111113
+    },
+    "winner": {
+     "admitted": 39626.0,
+     "admit_rate": 0.6872827564475207,
+     "rejected": 18030.0,
+     "wrongful_rejections": 4710.0,
+     "overshoot_max_share": 0.040904166666666665,
+     "utilization": 1.0112836805555556,
+     "truncated_clean_rate": 0.000681378783522708,
+     "demand_per_budget": 1.5374439861111113
+    },
+    "bar_capped": {
+     "admitted": 37396.0,
+     "admit_rate": 0.6486062231322384,
+     "rejected": 20260.0,
+     "wrongful_rejections": 12036.666666666666,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.956031138888889,
+     "truncated_clean_rate": 0.00753209784460888,
+     "demand_per_budget": 1.5140608472222221
+    },
+    "winner_capped": {
+     "admitted": 39276.333333333336,
+     "admit_rate": 0.6812175016527965,
+     "rejected": 18379.666666666668,
+     "wrongful_rejections": 8552.666666666666,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.9680030694444444,
+     "truncated_clean_rate": 0.006203872390056038,
+     "demand_per_budget": 1.516746625
+    }
+   }
+  },
+  {
+   "rate": 1.0,
+   "budget": 200000,
+   "tokens_per_second": 25.0,
+   "policies": {
+    "max_tokens": {
+     "admitted": 3621.6666666666665,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.19617080555555555,
+     "truncated_clean_rate": 0.0010143813948576984,
+     "demand_per_budget": 0.19617080555555555
+    },
+    "bar": {
+     "admitted": 3621.6666666666665,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.19617080555555555,
+     "truncated_clean_rate": 0.0010143813948576984,
+     "demand_per_budget": 0.19617080555555555
+    },
+    "winner": {
+     "admitted": 3621.6666666666665,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.19617080555555555,
+     "truncated_clean_rate": 0.0010143813948576984,
+     "demand_per_budget": 0.19617080555555555
+    },
+    "bar_capped": {
+     "admitted": 3621.6666666666665,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.19255527777777778,
+     "truncated_clean_rate": 0.007654849253367406,
+     "demand_per_budget": 0.19255527777777778
+    },
+    "winner_capped": {
+     "admitted": 3621.6666666666665,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.19301819444444446,
+     "truncated_clean_rate": 0.006643984617456388,
+     "demand_per_budget": 0.19301819444444446
+    }
+   }
+  },
+  {
+   "rate": 2.0,
+   "budget": 200000,
+   "tokens_per_second": 25.0,
+   "policies": {
+    "max_tokens": {
+     "admitted": 7029.666666666667,
+     "admit_rate": 0.9680777799651058,
+     "rejected": 231.66666666666666,
+     "wrongful_rejections": 202.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.37425674999999997,
+     "truncated_clean_rate": 0.000854810353455839,
+     "demand_per_budget": 0.3872713055555555
+    },
+    "bar": {
+     "admitted": 7261.333333333333,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.3872713055555555,
+     "truncated_clean_rate": 0.0008727071852815499,
+     "demand_per_budget": 0.3872713055555555
+    },
+    "winner": {
+     "admitted": 7261.333333333333,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.3872713055555555,
+     "truncated_clean_rate": 0.0008727071852815499,
+     "demand_per_budget": 0.3872713055555555
+    },
+    "bar_capped": {
+     "admitted": 7261.333333333333,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.3808052777777778,
+     "truncated_clean_rate": 0.009229238725702376,
+     "demand_per_budget": 0.38080527777777773
+    },
+    "winner_capped": {
+     "admitted": 7261.333333333333,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.38145566666666664,
+     "truncated_clean_rate": 0.008173113726228205,
+     "demand_per_budget": 0.38145566666666664
+    }
+   }
+  },
+  {
+   "rate": 4.0,
+   "budget": 200000,
+   "tokens_per_second": 25.0,
+   "policies": {
+    "max_tokens": {
+     "admitted": 8880.0,
+     "admit_rate": 0.6128692260384404,
+     "rejected": 5609.0,
+     "wrongful_rejections": 4768.666666666667,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.4623495555555555,
+     "truncated_clean_rate": 0.0006008327778839166,
+     "demand_per_budget": 0.7670415277777778
+    },
+    "bar": {
+     "admitted": 14480.666666666666,
+     "admit_rate": 0.9994261918434759,
+     "rejected": 8.333333333333334,
+     "wrongful_rejections": 5.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.7664935833333333,
+     "truncated_clean_rate": 0.0005524639238805747,
+     "demand_per_budget": 0.7670415277777778
+    },
+    "winner": {
+     "admitted": 14485.333333333334,
+     "admit_rate": 0.9997475425829584,
+     "rejected": 3.6666666666666665,
+     "wrongful_rejections": 1.3333333333333333,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.7668220277777777,
+     "truncated_clean_rate": 0.0005522866514385869,
+     "demand_per_budget": 0.7670415277777778
+    },
+    "bar_capped": {
+     "admitted": 14036.666666666666,
+     "admit_rate": 0.9687843858605952,
+     "rejected": 452.3333333333333,
+     "wrongful_rejections": 298.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.7297400277777778,
+     "truncated_clean_rate": 0.006887382714321044,
+     "demand_per_budget": 0.7554693611111111
+    },
+    "winner_capped": {
+     "admitted": 14253.666666666666,
+     "admit_rate": 0.9837607827707431,
+     "rejected": 235.33333333333334,
+     "wrongful_rejections": 127.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.740487888888889,
+     "truncated_clean_rate": 0.006362063263250117,
+     "demand_per_budget": 0.7562933333333334
+    }
+   }
+  },
+  {
+   "rate": 6.0,
+   "budget": 200000,
+   "tokens_per_second": 25.0,
+   "policies": {
+    "max_tokens": {
+     "admitted": 9213.666666666666,
+     "admit_rate": 0.42394962407348863,
+     "rejected": 12519.333333333334,
+     "wrongful_rejections": 10504.666666666666,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.4797531944444445,
+     "truncated_clean_rate": 0.000687505998005166,
+     "demand_per_budget": 1.152823611111111
+    },
+    "bar": {
+     "admitted": 18017.666666666668,
+     "admit_rate": 0.8290392928295488,
+     "rejected": 3715.3333333333335,
+     "wrongful_rejections": 1773.0,
+     "overshoot_max_share": 0.0022483333333333335,
+     "utilization": 0.9388610000000001,
+     "truncated_clean_rate": 0.0006475044845437358,
+     "demand_per_budget": 1.152823611111111
+    },
+    "winner": {
+     "admitted": 18503.0,
+     "admit_rate": 0.8513720083910009,
+     "rejected": 3230.0,
+     "wrongful_rejections": 1092.3333333333333,
+     "overshoot_max_share": 0.007279999999999999,
+     "utilization": 0.9513878611111112,
+     "truncated_clean_rate": 0.0006124680237848389,
+     "demand_per_budget": 1.152823611111111
+    },
+    "bar_capped": {
+     "admitted": 16131.333333333334,
+     "admit_rate": 0.7422402289041431,
+     "rejected": 5601.666666666667,
+     "wrongful_rejections": 3563.3333333333335,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.8229104444444445,
+     "truncated_clean_rate": 0.00684020523172146,
+     "demand_per_budget": 1.1359069999999998
+    },
+    "winner_capped": {
+     "admitted": 17016.0,
+     "admit_rate": 0.7829501378221444,
+     "rejected": 4717.0,
+     "wrongful_rejections": 2431.6666666666665,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.8445585277777777,
+     "truncated_clean_rate": 0.005545421675548949,
+     "demand_per_budget": 1.1372267777777776
+    }
+   }
+  },
+  {
+   "rate": 8.0,
+   "budget": 200000,
+   "tokens_per_second": 25.0,
+   "policies": {
+    "max_tokens": {
+     "admitted": 9383.333333333334,
+     "admit_rate": 0.32412724355969674,
+     "rejected": 19567.0,
+     "wrongful_rejections": 16372.666666666666,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.48410836111111105,
+     "truncated_clean_rate": 0.0005328879358341701,
+     "demand_per_budget": 1.5341800833333334
+    },
+    "bar": {
+     "admitted": 18979.0,
+     "admit_rate": 0.655589593683691,
+     "rejected": 9971.333333333334,
+     "wrongful_rejections": 4526.0,
+     "overshoot_max_share": 0.02637666666666667,
+     "utilization": 0.9702858888888889,
+     "truncated_clean_rate": 0.000719075359903551,
+     "demand_per_budget": 1.5341800833333334
+    },
+    "winner": {
+     "admitted": 19758.333333333332,
+     "admit_rate": 0.6825066789210323,
+     "rejected": 9192.0,
+     "wrongful_rejections": 2921.0,
+     "overshoot_max_share": 0.03481,
+     "utilization": 0.98097275,
+     "truncated_clean_rate": 0.0006067143096897321,
+     "demand_per_budget": 1.5341800833333334
+    },
+    "bar_capped": {
+     "admitted": 16956.0,
+     "admit_rate": 0.5857079475368179,
+     "rejected": 11994.333333333334,
+     "wrongful_rejections": 7249.666666666667,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.8472486388888889,
+     "truncated_clean_rate": 0.007277995289480535,
+     "demand_per_budget": 1.5119588055555555
+    },
+    "winner_capped": {
+     "admitted": 18432.333333333332,
+     "admit_rate": 0.6367003032263604,
+     "rejected": 10518.0,
+     "wrongful_rejections": 5161.333333333333,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.8751950277777777,
+     "truncated_clean_rate": 0.006149468547870619,
+     "demand_per_budget": 1.5143693055555554
+    }
+   }
+  },
+  {
+   "rate": 12.0,
+   "budget": 200000,
+   "tokens_per_second": 25.0,
+   "policies": {
+    "max_tokens": {
+     "admitted": 9476.333333333334,
+     "admit_rate": 0.21890390405542656,
+     "rejected": 33814.0,
+     "wrongful_rejections": 27828.333333333332,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.4919291388888889,
+     "truncated_clean_rate": 0.0007753006504867408,
+     "demand_per_budget": 2.3126350555555555
+    },
+    "bar": {
+     "admitted": 19639.0,
+     "admit_rate": 0.45365946860736606,
+     "rejected": 23651.333333333332,
+     "wrongful_rejections": 10084.333333333334,
+     "overshoot_max_share": 0.026155,
+     "utilization": 0.9870494444444445,
+     "truncated_clean_rate": 0.0007127662626347712,
+     "demand_per_budget": 2.3126350555555555
+    },
+    "winner": {
+     "admitted": 21016.666666666668,
+     "admit_rate": 0.48548415125091043,
+     "rejected": 22273.666666666668,
+     "wrongful_rejections": 6381.666666666667,
+     "overshoot_max_share": 0.033558333333333336,
+     "utilization": 0.9985786666666666,
+     "truncated_clean_rate": 0.0007299659256102252,
+     "demand_per_budget": 2.3126350555555555
+    },
+    "bar_capped": {
+     "admitted": 17604.0,
+     "admit_rate": 0.40665562758846335,
+     "rejected": 25686.333333333332,
+     "wrongful_rejections": 14895.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.8652759166666666,
+     "truncated_clean_rate": 0.007347949185102108,
+     "demand_per_budget": 2.2762836944444444
+    },
+    "winner_capped": {
+     "admitted": 19940.666666666668,
+     "admit_rate": 0.4606293167570586,
+     "rejected": 23349.666666666668,
+     "wrongful_rejections": 10604.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.8981379444444445,
+     "truncated_clean_rate": 0.00635128256704143,
+     "demand_per_budget": 2.2803097222222224
+    }
+   }
+  },
+  {
+   "rate": 16.0,
+   "budget": 200000,
+   "tokens_per_second": 25.0,
+   "policies": {
+    "max_tokens": {
+     "admitted": 9634.333333333334,
+     "admit_rate": 0.16709948222257567,
+     "rejected": 48021.666666666664,
+     "wrongful_rejections": 39478.333333333336,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.49099919444444445,
+     "truncated_clean_rate": 0.00041437194434060503,
+     "demand_per_budget": 3.0748879722222227
+    },
+    "bar": {
+     "admitted": 20033.0,
+     "admit_rate": 0.3474569975157989,
+     "rejected": 37623.0,
+     "wrongful_rejections": 15570.666666666666,
+     "overshoot_max_share": 0.041166666666666664,
+     "utilization": 0.9901106111111111,
+     "truncated_clean_rate": 0.000532349317931269,
+     "demand_per_budget": 3.0748879722222227
+    },
+    "winner": {
+     "admitted": 21884.666666666668,
+     "admit_rate": 0.37957178278180553,
+     "rejected": 35771.333333333336,
+     "wrongful_rejections": 9523.333333333334,
+     "overshoot_max_share": 0.041955,
+     "utilization": 1.0009356666666667,
+     "truncated_clean_rate": 0.00048754119643535174,
+     "demand_per_budget": 3.0748879722222227
+    },
+    "bar_capped": {
+     "admitted": 17992.0,
+     "admit_rate": 0.3120552042969808,
+     "rejected": 39664.0,
+     "wrongful_rejections": 22075.666666666668,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.8708071111111112,
+     "truncated_clean_rate": 0.006836349317891202,
+     "demand_per_budget": 3.0281216944444442
+    },
+    "winner_capped": {
+     "admitted": 21006.333333333332,
+     "admit_rate": 0.3643380285685209,
+     "rejected": 36649.666666666664,
+     "wrongful_rejections": 15703.333333333334,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.9081790277777778,
+     "truncated_clean_rate": 0.005982132342940834,
+     "demand_per_budget": 3.03349325
+    }
+   }
+  },
+  {
+   "rate": 1.0,
+   "budget": 200000,
+   "tokens_per_second": 100.0,
+   "policies": {
+    "max_tokens": {
+     "admitted": 3621.6666666666665,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.19617080555555555,
+     "truncated_clean_rate": 0.0010143813948576984,
+     "demand_per_budget": 0.19617080555555555
+    },
+    "bar": {
+     "admitted": 3621.6666666666665,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.19617080555555555,
+     "truncated_clean_rate": 0.0010143813948576984,
+     "demand_per_budget": 0.19617080555555555
+    },
+    "winner": {
+     "admitted": 3621.6666666666665,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.19617080555555555,
+     "truncated_clean_rate": 0.0010143813948576984,
+     "demand_per_budget": 0.19617080555555555
+    },
+    "bar_capped": {
+     "admitted": 3621.6666666666665,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.19255527777777778,
+     "truncated_clean_rate": 0.007654849253367406,
+     "demand_per_budget": 0.19255527777777778
+    },
+    "winner_capped": {
+     "admitted": 3621.6666666666665,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.19301819444444446,
+     "truncated_clean_rate": 0.006643984617456388,
+     "demand_per_budget": 0.19301819444444446
+    }
+   }
+  },
+  {
+   "rate": 2.0,
+   "budget": 200000,
+   "tokens_per_second": 100.0,
+   "policies": {
+    "max_tokens": {
+     "admitted": 7261.333333333333,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.3872713055555555,
+     "truncated_clean_rate": 0.0008727071852815499,
+     "demand_per_budget": 0.3872713055555555
+    },
+    "bar": {
+     "admitted": 7261.333333333333,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.3872713055555555,
+     "truncated_clean_rate": 0.0008727071852815499,
+     "demand_per_budget": 0.3872713055555555
+    },
+    "winner": {
+     "admitted": 7261.333333333333,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.3872713055555555,
+     "truncated_clean_rate": 0.0008727071852815499,
+     "demand_per_budget": 0.3872713055555555
+    },
+    "bar_capped": {
+     "admitted": 7261.333333333333,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.3808052777777778,
+     "truncated_clean_rate": 0.009229238725702376,
+     "demand_per_budget": 0.38080527777777773
+    },
+    "winner_capped": {
+     "admitted": 7261.333333333333,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.38145566666666664,
+     "truncated_clean_rate": 0.008173113726228205,
+     "demand_per_budget": 0.38145566666666664
+    }
+   }
+  },
+  {
+   "rate": 4.0,
+   "budget": 200000,
+   "tokens_per_second": 100.0,
+   "policies": {
+    "max_tokens": {
+     "admitted": 13876.0,
+     "admit_rate": 0.9576949532170828,
+     "rejected": 613.0,
+     "wrongful_rejections": 541.3333333333334,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.7335998611111112,
+     "truncated_clean_rate": 0.0005765369534591649,
+     "demand_per_budget": 0.7670415277777778
+    },
+    "bar": {
+     "admitted": 14489.0,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.7670415277777778,
+     "truncated_clean_rate": 0.0005521475329852236,
+     "demand_per_budget": 0.7670415277777778
+    },
+    "winner": {
+     "admitted": 14489.0,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.7670415277777778,
+     "truncated_clean_rate": 0.0005521475329852236,
+     "demand_per_budget": 0.7670415277777778
+    },
+    "bar_capped": {
+     "admitted": 14489.0,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.7554693611111111,
+     "truncated_clean_rate": 0.006948675996500314,
+     "demand_per_budget": 0.7554693611111111
+    },
+    "winner_capped": {
+     "admitted": 14489.0,
+     "admit_rate": 1.0,
+     "rejected": 0.0,
+     "wrongful_rejections": 0.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.7562933333333334,
+     "truncated_clean_rate": 0.006374142632052043,
+     "demand_per_budget": 0.7562933333333334
+    }
+   }
+  },
+  {
+   "rate": 6.0,
+   "budget": 200000,
+   "tokens_per_second": 100.0,
+   "policies": {
+    "max_tokens": {
+     "admitted": 16090.666666666666,
+     "admit_rate": 0.7403638327668055,
+     "rejected": 5642.333333333333,
+     "wrongful_rejections": 4791.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.8470804444444444,
+     "truncated_clean_rate": 0.0006855471584288725,
+     "demand_per_budget": 1.152823611111111
+    },
+    "bar": {
+     "admitted": 19002.666666666668,
+     "admit_rate": 0.8743664027726786,
+     "rejected": 2730.3333333333335,
+     "wrongful_rejections": 1101.6666666666667,
+     "overshoot_max_share": 0.045956666666666666,
+     "utilization": 1.0003584722222223,
+     "truncated_clean_rate": 0.0006840359065734073,
+     "demand_per_budget": 1.152823611111111
+    },
+    "winner": {
+     "admitted": 19182.666666666668,
+     "admit_rate": 0.882651493881882,
+     "rejected": 2550.3333333333335,
+     "wrongful_rejections": 717.3333333333334,
+     "overshoot_max_share": 0.04816666666666667,
+     "utilization": 1.0022647777777778,
+     "truncated_clean_rate": 0.0006602275427474857,
+     "demand_per_budget": 1.152823611111111
+    },
+    "bar_capped": {
+     "admitted": 18725.333333333332,
+     "admit_rate": 0.8616024877792011,
+     "rejected": 3007.6666666666665,
+     "wrongful_rejections": 1824.6666666666667,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.9691766111111111,
+     "truncated_clean_rate": 0.006763999465724956,
+     "demand_per_budget": 1.1359069999999998
+    },
+    "winner_capped": {
+     "admitted": 19090.666666666668,
+     "admit_rate": 0.8784151589271326,
+     "rejected": 2642.3333333333335,
+     "wrongful_rejections": 1268.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.9755073055555555,
+     "truncated_clean_rate": 0.005780994150172483,
+     "demand_per_budget": 1.1372267777777776
+    }
+   }
+  },
+  {
+   "rate": 8.0,
+   "budget": 200000,
+   "tokens_per_second": 100.0,
+   "policies": {
+    "max_tokens": {
+     "admitted": 16772.0,
+     "admit_rate": 0.5793538925559266,
+     "rejected": 12178.333333333334,
+     "wrongful_rejections": 10283.666666666666,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.8755943611111111,
+     "truncated_clean_rate": 0.0006354868283995085,
+     "demand_per_budget": 1.5341800833333334
+    },
+    "bar": {
+     "admitted": 19311.0,
+     "admit_rate": 0.6670591851385845,
+     "rejected": 9639.333333333334,
+     "wrongful_rejections": 3092.6666666666665,
+     "overshoot_max_share": 0.05753166666666667,
+     "utilization": 1.0095695833333334,
+     "truncated_clean_rate": 0.000585491412012755,
+     "demand_per_budget": 1.5341800833333334
+    },
+    "winner": {
+     "admitted": 19598.0,
+     "admit_rate": 0.6769739592432381,
+     "rejected": 9352.333333333334,
+     "wrongful_rejections": 1747.0,
+     "overshoot_max_share": 0.056909999999999995,
+     "utilization": 1.0102856666666666,
+     "truncated_clean_rate": 0.0005767370723961436,
+     "demand_per_budget": 1.5341800833333334
+    },
+    "bar_capped": {
+     "admitted": 19333.666666666668,
+     "admit_rate": 0.6678420334774433,
+     "rejected": 9616.666666666666,
+     "wrongful_rejections": 5525.666666666667,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.9898771111111112,
+     "truncated_clean_rate": 0.00727558987161524,
+     "demand_per_budget": 1.5119588055555555
+    },
+    "winner_capped": {
+     "admitted": 19949.333333333332,
+     "admit_rate": 0.6891059637782857,
+     "rejected": 9001.0,
+     "wrongful_rejections": 3759.0,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.9945168333333333,
+     "truncated_clean_rate": 0.006064241021158847,
+     "demand_per_budget": 1.5143693055555554
+    }
+   }
+  },
+  {
+   "rate": 12.0,
+   "budget": 200000,
+   "tokens_per_second": 100.0,
+   "policies": {
+    "max_tokens": {
+     "admitted": 17142.0,
+     "admit_rate": 0.3959819817210552,
+     "rejected": 26148.333333333332,
+     "wrongful_rejections": 21785.666666666668,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.8923417777777779,
+     "truncated_clean_rate": 0.0006809585118785166,
+     "demand_per_budget": 2.3126350555555555
+    },
+    "bar": {
+     "admitted": 19373.666666666668,
+     "admit_rate": 0.44753150214430204,
+     "rejected": 23916.666666666668,
+     "wrongful_rejections": 6645.333333333333,
+     "overshoot_max_share": 0.04995166666666667,
+     "utilization": 1.014040638888889,
+     "truncated_clean_rate": 0.000809048880475638,
+     "demand_per_budget": 2.3126350555555555
+    },
+    "winner": {
+     "admitted": 19865.0,
+     "admit_rate": 0.45888041964161924,
+     "rejected": 23425.333333333332,
+     "wrongful_rejections": 3249.3333333333335,
+     "overshoot_max_share": 0.04929666666666666,
+     "utilization": 1.0147853611111113,
+     "truncated_clean_rate": 0.0007887500512586287,
+     "demand_per_budget": 2.3126350555555555
+    },
+    "bar_capped": {
+     "admitted": 19586.0,
+     "admit_rate": 0.4524362948747365,
+     "rejected": 23704.333333333332,
+     "wrongful_rejections": 12784.666666666666,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.9949353333333333,
+     "truncated_clean_rate": 0.007743674195675063,
+     "demand_per_budget": 2.2762836944444444
+    },
+    "winner_capped": {
+     "admitted": 20570.0,
+     "admit_rate": 0.475166650794194,
+     "rejected": 22720.333333333332,
+     "wrongful_rejections": 8380.333333333334,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.9980711944444444,
+     "truncated_clean_rate": 0.0068375911722388565,
+     "demand_per_budget": 2.2803097222222224
+    }
+   }
+  },
+  {
+   "rate": 16.0,
+   "budget": 200000,
+   "tokens_per_second": 100.0,
+   "policies": {
+    "max_tokens": {
+     "admitted": 17268.0,
+     "admit_rate": 0.299502822579744,
+     "rejected": 40388.0,
+     "wrongful_rejections": 33696.333333333336,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.8948285833333333,
+     "truncated_clean_rate": 0.0005790647808166228,
+     "demand_per_budget": 3.0748879722222227
+    },
+    "bar": {
+     "admitted": 19495.666666666668,
+     "admit_rate": 0.3381371815672915,
+     "rejected": 38160.333333333336,
+     "wrongful_rejections": 9210.0,
+     "overshoot_max_share": 0.05345833333333333,
+     "utilization": 1.0143050277777779,
+     "truncated_clean_rate": 0.0006669603533964299,
+     "demand_per_budget": 3.0748879722222227
+    },
+    "winner": {
+     "admitted": 20068.666666666668,
+     "admit_rate": 0.3480755166942533,
+     "rejected": 37587.333333333336,
+     "wrongful_rejections": 4288.333333333333,
+     "overshoot_max_share": 0.05010333333333333,
+     "utilization": 1.0151747222222223,
+     "truncated_clean_rate": 0.0006645973358490588,
+     "demand_per_budget": 3.0748879722222227
+    },
+    "bar_capped": {
+     "admitted": 19683.0,
+     "admit_rate": 0.34138729721680655,
+     "rejected": 37973.0,
+     "wrongful_rejections": 20463.333333333332,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.9953465555555555,
+     "truncated_clean_rate": 0.007332724721119237,
+     "demand_per_budget": 3.0281216944444442
+    },
+    "winner_capped": {
+     "admitted": 21030.666666666668,
+     "admit_rate": 0.3647604271804396,
+     "rejected": 36625.333333333336,
+     "wrongful_rejections": 12407.333333333334,
+     "overshoot_max_share": 0.0,
+     "utilization": 0.9985614444444444,
+     "truncated_clean_rate": 0.006229825167613154,
+     "demand_per_budget": 3.03349325
+    }
+   }
+  }
+ ]
+}
