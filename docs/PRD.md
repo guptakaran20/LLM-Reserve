@@ -449,12 +449,14 @@ The one item left from days 1–6 is the Day-4 hour on quantile regression and p
 
 ### Day 14: Ship
 
-- [ ] README: problem, method, results table, curve, simulator plot, how to run.
-- [ ] Blog post draft, 800 to 1,200 words.
-- [ ] Fresh-clone test: `make data train eval sim`, then `docker compose up`.
-- [ ] Tag v1.0 and fill the resume bullet with your real numbers.
+- [x] README: problem, method, results table, curve, simulator plot, how to run.
+- [x] Blog post draft, 800 to 1,200 words.
+- [x] Fresh-clone test: `make data train eval sim`, then `docker compose up`.
+- [ ] Tag v1.0 and fill the resume bullet with your real numbers. *(Bullet filled; the tag waits for the merge to `main` and the push.)*
 
 **Done when:** the repo is public and reproducible from a clean clone. **Gate: shipped.**
+
+**Reproducible, 5 Nov 2026; not yet public.** A fresh clone of `day-14` ran `make setup data train eval sim sweep mispredict onnx test serve demo down` with no manual step: 142 of 142 tests pass, every regenerated number matches the committed one (only timings differ), and predict → reserve → settle works against the freshly built compose stack. About 89 minutes of stage time end to end, 60 of them the dataset download. The README opens with the problem and the headline numbers and states the two caveats beside them; the blog draft is [blog.md](blog.md) (about 1,170 words); the resume bullet is filled below. Details in [findings.md](findings.md#day-14-ship-5-nov-2026) (findings 49–50). **Left for the owner:** merge the stacked branches (day-6 through day-14) to `main`, push, check GitHub Actions, make the repo public and tag `v1.0`.
 
 ## Risks and mitigations
 
@@ -486,15 +488,21 @@ Never cut the leakage checks, the matched-coverage evaluation, **the oracle row 
 Version 1 is done when a stranger can clone the repo, reproduce the headline numbers, and run the service with one command each.
 
 - [ ] Public GitHub repo `llm-reserve`, tagged v1.0, with tests passing in GitHub Actions.
-- [ ] `docs/findings.md`: exploration plots, results table **with the oracle row (rev 2)**, coverage vs. reservation curve, error-analysis counts.
-- [ ] Simulator results: policy comparison table, admitted-requests plot, misprediction trade-off and the chosen default.
-- [ ] Service: `/predict`, `/reserve`, `/settle` running via `docker compose up`, with latency and concurrency results.
-- [ ] README that opens with the headline numbers and the one-line problem statement.
-- [ ] Blog post draft.
+- [x] `docs/findings.md`: exploration plots, results table **with the oracle row (rev 2)**, coverage vs. reservation curve, error-analysis counts.
+- [x] Simulator results: policy comparison table, admitted-requests plot, misprediction trade-off and the chosen default.
+- [x] Service: `/predict`, `/reserve`, `/settle` running via `docker compose up`, with latency and concurrency results.
+- [x] README that opens with the headline numbers and the one-line problem statement.
+- [x] Blog post draft.
 
 **Resume bullet** (fill the blanks with real numbers on day 14; never round up):
 
 > Built llm-reserve, a learned output-length predictor (XGBoost and PyTorch, quantile loss) that cut reserved LLM budget by __% vs. a fixed-percentile baseline at 95% coverage (__% of the oracle ceiling), admitting __× more concurrent requests in a budget simulator; served via FastAPI, ONNX Runtime and atomic Redis reservations at __ ms p99.
+
+**Filled on Day 14 (5 Nov 2026), from the test split and the Day-10/13 runs, unrounded:**
+
+> Built llm-reserve, a learned output-length predictor (XGBoost and PyTorch, quantile loss) that cut reserved LLM budget by 20.4% vs. a fixed per-model percentile at matched 95% coverage on held-out data (closing 50% of the gap to an oracle), admitting 1.476× as many requests as worst-case `max_tokens` reservations in an overloaded budget simulator with zero budget overshoot; served via FastAPI, ONNX Runtime and atomic Redis reservations at 12.8 ms p99 (`/predict`) and 0.45 ms p99 (`/reserve`).
+
+Sources: 20.4% and 50% are finding 21 (−21.8% at the frozen knobs); 1.476× is finding 33 (8 requests/s, 200k tokens per minute, the 1.5× cap); the latencies are finding 45 and 48 at one client. If an interviewer asks, the honest qualifiers are finding 24 (−9.3% on an unseen benchmark) and the concurrent-load gaps (findings 45 and 48).
 
 ## After version 1 (January)
 
