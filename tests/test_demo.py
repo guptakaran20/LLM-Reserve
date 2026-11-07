@@ -140,20 +140,27 @@ def test_page_renders_and_responds_to_its_controls():
 
     at = AppTest.from_file(str(APP / "streamlit_app.py"), default_timeout=120).run()
     assert not at.exception, at.exception
-    assert len(at.tabs) == 4 and len(at.metric) >= 8
+    assert len(at.tabs) == 4 and len(at.metric) >= 4
     labels = {m.label for m in at.metric}
-    assert any("Fewer tokens reserved" in x for x in labels) and any("Learned reserve" in x for x in labels)
+    assert any("Fewer tokens reserved" in x for x in labels)
 
-    # pick another example: the prompt box follows and the bound changes
+    # nothing typed yet: the page asks for a prompt
+    assert any("Type a prompt" in i.value for i in at.info)
+    # pick an example: the prompt box fills and the bound appears
+    at.selectbox(key="pick").select("Summarize").run()
+    assert not at.exception, at.exception
     before = [m.value for m in at.metric if m.label == "Predicted 95% bound"][0]
     at.selectbox(key="pick").select("Essay").run()
     assert not at.exception, at.exception
     after = [m.value for m in at.metric if m.label == "Predicted 95% bound"][0]
     assert before != after
+    assert any(m.label == "Learned reserve" for m in at.metric)
 
-    # an empty prompt asks for text instead of failing
-    at.selectbox(key="pick").select("(my own)").run()
-    assert not at.exception and any("Type a prompt" in i.value for i in at.info)
+    # write your own prompt and press Compute: scored live
+    at.text_area(key="prompt_text").set_value("Write a very long detailed report on climate policy.").run()
+    at.button[0].click().run()
+    assert not at.exception, at.exception
+    assert any("scored by the int8" in m.value for m in at.markdown)
 
     # the budget demo reacts to a smaller window
     at.slider[0].set_value(5_000).run()
