@@ -1,0 +1,8 @@
+# The demo's runtime dependencies only: no torch, xgboost, scikit-learn or Redis (the model is the ONNX bundle in
+# app/bundle). Streamlit Community Cloud reads this file because it sits next to the entrypoint, ahead of the
+# repo's root requirements.txt, which pins the training stack. Versions match the root pins.
+streamlit==1.66.1
+onnxruntime==1.31.1
+tokenizers==0.23.3
+numpy==2.5.4
+pandas==3.1.0

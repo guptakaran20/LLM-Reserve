@@ -138,6 +138,16 @@ curl -s localhost:8000/settle -H 'content-type: application/json' \
 
 Settings come from the environment: `BUDGET_TOKENS` (default 200,000 per `WINDOW_SECONDS` = 60), `CAP_MARGIN` (1.5), `ENCODER` (`int8` or `fp32`), `PREDICT_THREADS` (2), `WEB_CONCURRENCY` (uvicorn workers, 1), `REDIS_MAX_CONNECTIONS` (64).
 
+## Try it in a browser
+
+```bash
+make app        # Streamlit page on http://localhost:8501: a prompt box, a budget demo and the simulator
+```
+
+Type a prompt and it shows the predicted bound for every target model, what each policy would reserve, how many of a queue
+of requests fit in a budget, and the simulator curves. It runs the ONNX model in-process (no Redis, no dataset), so it can
+be hosted for free: see [docs/deploy.md](docs/deploy.md).
+
 ## Layout
 
 | Path | What |
@@ -149,7 +159,8 @@ Settings come from the environment: `BUDGET_TOKENS` (default 200,000 per `WINDOW
 | `simulate.py`, `sweep.py`, `mispredict.py` | The gateway simulator, the policy sweep, the misprediction strategies |
 | `export.py`, `quantize.py`, `serving.py` | ONNX export and parity, the int8 encoder, the runtime `Predictor` |
 | `service.py`, `bench.py` | FastAPI + Redis Lua service, the benchmark client |
-| `docs/PRD.md`, `docs/findings.md` | The plan and the day-by-day results log |
+| `app/`, `demo.py`, `demo_assets.py` | The Streamlit page, its self-contained model bundle and data, and its tested logic |
+| `docs/PRD.md`, `docs/findings.md`, `docs/deploy.md` | The plan, the day-by-day results log, running and hosting the demo |
 | `docs/blog.md` | A write-up of the project |
 
 ## Limits

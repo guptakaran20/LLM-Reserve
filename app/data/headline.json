@@ -1,0 +1,22 @@
+{
+ "split": "test",
+ "prompts": 1130,
+ "completions": 140276,
+ "winner": {
+  "coverage": 0.958139667512618,
+  "ratio": 1.8080583335670415
+ },
+ "bar": {
+  "coverage": 0.9605064301805013,
+  "ratio": 2.3128790247248894
+ },
+ "oracle_ratio": 1.309067927108929,
+ "vs_bar": -0.21826506521148248,
+ "vs_bar_matched": -0.20429351926243533,
+ "gap_closed": 0.5029040746379384,
+ "vs_max_tokens": 0.1823338419381701,
+ "unseen_dataset": {
+  "coverage": 0.9393695286435313,
+  "matched_vs_bar": -0.09347239291814857
+ }
+}
