@@ -1,0 +1,8 @@
+# Send the build only what the image needs: the 600 MB of raw data and the venv stay out.
+*
+!requirements.txt
+!requirements-serve.in
+!src/
+!data/models/onnx/
+**/__pycache__
+**/*.egg-info

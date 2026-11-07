@@ -605,3 +605,28 @@ What the export does buy is a light image. The parity stage runs with neither to
 - **The saved booster has 960 rounds; the model was chosen at 860.** `predict_xgb` stops at `best_iteration`, but a converter exports every tree. The export slices the booster first and records both numbers.
 - **onnxmltools only reads feature names of the form f0, f1, …** and supports opset 15 at most; the slice is exported without names, and `serving.json` carries the column order instead. The converter does carry XGBoost 3's quantile base score (6.91) correctly.
 - **torch's dynamo exporter makes an invalid graph if the output is named `embedding`**, because the name is already used inside BERT ("duplicate definition"); the output is `sentence_vector`. The older TorchScript exporter worked too (2.3e-7) but is deprecated.
+
+## Day 12: The service (5 Nov 2026)
+
+**Scope.** A FastAPI service (`src/llm_reserve/service.py`) over the Day-11 `serving.Predictor` and Redis, in `docker-compose.yml` with Redis 7.4 (`make serve`, then `make demo` for the curl flow). No model, threshold or simulator number changes today; the bound the container serves for the demo prompt (211 tokens) is the one the local Predictor gives. Budget settings are the simulator's: 200,000 tokens per 60-second window, strategy A at ×1.5.
+
+| Call | Input | Returns |
+|---|---|---|
+| `POST /predict` | prompt, model (Hugging Face or CASTILLO id), `input_tokens`, optional `max_tokens` | the 95% bound, the capped `max_tokens` to send, the tokens `/reserve` will hold, each member's log prediction |
+| `POST /reserve` | `input_tokens`, `max_tokens`, optional `bound` | a reservation id and the `max_tokens` to send, or 429 with `Retry-After` (seconds to the next window) |
+| `POST /settle` | reservation id, `input_tokens`, `output_tokens` | reserved, actual, the delta applied and the window's spend; 404 if unknown or already settled |
+| `GET /budget`, `GET /healthz` | | the current window's spend; Redis and model status |
+
+The demo (`scripts/demo.sh`) after `docker compose up`: Llama-3.1-8B, a 20-token prompt, bound 211, sent with `max_tokens` 317 (211 × 1.5), 337 tokens held; settling a 126-token answer charges 146 and frees 191. 19 new tests (127 in all) cover the two scripts on fakeredis (exact fill, one token over, reused id, double settle, settle after the window expired, 300 concurrent reserves), the cap against `mispredict.capped` and the Day-10 margin in `mispredict.json`, the API with a stub predictor (429 and `Retry-After`, billing across a window edge, bad ids and models), and `/predict` against the real ONNX bundle.
+
+### 39. `/reserve` stays out of the model's way, and applies the Day-10 cap itself
+
+`/predict` spends 8.7 ms of its 15 ms p99 budget in the encoder alone (findings 37), and `/reserve` has a 5 ms target, so reserving cannot include a prediction. The gateway makes two calls and passes the bound along; `/reserve` turns it into the cap (`min(ceil(bound × 1.5), max_tokens)`, the same rule as `mispredict.capped`, which a test checks) and returns the `max_tokens` the call must be sent with. A gateway that sends it cannot overshoot its window. One that ignores it falls back to the unprotected Day-9 behaviour, and `/settle` reports any overshoot. `/predict` is a plain function, so FastAPI runs it in its thread pool and inference never blocks the event loop that serves `/reserve`. The trust boundary is the gateway: a caller of `/reserve` can claim any bound, so the service belongs behind it, not on the internet.
+
+### 40. Settle is a script too, so a retried settle cannot refund twice
+
+The PRD asked for a Lua reserve and an `INCRBY` settle. A bare `INCRBY` would apply a retried settle twice and free tokens that were never reserved, so settle also runs as a script: it reads the reservation, applies `INCRBY` (actual − reserved) to its window and deletes it in one atomic step; a second settle gets a 404. Reserve checks and increments in one step, so there is no check-then-act race: 300 parallel reserves of 2,000 tokens against the compose Redis admitted 99, leaving 198,146 of 200,000 spent (146 were the demo's), the 100th refused. The window index is part of the reservation id, so settle bills the admitting window without a lookup, as the simulator does (Day 8); a settle after that window's key has expired (two windows) adjusts nothing. Two choices for later: the window comes from the API's clock, so several API replicas need synchronized clocks; and an unsettled reservation stays charged to its window, and is forgotten after an hour.
+
+### 41. A 761 MB image without the training stack
+
+The image installs only `requirements-serve.in` (FastAPI, uvicorn, redis, onnxruntime, tokenizers, numpy, pandas) with `requirements.txt` as a constraints file, so every version is the one pinned for training and nothing is pinned twice. torch, xgboost and scikit-learn are absent (checked in the container). Moving `data.py`'s `huggingface_hub` import into the download function keeps the service's imports light, though `tokenizers` installs `huggingface_hub` anyway. 761 MB is mostly onnxruntime, numpy and pandas on `python:3.12-slim` plus the 94.5 MB bundle; pandas is only there because `features.py` imports it at the top. A rebuild after a code change takes about 30 seconds.

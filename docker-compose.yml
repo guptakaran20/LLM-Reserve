@@ -1,0 +1,25 @@
+# `docker compose up --build`: the API on http://localhost:8000 and the Redis that holds the budget windows.
+services:
+  redis:
+    image: redis:7.4-alpine
+    # Budget windows last a minute: nothing worth persisting across a restart.
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 2s
+      retries: 10
+
+  api:
+    build: .
+    image: llm-reserve-api
+    ports:
+      - "8000:8000"
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      BUDGET_TOKENS: ${BUDGET_TOKENS:-200000}
+      WINDOW_SECONDS: ${WINDOW_SECONDS:-60}
+      CAP_MARGIN: ${CAP_MARGIN:-1.5}
+    depends_on:
+      redis:
+        condition: service_healthy

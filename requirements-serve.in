@@ -1,0 +1,10 @@
+# The service image's direct dependencies (Day 12): no torch, xgboost or training libraries.
+# The Dockerfile installs these with requirements.txt as a constraints file, so every version,
+# transitive ones included, is the one pinned for the rest of the project.
+fastapi
+uvicorn
+redis
+onnxruntime
+tokenizers
+numpy
+pandas

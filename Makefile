@@ -2,7 +2,7 @@ PYTHON ?= python3.12
 VENV := .venv
 PY := $(VENV)/bin/python
 
-.PHONY: setup lock data explore baselines features models mlp eval sim sweep mispredict onnx test clean-data
+.PHONY: setup lock data explore baselines features models mlp eval sim sweep mispredict onnx serve demo down test clean-data
 
 # Create the virtualenv from the pinned requirements.
 setup: $(VENV)/.installed
@@ -78,6 +78,17 @@ onnx: setup
 	nice $(PY) -m llm_reserve.export torch
 	nice $(PY) -m llm_reserve.export xgb
 	nice $(PY) -m llm_reserve.export check
+
+# Day-12 service: the API (FastAPI + ONNX Runtime) and Redis in docker compose on http://localhost:8000.
+# Needs `make onnx` (the image copies data/models/onnx/). `make demo` runs predict -> reserve -> settle with curl.
+serve:
+	docker compose up --build --detach --wait
+
+demo:
+	./scripts/demo.sh
+
+down:
+	docker compose down
 
 test: setup
 	$(PY) -m pytest -q
